@@ -19,7 +19,7 @@ export const StoreLocatorPage: React.FC = () => {
   const { storeSettings, openWhatsAppEnquiry } = useStore();
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
-  const showroomPhotos = [
+  const defaultShowroomPhotos = [
     {
       title: 'CHARLIE MOBILE & ACCESSORIES — Main Storefront Fascia',
       caption: 'Official CM Monogram & Illuminated Retail Storefront',
@@ -37,6 +37,11 @@ export const StoreLocatorPage: React.FC = () => {
     },
   ];
 
+  const showroomPhotos =
+    storeSettings.showroomPhotos && storeSettings.showroomPhotos.length > 0
+      ? storeSettings.showroomPhotos
+      : defaultShowroomPhotos;
+
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 space-y-8">
       {/* Header */}
@@ -51,13 +56,6 @@ export const StoreLocatorPage: React.FC = () => {
           </h1>
           <p className="text-xs sm:text-sm text-[#737373]">{storeSettings.tagline}</p>
         </div>
-
-        <Link
-          to="/admin"
-          className="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#2563EB] text-xs font-bold text-[#171717]"
-        >
-          Configure Store Details in Admin
-        </Link>
       </div>
 
       {/* Main Showroom Gallery + Contact Details Split */}

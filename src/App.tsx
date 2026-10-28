@@ -28,31 +28,50 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
+const AppShell: React.FC = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  if (isAdminRoute) {
+    // Standalone dedicated Admin Console page — completely separate from the customer storefront
+    return (
+      <div className="min-h-screen bg-[#F5F6F8] text-[#171717]">
+        <Routes>
+          <Route path="/admin/*" element={<AdminPage />} />
+        </Routes>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#F5F6F8] text-[#171717]">
+      <Navbar />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/products" element={<ProductListingPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/offers" element={<OffersPage />} />
+          <Route path="/store" element={<StoreLocatorPage />} />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 export default function App() {
   return (
     <StoreProvider>
       <BrowserRouter>
         <ScrollToTop />
-        <div className="min-h-screen flex flex-col bg-[#F5F6F8] text-[#171717]">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/products" element={<ProductListingPage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/offers" element={<OffersPage />} />
-              <Route path="/store" element={<StoreLocatorPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="*" element={<HomePage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <AppShell />
       </BrowserRouter>
     </StoreProvider>
   );

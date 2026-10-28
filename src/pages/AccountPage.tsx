@@ -96,15 +96,6 @@ export const AccountPage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="min-h-[40px] px-4 py-2 rounded-xl bg-[#00C2FF] text-[#101114] text-xs font-extrabold flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Open Admin Panel</span>
-            </Link>
-          )}
           {user ? (
             <button
               type="button"

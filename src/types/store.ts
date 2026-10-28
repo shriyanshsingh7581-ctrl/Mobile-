@@ -40,6 +40,7 @@ export interface Product {
   warranty: string;
   exchangeBonus: number;
   emiStartingAt: number;
+  storagePriceStep?: number;
   specs: Record<string, string>;
   reviews?: ProductReview[];
   updatedAt?: string;
@@ -124,6 +125,12 @@ export interface Order {
   updatedAt: string;
 }
 
+export interface ShowroomPhoto {
+  title: string;
+  caption: string;
+  src: string;
+}
+
 export interface StoreSettings {
   storeName: string;
   businessName: string;
@@ -136,12 +143,19 @@ export interface StoreSettings {
   openingHours: string;
   mapLink: string;
   announcementText: string;
+  bankOfferTitle?: string;
+  bankOfferSubtitle?: string;
+  exchangeMaxBonus?: number;
+  emiStartingPrice?: number;
   codEnabled: boolean;
   onlinePaymentEnabled: boolean;
   storePickupEnabled: boolean;
   localDeliveryEnabled: boolean;
   shippingEnabled: boolean;
   upiId: string;
+  cloudinaryCloudName?: string;
+  cloudinaryUploadPreset?: string;
+  showroomPhotos?: ShowroomPhoto[];
   instagramUrl?: string;
   facebookUrl?: string;
 }

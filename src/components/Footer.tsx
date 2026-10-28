@@ -134,7 +134,6 @@ export const Footer: React.FC = () => {
             <li><Link to="/account" className="hover:text-white">My Account &amp; Order Tracking</Link></li>
             <li><Link to="/cart" className="hover:text-white">Shopping Bag</Link></li>
             <li><Link to="/offers" className="hover:text-white">No-Cost EMI &amp; Bank Deals</Link></li>
-            <li><Link to="/admin" className="hover:text-[#00C2FF]">Store Owner Admin Panel</Link></li>
           </ul>
           <button
             type="button"

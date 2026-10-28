@@ -98,6 +98,7 @@ interface StoreContextValue {
   updateHomepageSections: (sections: HomepageSectionConfig[]) => void;
   saveCoupon: (coupon: Coupon) => void;
   deleteCoupon: (code: string) => void;
+  resetCatalogToDefaults: () => void;
   openWhatsAppEnquiry: (params: {
     productName?: string;
     price?: number;
@@ -376,7 +377,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Calculate storage price bump if non-base storage is chosen
     const storageIndex = Math.max(0, product.storageOptions.indexOf(selectedStorage));
-    const unitPrice = product.price + storageIndex * 10000;
+    const stepAmount = product.storagePriceStep !== undefined ? product.storagePriceStep : 10000;
+    const unitPrice = product.price + storageIndex * stepAmount;
 
     setCart((prev) => {
       const targetKey = getVariantKey({
@@ -728,6 +730,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast(`Deleted coupon ${code}`);
   };
 
+  const resetCatalogToDefaults = () => {
+    setProducts(INITIAL_PRODUCTS);
+    setCategories(INITIAL_CATEGORIES);
+    setBanners(INITIAL_BANNERS);
+    setCoupons(INITIAL_COUPONS);
+    setStoreSettings(INITIAL_STORE_SETTINGS);
+    setHomepageSections(INITIAL_HOMEPAGE_SECTIONS);
+    showToast('Restored default Charlie Mobile catalog & settings');
+  };
+
   const openWhatsAppEnquiry = (params: {
     productName?: string;
     price?: number;
@@ -815,6 +827,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateHomepageSections,
         saveCoupon,
         deleteCoupon,
+        resetCatalogToDefaults,
         openWhatsAppEnquiry,
       }}
     >

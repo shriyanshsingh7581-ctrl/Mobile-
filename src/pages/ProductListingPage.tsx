@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowUpDown,
+  Check,
   ChevronRight,
   RotateCcw,
   SlidersHorizontal,
@@ -34,9 +35,10 @@ export const ProductListingPage: React.FC = () => {
   const [only5G, setOnly5G] = useState<boolean>(initial5G);
   const [onlyInStock, setOnlyInStock] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>(initialSort);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
 
-  // Sync URL parameter changes when user clicks header nav links
+  const [mobileFilterOpen, setMobileFilterOpen] = useState<boolean>(false);
+  const [mobileSortOpen, setMobileSortOpen] = useState<boolean>(false);
+
   React.useEffect(() => {
     const cat = searchParams.get('category') || 'all';
     const brand = searchParams.get('brand');
@@ -85,7 +87,6 @@ export const ProductListingPage: React.FC = () => {
 
   const filteredAndSorted = useMemo(() => {
     const list = products.filter((p) => {
-      // Category match
       if (selectedCategory !== 'all') {
         if (selectedCategory === 'smartphones') {
           const nonPhone = [
@@ -167,9 +168,17 @@ export const ProductListingPage: React.FC = () => {
 
   const activeCategoryTitle =
     selectedCategory === 'all'
-      ? 'All Smartphones & Electronics'
+      ? 'All Mobiles & Accessories'
       : categories.find((c) => c.slug === selectedCategory)?.name ||
         selectedCategory.toUpperCase();
+
+  const sortOptions = [
+    { id: 'recommended', label: 'Recommended' },
+    { id: 'popularity', label: 'Popularity / Best Selling' },
+    { id: 'price_asc', label: 'Price: Low to High' },
+    { id: 'price_desc', label: 'Price: High to Low' },
+    { id: 'newest', label: 'Newest Launches First' },
+  ];
 
   const renderFilterControls = () => (
     <div className="space-y-5 text-xs">
@@ -183,7 +192,7 @@ export const ProductListingPage: React.FC = () => {
             className={`px-2.5 py-1.5 rounded-lg font-semibold cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-[#101114] text-white'
-                : 'bg-[#F5F6F8] text-[#171717] hover:bg-slate-200'
+                : 'bg-[#F5F6F8] text-[#171717]'
             }`}
           >
             All
@@ -196,7 +205,7 @@ export const ProductListingPage: React.FC = () => {
               className={`px-2.5 py-1.5 rounded-lg font-semibold cursor-pointer ${
                 selectedCategory === cat.slug
                   ? 'bg-[#2563EB] text-white'
-                  : 'bg-[#F5F6F8] text-[#171717] hover:bg-slate-200'
+                  : 'bg-[#F5F6F8] text-[#171717]'
               }`}
             >
               {cat.name}
@@ -240,7 +249,7 @@ export const ProductListingPage: React.FC = () => {
                 type="checkbox"
                 checked={selectedBrands.includes(brand)}
                 onChange={() => toggleBrand(brand)}
-                className="rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
+                className="rounded border-slate-300 text-[#2563EB]"
               />
               <span>{brand}</span>
             </label>
@@ -315,7 +324,7 @@ export const ProductListingPage: React.FC = () => {
 
       {/* Color Finish */}
       <div className="pt-4 border-t border-[#E5E7EB]">
-        <h4 className="font-bold text-[#171717] uppercase tracking-wider mb-2">Color Finish</h4>
+        <h4 className="font-bold text-[#171717] uppercase tracking-wider mb-2">Color</h4>
         <select
           value={selectedColor}
           onChange={(e) => setSelectedColor(e.target.value)}
@@ -333,7 +342,7 @@ export const ProductListingPage: React.FC = () => {
       {/* 5G & Availability Toggles */}
       <div className="pt-4 border-t border-[#E5E7EB] space-y-2.5">
         <label className="flex items-center justify-between cursor-pointer">
-          <span className="font-semibold text-[#171717]">5G Network Support Only</span>
+          <span className="font-semibold text-[#171717]">5G Smartphones Only</span>
           <input
             type="checkbox"
             checked={only5G}
@@ -355,9 +364,9 @@ export const ProductListingPage: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-6 pb-24 lg:pb-10">
       {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[#737373] mb-3">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-[#737373] mb-2.5">
         <Link to="/" className="hover:text-[#171717]">
           Home
         </Link>
@@ -366,50 +375,93 @@ export const ProductListingPage: React.FC = () => {
           Categories
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <span className="font-semibold text-[#171717] truncate">{activeCategoryTitle}</span>
+        <span className="font-bold text-[#171717] truncate">{activeCategoryTitle}</span>
       </nav>
 
-      {/* Title & Sort Bar */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Title & Desktop Sort Header */}
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-4 mb-3 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg sm:text-2xl font-extrabold text-[#171717]">
+          <h1 className="text-base sm:text-2xl font-extrabold text-[#171717]">
             {activeCategoryTitle}
           </h1>
-          <p className="text-xs text-[#737373] tabular-nums mt-0.5">
-            Showing {filteredAndSorted.length} of {products.length} products at Charlie Mobile
+          <p className="text-[11px] sm:text-xs text-[#737373] tabular-nums">
+            Showing {filteredAndSorted.length} products · 2-Hr Pickup Available
           </p>
         </div>
 
-        {/* Mobile Filter & Sort Triggers + Desktop Sort */}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setMobileFilterOpen(true)}
-            className="lg:hidden min-h-[40px] px-3.5 py-2 rounded-xl bg-[#101114] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        {/* Desktop Sort Selector */}
+        <div className="hidden lg:flex items-center gap-2">
+          <ArrowUpDown className="w-4 h-4 text-[#737373]" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort products"
+            className="h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F5F6F8] text-xs font-bold text-[#171717] focus:outline-none focus:border-[#2563EB]"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#00C2FF]" />
-            <span>Filters</span>
-          </button>
-
-          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-            <ArrowUpDown className="w-4 h-4 text-[#737373] hidden sm:block" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort products"
-              className="h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F5F6F8] text-xs font-bold text-[#171717] focus:outline-none focus:border-[#2563EB] w-full sm:w-auto"
-            >
-              <option value="recommended">Sort: Recommended</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="newest">Newest Arrivals</option>
-              <option value="popularity">Popularity</option>
-            </select>
-          </div>
+            {sortOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                Sort: {o.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Main Content Layout: Desktop Sidebar + Product Grid */}
+      {/* POORVIKA MOBILE UX: Horizontal One-Thumb Quick Filter Chips */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-3">
+        <button
+          type="button"
+          onClick={() => setOnly5G((v) => !v)}
+          className={`h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer border ${
+            only5G
+              ? 'bg-[#2563EB] text-white border-[#2563EB]'
+              : 'bg-white text-[#171717] border-[#E5E7EB]'
+          }`}
+        >
+          5G Ready
+        </button>
+        <button
+          type="button"
+          onClick={() => setMaxPrice((p) => (p === 30000 ? 200000 : 30000))}
+          className={`h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer border ${
+            maxPrice === 30000
+              ? 'bg-[#2563EB] text-white border-[#2563EB]'
+              : 'bg-white text-[#171717] border-[#E5E7EB]'
+          }`}
+        >
+          Under ₹30,000
+        </button>
+        {['8GB', '12GB', '16GB'].map((ram) => (
+          <button
+            key={ram}
+            type="button"
+            onClick={() => setSelectedRam((r) => (r === ram ? 'all' : ram))}
+            className={`h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer border ${
+              selectedRam === ram
+                ? 'bg-[#101114] text-white border-[#101114]'
+                : 'bg-white text-[#171717] border-[#E5E7EB]'
+            }`}
+          >
+            {ram} RAM
+          </button>
+        ))}
+        {['Apple', 'Samsung', 'Vivo', 'OnePlus'].map((b) => (
+          <button
+            key={b}
+            type="button"
+            onClick={() => toggleBrand(b)}
+            className={`h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer border ${
+              selectedBrands.includes(b)
+                ? 'bg-[#101114] text-white border-[#101114]'
+                : 'bg-white text-[#171717] border-[#E5E7EB]'
+            }`}
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Desktop Filter Sidebar */}
         <aside className="hidden lg:block lg:col-span-3 bg-white rounded-2xl border border-[#E5E7EB] p-5 sticky top-28">
@@ -449,7 +501,7 @@ export const ProductListingPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
               {filteredAndSorted.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -458,11 +510,69 @@ export const ProductListingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Sheet Filter Drawer */}
+      {/* POORVIKA MOBILE STICKY SORT & FILTER BAR (Pinned above bottom nav on mobile) */}
+      <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-[#101114] text-white border-t border-white/15 grid grid-cols-2 divide-x divide-white/15 h-11 shadow-lg">
+        <button
+          type="button"
+          onClick={() => setMobileSortOpen(true)}
+          className="flex items-center justify-center gap-2 text-xs font-extrabold cursor-pointer active:bg-white/10"
+        >
+          <ArrowUpDown className="w-3.5 h-3.5 text-[#00C2FF]" />
+          <span>Sort By</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileFilterOpen(true)}
+          className="flex items-center justify-center gap-2 text-xs font-extrabold cursor-pointer active:bg-white/10"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5 text-[#00C2FF]" />
+          <span>Filter ({selectedBrands.length + (only5G ? 1 : 0)})</span>
+        </button>
+      </div>
+
+      {/* Mobile Sort Bottom Sheet */}
+      {mobileSortOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden bg-black/60 backdrop-blur-xs flex flex-col justify-end">
+          <div className="bg-white rounded-t-3xl p-5 space-y-3 pb-safe">
+            <div className="w-10 h-1.5 bg-slate-300 rounded-full mx-auto" />
+            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-2.5">
+              <h3 className="text-base font-extrabold text-[#171717]">Sort Smartphones By</h3>
+              <button
+                type="button"
+                onClick={() => setMobileSortOpen(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-1">
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setSortBy(opt.id);
+                    setMobileSortOpen(false);
+                  }}
+                  className={`w-full p-3 rounded-xl flex items-center justify-between text-xs font-bold ${
+                    sortBy === opt.id
+                      ? 'bg-blue-50 text-[#2563EB]'
+                      : 'text-[#171717] hover:bg-slate-50'
+                  }`}
+                >
+                  <span>{opt.label}</span>
+                  {sortBy === opt.id && <Check className="w-4 h-4 text-[#2563EB]" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Filter Bottom Sheet */}
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 lg:hidden bg-black/60 backdrop-blur-xs flex flex-col justify-end">
           <div className="bg-white rounded-t-3xl max-h-[85vh] flex flex-col overflow-hidden">
-            {/* Drag Handle */}
             <div className="w-10 h-1.5 bg-slate-300 rounded-full mx-auto mt-2.5" />
             <div className="px-5 py-3 border-b border-[#E5E7EB] flex items-center justify-between">
               <h3 className="text-base font-extrabold text-[#171717]">Filter Products</h3>
@@ -492,7 +602,7 @@ export const ProductListingPage: React.FC = () => {
                 onClick={() => setMobileFilterOpen(false)}
                 className="w-full h-11 rounded-xl bg-[#2563EB] text-white text-xs font-bold"
               >
-                Show {filteredAndSorted.length} Products
+                Apply Filters ({filteredAndSorted.length} Products)
               </button>
             </div>
           </div>
