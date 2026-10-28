@@ -17,7 +17,16 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export const ADMIN_EMAIL = 'shriyanshsingh7581@gmail.com';
+export const ADMIN_EMAIL = 'charliegedekar@gmail.com';
+export const ADMIN_EMAILS = [
+  'charliegedekar@gmail.com',
+  'shriyanshsingh7581@gmail.com',
+];
+
+export function isAuthorizedAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
 
 export enum OperationType {
   CREATE = 'create',

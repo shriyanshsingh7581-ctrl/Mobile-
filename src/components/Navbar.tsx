@@ -99,9 +99,16 @@ export const Navbar: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-3 sm:gap-5 shrink-0 text-slate-300">
-            <span className="hidden sm:inline-flex items-center gap-1 text-emerald-400 font-semibold">
+            <a
+              href={`tel:${(storeSettings.phone || '8818850488').replace(/[^0-9+]/g, '')}`}
+              className="inline-flex items-center gap-1 text-[#00C2FF] font-extrabold hover:underline whitespace-nowrap"
+            >
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>{storeSettings.phone || '+91 8818850488'}</span>
+            </a>
+            <span className="hidden md:inline-flex items-center gap-1 text-emerald-400 font-semibold">
               <Zap className="w-3.5 h-3.5" />
-              2-Hr Express Delivery &amp; Pickup
+              2-Hr Express Delivery
             </span>
             <Link
               to="/store"
@@ -159,13 +166,13 @@ export const Navbar: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search smartphones, iPhone 16, Vivo X200, earbuds, chargers..."
-                className="w-full h-10 pl-4 pr-11 rounded-xl bg-white text-sm text-[#171717] placeholder:text-[#737373] focus:outline-none focus:ring-2 focus:ring-[#00C2FF]"
+                placeholder="Search For Products, Brands, Offers (iPhone 17 Pro, S26 Ultra, Vivo V80)..."
+                className="w-full h-10 pl-4 pr-11 rounded-xl bg-white text-sm text-[#171717] placeholder:text-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F26522]"
               />
               <button
                 type="submit"
                 aria-label="Search"
-                className="absolute right-1.5 w-8 h-8 rounded-lg bg-[#2563EB] hover:bg-blue-600 flex items-center justify-center text-white cursor-pointer"
+                className="absolute right-1.5 w-8 h-8 rounded-lg bg-[#F26522] hover:bg-[#EA580C] flex items-center justify-center text-white cursor-pointer"
               >
                 <Search className="w-4 h-4" />
               </button>
@@ -213,7 +220,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/cart"
                 aria-label="Shopping Cart"
-                className="relative h-9 px-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white flex items-center gap-1.5 text-xs font-extrabold transition-colors"
+                className="relative h-9 px-2.5 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white flex items-center gap-1.5 text-xs font-extrabold transition-colors"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span className="tabular-nums">{totalCartItems}</span>
@@ -228,12 +235,12 @@ export const Navbar: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Mobiles, iPhone, Vivo, Chargers, Earbuds..."
+              placeholder="Search For Products, Brands, Offers..."
               className="w-full h-10 pl-9 pr-20 rounded-xl bg-white text-xs font-medium text-[#171717] placeholder:text-[#737373] focus:outline-none shadow-inner"
             />
             <button
               type="submit"
-              className="absolute right-1.5 h-7 px-3 rounded-lg bg-[#2563EB] text-white text-[11px] font-bold"
+              className="absolute right-1.5 h-7 px-3 rounded-lg bg-[#F26522] text-white text-[11px] font-bold"
             >
               Search
             </button>
@@ -377,18 +384,25 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Drawer Footer WhatsApp Help */}
-            <div className="p-4 border-t border-[#E5E7EB] bg-[#F5F6F8]">
+            {/* Drawer Footer Call & WhatsApp Help */}
+            <div className="p-4 border-t border-[#E5E7EB] bg-[#F5F6F8] space-y-2">
+              <a
+                href={`tel:${(storeSettings.phone || '8818850488').replace(/[^0-9+]/g, '')}`}
+                className="w-full h-9 rounded-xl bg-[#101114] text-white text-xs font-bold flex items-center justify-center gap-2"
+              >
+                <PhoneCall className="w-3.5 h-3.5 text-[#00C2FF]" />
+                <span>Call Store: {storeSettings.phone || '+91 8818850488'}</span>
+              </a>
               <button
                 type="button"
                 onClick={() => {
                   setMobileDrawerOpen(false);
                   openWhatsAppEnquiry({});
                 }}
-                className="w-full h-10 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-2"
+                className="w-full h-9 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
               >
-                <PhoneCall className="w-3.5 h-3.5" />
-                <span>WhatsApp Store Helpline</span>
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp: 8818850488</span>
               </button>
             </div>
           </div>
@@ -437,11 +451,11 @@ export const Navbar: React.FC = () => {
                 key={item.label}
                 to={item.path}
                 className={`relative flex flex-col items-center justify-center h-full min-h-[44px] transition-colors ${
-                  active ? 'text-[#2563EB] font-extrabold' : 'text-[#737373] font-semibold'
+                  active ? 'text-[#F26522] font-extrabold' : 'text-[#737373] font-semibold'
                 }`}
               >
                 {active && (
-                  <span className="absolute top-0 w-8 h-0.5 rounded-full bg-[#2563EB]" />
+                  <span className="absolute top-0 w-8 h-0.5 rounded-full bg-[#F26522]" />
                 )}
                 <div className="relative">
                   <Icon className="w-5 h-5" />

@@ -17,6 +17,7 @@ import {
   auth,
   db,
   handleFirestoreError,
+  isAuthorizedAdminEmail,
   signInWithGoogle,
   signOutUser,
 } from '../lib/firebase';
@@ -129,18 +130,18 @@ export function getVariantKey(item: {
 }
 
 const STORAGE_KEYS = {
-  CART: 'charlie_mobile_cart_v1',
-  SAVED: 'charlie_mobile_saved_v1',
-  WISHLIST: 'charlie_mobile_wishlist_v1',
-  SEARCHES: 'charlie_mobile_searches_v1',
-  PRODUCTS: 'charlie_mobile_products_v1',
-  CATEGORIES: 'charlie_mobile_categories_v1',
-  BANNERS: 'charlie_mobile_banners_v1',
-  SETTINGS: 'charlie_mobile_settings_v1',
-  SECTIONS: 'charlie_mobile_sections_v1',
-  COUPONS: 'charlie_mobile_coupons_v1',
-  ORDERS: 'charlie_mobile_orders_v1',
-  CITY: 'charlie_mobile_city_v1',
+  CART: 'charlie_mobile_cart_v4',
+  SAVED: 'charlie_mobile_saved_v4',
+  WISHLIST: 'charlie_mobile_wishlist_v4',
+  SEARCHES: 'charlie_mobile_searches_v4',
+  PRODUCTS: 'charlie_mobile_products_v4',
+  CATEGORIES: 'charlie_mobile_categories_v4',
+  BANNERS: 'charlie_mobile_banners_v4',
+  SETTINGS: 'charlie_mobile_settings_v4',
+  SECTIONS: 'charlie_mobile_sections_v4',
+  COUPONS: 'charlie_mobile_coupons_v4',
+  ORDERS: 'charlie_mobile_orders_v4',
+  CITY: 'charlie_mobile_city_v4',
 };
 
 function loadLocal<T>(key: string, fallback: T): T {
@@ -183,10 +184,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadLocal(STORAGE_KEYS.SAVED, [])
   );
   const [wishlist, setWishlist] = useState<string[]>(() =>
-    loadLocal(STORAGE_KEYS.WISHLIST, ['prod_iphone_16_pro_max', 'prod_vivo_x200_pro'])
+    loadLocal(STORAGE_KEYS.WISHLIST, ['prod_iphone_17_pro_max', 'prod_samsung_s26_ultra'])
   );
   const [recentSearches, setRecentSearches] = useState<string[]>(() =>
-    loadLocal(STORAGE_KEYS.SEARCHES, ['iPhone 16 Pro Max', '5G Smartphones', 'Vivo X200 Pro', '100W GaN Charger'])
+    loadLocal(STORAGE_KEYS.SEARCHES, ['iPhone 17 Pro Max', 'Galaxy S26 Ultra', 'Vivo V80 5G', 'Apple 20W Adapter'])
   );
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [selectedCity, setSelectedCityState] = useState<string>(() =>
@@ -196,7 +197,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isAdmin = useMemo(() => {
     if (!user) return false;
-    return user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    return isAuthorizedAdminEmail(user.email) || user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   }, [user]);
 
   const showToast = (msg: string) => {
