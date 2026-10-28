@@ -1,0 +1,359 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Smartphone, tablet, smartwatch, or accessory item in Charlie Mobile catalog",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Product model name",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "brand": {
+          "type": "string",
+          "description": "Brand name",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "category": {
+          "type": "string",
+          "description": "Category slug",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "price": {
+          "type": "number",
+          "description": "Selling price in INR"
+        },
+        "mrp": {
+          "type": "number",
+          "description": "Maximum retail price in INR"
+        },
+        "stock": {
+          "type": "number",
+          "description": "Available inventory units"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed product description",
+          "maxLength": 2000
+        },
+        "mainImage": {
+          "type": "string",
+          "description": "Primary product image URL or SVG identifier",
+          "maxLength": 1000
+        },
+        "is5G": {
+          "type": "boolean",
+          "description": "Whether device supports 5G networks"
+        },
+        "isBestSeller": {
+          "type": "boolean",
+          "description": "Best seller badge flag"
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Featured product flag"
+        },
+        "isNewRelease": {
+          "type": "boolean",
+          "description": "New release flag"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of update"
+        }
+      },
+      "required": ["name", "brand", "category", "price", "mrp", "stock", "mainImage", "updatedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category definition",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "image": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "order": {
+          "type": "number"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["name", "slug", "order", "updatedAt"]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Promotional hero or campaign banner",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "ctaText": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "ctaLink": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "image": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["title", "subtitle", "ctaText", "ctaLink", "image", "enabled", "updatedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order record",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 24
+        },
+        "customerEmail": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "shippingAddress": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        },
+        "deliveryMethod": {
+          "type": "string",
+          "enum": ["store_pickup", "local_delivery", "shipping"],
+          "maxLength": 32
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["upi", "cod", "online"],
+          "maxLength": 32
+        },
+        "paymentStatus": {
+          "type": "string",
+          "enum": ["pending_verification", "cod_due", "paid", "failed"],
+          "maxLength": 32
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+          "maxLength": 32
+        },
+        "itemsSummary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "subtotal": {
+          "type": "number"
+        },
+        "discount": {
+          "type": "number"
+        },
+        "deliveryFee": {
+          "type": "number"
+        },
+        "totalAmount": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "customerName",
+        "customerPhone",
+        "customerEmail",
+        "shippingAddress",
+        "deliveryMethod",
+        "paymentMethod",
+        "paymentStatus",
+        "status",
+        "itemsSummary",
+        "subtotal",
+        "discount",
+        "deliveryFee",
+        "totalAmount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private customer profile and saved preferences",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "savedAddress": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "email", "phone", "savedAddress", "updatedAt"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Global store configuration and contact settings",
+      "type": "object",
+      "properties": {
+        "storeName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "openingHours": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "mapLink": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "announcementText": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "codEnabled": {
+          "type": "boolean"
+        },
+        "upiId": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "storeName",
+        "address",
+        "phone",
+        "whatsappNumber",
+        "email",
+        "openingHours",
+        "mapLink",
+        "announcementText",
+        "codEnabled",
+        "upiId",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Catalog products readable by all shoppers and writable by admins"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories readable by all shoppers and writable by admins"
+    },
+    "/banners/{bannerId}": {
+      "schema": "Banner",
+      "description": "Promotional banners readable by all shoppers and writable by admins"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders isolated to order owner or store admin"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Customer profile isolated strictly to the owner or admin"
+    },
+    "/settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Public store settings readable by all and editable by admin"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Charlie Mobile & Accessories",
+  "description": "Premium mobile phones, 5G smartphones, smartwatches, tablets, audio gear, and original accessories retail store with instant local delivery and store pickup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
