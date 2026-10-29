@@ -1,5 +1,5 @@
 /**
- * Cloudinary Image Upload & Optimization Service
+ * Cloudinary Image & Video Upload & Optimization Service
  * Pre-configured with Charlie Mobile's official Cloudinary Cloud Name (dxeuzdwkz)
  * and Upload Preset (charliemobile), with admin override support.
  */
@@ -49,29 +49,48 @@ export function saveCloudinaryConfig(cloudName: string, uploadPreset: string) {
   }
 }
 
+export function isVideoUrl(url?: string): boolean {
+  if (!url) return false;
+  const lower = url.toLowerCase().trim();
+  return (
+    lower.startsWith('data:video/') ||
+    lower.includes('/video/upload/') ||
+    /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(lower)
+  );
+}
+
 function readAsDataUrlFallback(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.onerror = () => reject(new Error('Failed to read media file'));
     reader.readAsDataURL(file);
   });
 }
 
-export async function uploadImageToCloudinary(file: File): Promise<string> {
+export async function uploadMediaToCloudinary(
+  file: File
+): Promise<{ url: string; mediaType: 'image' | 'video' }> {
   const { cloudName, uploadPreset, isConfigured } = getCloudinaryConfig();
+  const isVideoFile =
+    file.type.startsWith('video/') ||
+    /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name);
+  const mediaType: 'image' | 'video' = isVideoFile ? 'video' : 'image';
 
   if (!isConfigured) {
-    return readAsDataUrlFallback(file);
+    const localUrl = await readAsDataUrlFallback(file);
+    return { url: localUrl, mediaType };
   }
 
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', uploadPreset);
 
+  const endpointType = isVideoFile ? 'video' : 'image';
+
   try {
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/${endpointType}/upload`,
       {
         method: 'POST',
         body: formData,
@@ -81,18 +100,30 @@ export async function uploadImageToCloudinary(file: File): Promise<string> {
     if (!response.ok) {
       const errText = await response.text();
       console.warn('Cloudinary API returned non-OK, using local DataURL fallback:', errText);
-      return readAsDataUrlFallback(file);
+      const localUrl = await readAsDataUrlFallback(file);
+      return { url: localUrl, mediaType };
     }
 
     const data = await response.json();
     if (data && data.secure_url) {
-      return optimizeCloudinaryUrl(String(data.secure_url), 1000);
+      const secureUrl = String(data.secure_url);
+      return {
+        url: isVideoFile ? secureUrl : optimizeCloudinaryUrl(secureUrl, 1200),
+        mediaType,
+      };
     }
-    return readAsDataUrlFallback(file);
+    const localUrl = await readAsDataUrlFallback(file);
+    return { url: localUrl, mediaType };
   } catch (err) {
     console.warn('Network/CORS error reaching Cloudinary, using DataURL fallback:', err);
-    return readAsDataUrlFallback(file);
+    const localUrl = await readAsDataUrlFallback(file);
+    return { url: localUrl, mediaType };
   }
+}
+
+export async function uploadImageToCloudinary(file: File): Promise<string> {
+  const result = await uploadMediaToCloudinary(file);
+  return result.url;
 }
 
 export async function uploadMultipleImagesToCloudinary(
@@ -104,6 +135,7 @@ export async function uploadMultipleImagesToCloudinary(
 
 export function optimizeCloudinaryUrl(url: string, width = 800): string {
   if (!url || !url.includes('res.cloudinary.com')) return url;
+  if (isVideoUrl(url)) return url;
   if (url.includes('/upload/f_auto')) return url;
   return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
 }

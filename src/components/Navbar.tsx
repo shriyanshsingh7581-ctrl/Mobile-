@@ -20,8 +20,7 @@ import { useStore } from '../context/StoreContext';
 import { useOnlineStatus } from '../hooks/usePWAInstall';
 import { PWAInstallBanner } from './PWAInstallBanner';
 
-const CHARLIE_LOGO_URL =
-  '/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png';
+const CHARLIE_LOGO_URL = '/charlie-logo.png';
 
 interface DrawerCategory {
   id: string;
@@ -242,17 +241,17 @@ export const Navbar: React.FC = () => {
               <Link to="/" className="flex items-center gap-2 min-w-0">
                 <div className="h-9 px-2 rounded-lg bg-white flex items-center justify-center shadow-xs shrink-0">
                   <img
-                    src={CHARLIE_LOGO_URL}
-                    alt="Charlie Mobiles & Accessories"
+                    src={storeSettings.logoUrl || CHARLIE_LOGO_URL}
+                    alt={storeSettings.businessName || 'Charlie Mobiles & Accessories'}
                     className="h-8 w-auto object-contain"
                   />
                 </div>
                 <div className="leading-none truncate">
                   <span className="block text-base sm:text-xl font-black tracking-wide text-white uppercase truncate">
-                    CHARLIE
+                    {storeSettings.storeName?.split(' ')[0] || 'CHARLIE'}
                   </span>
                   <span className="block text-[9px] font-bold tracking-widest text-orange-100 uppercase truncate">
-                    MOBILES &amp; ACC.
+                    {storeSettings.businessName?.replace(/^CHARLIE\s*/i, '') || 'MOBILES & ACC.'}
                   </span>
                 </div>
               </Link>

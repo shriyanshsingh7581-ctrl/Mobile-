@@ -1,28 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect width="512" height="512" rx="112" fill="#101114"/>
-  <rect x="24" y="24" width="464" height="464" rx="92" stroke="url(#cm_border)" stroke-width="6" stroke-opacity="0.45"/>
-  <!-- Outer electric glow ring -->
-  <circle cx="256" cy="256" r="185" stroke="url(#cm_glow)" stroke-width="3" stroke-dasharray="10 6" opacity="0.5"/>
-  <!-- CM Monogram -->
-  <!-- C Letterform -->
-  <path d="M234 156H168C134.863 156 108 182.863 108 216V296C108 329.137 134.863 356 168 356H234" stroke="#FFFFFF" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- M Letterform with Electric Blue & Cyan Accent -->
-  <path d="M254 356V160L326 264L398 160V356" stroke="url(#cm_accent)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Signal / Spark Accent Dot -->
-  <circle cx="234" cy="256" r="14" fill="#00C2FF"/>
+  <rect width="512" height="512" rx="96" fill="#FFFFFF"/>
+  <!-- Infinity Loop Emblem in Black & Red -->
+  <path d="M180 185C125 185 90 220 90 265C90 310 125 345 180 345C225 345 256 305 285 265C314 225 345 185 390 185C435 185 462 220 462 265C462 310 435 345 390 345C345 345 314 305 285 265C256 225 225 185 180 185Z" stroke="url(#charlie_grad)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- C inside Left Loop -->
+  <path d="M202 238H165C148 238 136 250 136 265C136 280 148 292 165 292H202" stroke="#111111" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- M inside Right Loop -->
+  <path d="M318 295V235L350 272L382 235V295" stroke="#CC0000" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- CHARLIE Text -->
+  <text x="256" y="412" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="900" font-size="60" letter-spacing="6" fill="#111111">CHARLIE</text>
+  <text x="256" y="452" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800" font-size="22" letter-spacing="3" fill="#CC0000">MOBILES &amp; ACCESSORIES</text>
   <defs>
-    <linearGradient id="cm_accent" x1="254" y1="156" x2="404" y2="360" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#00C2FF"/>
-      <stop offset="100%" stop-color="#2563EB"/>
-    </linearGradient>
-    <linearGradient id="cm_border" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#00C2FF"/>
-      <stop offset="50%" stop-color="#2563EB"/>
-      <stop offset="100%" stop-color="#101114"/>
-    </linearGradient>
-    <linearGradient id="cm_glow" x1="70" y1="70" x2="440" y2="440" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#00C2FF"/>
-      <stop offset="100%" stop-color="#2563EB"/>
+    <linearGradient id="charlie_grad" x1="90" y1="265" x2="462" y2="265" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#111111"/>
+      <stop offset="50%" stop-color="#CC0000"/>
+      <stop offset="100%" stop-color="#E11D48"/>
     </linearGradient>
   </defs>
 </svg>

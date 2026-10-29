@@ -1,11 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
 import { SmartImage } from '../components/SmartImage';
 import { PWAInstallBanner } from '../components/PWAInstallBanner';
 import { Product } from '../types/store';
+import { isVideoUrl } from '../utils/cloudinary';
 
 interface TabMediaGroup {
   banner: string;
@@ -14,10 +15,30 @@ interface TabMediaGroup {
 }
 
 export const HomePage: React.FC = () => {
-  const { products, categories, banners } = useStore();
+  const { products, categories, banners, storeSettings, homepageSections } = useStore();
 
   const activeBanners = banners.filter((b) => b.enabled);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [bannerMuted, setBannerMuted] = useState(true);
+
+  const slideIntervalMs = Math.max(2, Number(storeSettings.bannerIntervalSeconds || 5)) * 1000;
+
+  // Auto-advance Hero Banner every 5 seconds (configurable in Admin Panel)
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    const timer = window.setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % activeBanners.length);
+    }, slideIntervalMs);
+    return () => window.clearInterval(timer);
+  }, [activeBanners.length, slideIntervalMs]);
+
+  const getSectionConfig = (id: string, fallbackTitle: string) => {
+    const found = homepageSections.find((s) => s.id === id);
+    return {
+      enabled: found ? found.enabled : true,
+      title: found?.title || fallbackTitle,
+    };
+  };
 
   // Interactive Section Tabs matching the Video (00:03, 00:04, 00:06-00:27, 00:18, 00:19, 01:39)
   const [mobileTab, setMobileTab] = useState<'best_seller' | '5g' | 'top_brands' | 'accessories'>('best_seller');
@@ -45,6 +66,11 @@ export const HomePage: React.FC = () => {
 
   const currentBanner =
     activeBanners[bannerIndex % Math.max(1, activeBanners.length)] || banners[0];
+  const currentBannerIsVideo = Boolean(
+    currentBanner &&
+      (currentBanner.mediaType === 'video' ||
+        isVideoUrl(currentBanner.videoUrl || currentBanner.image))
+  );
 
   // Exact Poorvika Mobile & Accessories Tab Media Groups
   const mobileTabMedia: Record<typeof mobileTab, TabMediaGroup> = {
@@ -596,89 +622,156 @@ export const HomePage: React.FC = () => {
     </div>
   );
 
+  const topCategoriesSection = getSectionConfig('shop_by_categories', 'Top Categories');
+  const festiveHeroSection = getSectionConfig('festive_deals', 'Festive Deals & Hero Slider');
+  const monsoonSection = getSectionConfig(
+    'monsoon_deals',
+    storeSettings.seasonalDealsTitle || 'Catch the Coolest Monsoon Deals'
+  );
+  const mobilesSection = getSectionConfig('best_selling', 'Mobiles & Accessories');
+  const laptopsSection = getSectionConfig('laptops_tablets', 'Laptop & Tablets');
+  const brandsSection = getSectionConfig('top_brands', 'Top Brands Scroller');
+  const tvSection = getSectionConfig('tv_audio', 'Tv & Audio');
+  const kitchenSection = getSectionConfig('kitchen_appliances', 'Kitchen Appliances');
+  const homeAppSection = getSectionConfig('home_appliances', 'Home Appliances');
+  const smartTechSection = getSectionConfig('smartwatches_wearables', 'Smart Technology');
+  const personalCareSection = getSectionConfig('personal_care', 'Personal Care');
+
   return (
     <div className="bg-[#F5F6F8] pb-6 space-y-3">
       {/* 1. TOP CIRCULAR CATEGORY BUBBLES (00:00 in Video) */}
-      <section className="bg-white py-3 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6">
-          <div className="flex items-start gap-3 sm:gap-5 overflow-x-auto no-scrollbar snap-x">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={cat.slug === 'offers' ? '/offers' : `/products?category=${cat.slug}`}
-                className="group flex flex-col items-center shrink-0 w-[76px] sm:w-[92px] snap-start"
-              >
-                <div className="w-[68px] h-[68px] sm:w-20 sm:h-20 rounded-full bg-[#F8FAFC] border border-slate-200 group-hover:border-[#F26522] p-1.5 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 shadow-2xs">
-                  <SmartImage
-                    src={cat.image}
-                    alt={cat.name}
-                    brand={cat.name}
-                    category={cat.slug}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-[#1E293B] group-hover:text-[#F26522] text-center leading-tight line-clamp-2">
-                  {cat.name}
-                </span>
-              </Link>
-            ))}
+      {topCategoriesSection.enabled && (
+        <section className="bg-white py-3 border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-2.5 sm:px-6">
+            <div className="flex items-start gap-3 sm:gap-5 overflow-x-auto no-scrollbar snap-x">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={cat.slug === 'offers' ? '/offers' : `/products?category=${cat.slug}`}
+                  className="group flex flex-col items-center shrink-0 w-[76px] sm:w-[92px] snap-start"
+                >
+                  <div className="w-[68px] h-[68px] sm:w-20 sm:h-20 rounded-full bg-[#F8FAFC] border border-slate-200 group-hover:border-[#F26522] p-1.5 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 shadow-2xs">
+                    <SmartImage
+                      src={cat.image}
+                      alt={cat.name}
+                      brand={cat.name}
+                      category={cat.slug}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-[#1E293B] group-hover:text-[#F26522] text-center leading-tight line-clamp-2">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* PWA INSTALL APP BANNER ON HOME PAGE */}
       <PWAInstallBanner variant="home-card" />
 
       {/* 2. FESTIVE DEALS & OFFERS TOP STRIP BANNER (00:00 in Video) */}
-      <section className="max-w-7xl mx-auto px-2 sm:px-6">
-        <Link to="/offers" className="block rounded-lg overflow-hidden shadow-2xs">
-          <SmartImage
-            src="https://img-prd-pim.poorvika.com/pageimg/Festive-Deals-Offers-2027-M.webp"
-            alt="Festive Deals & Offers"
-            brand="Charlie Mobile"
-            category="smartphones"
-            className="w-full h-auto object-cover"
-          />
-        </Link>
-      </section>
+      {festiveHeroSection.enabled && (
+        <section className="max-w-7xl mx-auto px-2 sm:px-6">
+          <Link
+            to={storeSettings.festiveStripBannerLink || '/offers'}
+            className="block rounded-lg overflow-hidden shadow-2xs"
+          >
+            <SmartImage
+              src={
+                storeSettings.festiveStripBannerUrl ||
+                'https://img-prd-pim.poorvika.com/pageimg/Festive-Deals-Offers-2027-M.webp'
+              }
+              alt="Festive Deals & Offers"
+              brand="Charlie Mobile"
+              category="smartphones"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+        </section>
+      )}
 
-      {/* 3. HERO BANNER CAROUSEL WITH LEFT/RIGHT `<` `>` ARROWS & ORANGE PILL DOT INDICATOR (00:01 & 01:25-01:31 in Video) */}
-      {currentBanner && (
+      {/* 3. HERO BANNER CAROUSEL (SUPPORTS BOTH PHOTO & VIDEO + 5-SECOND AUTO SLIDE) */}
+      {festiveHeroSection.enabled && currentBanner && (
         <section className="max-w-7xl mx-auto px-2 sm:px-6">
           <div className="relative rounded-lg overflow-hidden bg-white shadow-2xs">
-            <Link to={currentBanner.ctaLink || '/products'} className="block">
-              <SmartImage
-                src={currentBanner.image}
-                alt={currentBanner.title}
-                brand="Charlie Mobile"
-                category="smartphones"
-                className="w-full h-auto max-h-[360px] object-cover mx-auto"
-              />
+            <Link to={currentBanner.ctaLink || '/products'} className="block relative">
+              {currentBannerIsVideo ? (
+                <video
+                  key={`${currentBanner.id}_${currentBanner.videoUrl || currentBanner.image}`}
+                  src={currentBanner.videoUrl || currentBanner.image}
+                  autoPlay
+                  muted={bannerMuted}
+                  loop
+                  playsInline
+                  className="w-full h-auto max-h-[380px] object-cover mx-auto bg-black"
+                />
+              ) : (
+                <SmartImage
+                  src={currentBanner.image}
+                  alt={currentBanner.title}
+                  brand="Charlie Mobile"
+                  category="smartphones"
+                  className="w-full h-auto max-h-[380px] object-cover mx-auto"
+                />
+              )}
             </Link>
 
+            {/* Video Mute / Unmute Button when current slide is a Video */}
+            {currentBannerIsVideo && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBannerMuted((m) => !m);
+                }}
+                aria-label={bannerMuted ? 'Unmute video' : 'Mute video'}
+                className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1.5 rounded-full bg-black/70 hover:bg-black/85 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-md"
+              >
+                {bannerMuted ? (
+                  <>
+                    <VolumeX className="w-3.5 h-3.5 text-orange-400" />
+                    <span>Sound Off</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Sound On</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Left `<` Button */}
-            <button
-              type="button"
-              onClick={() =>
-                setBannerIndex(
-                  (prev) => (prev - 1 + activeBanners.length) % activeBanners.length
-                )
-              }
-              aria-label="Previous banner"
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+            {activeBanners.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setBannerIndex(
+                    (prev) => (prev - 1 + activeBanners.length) % activeBanners.length
+                  )
+                }
+                aria-label="Previous banner"
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
 
             {/* Right `>` Button */}
-            <button
-              type="button"
-              onClick={() => setBannerIndex((prev) => (prev + 1) % activeBanners.length)}
-              aria-label="Next banner"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            {activeBanners.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setBannerIndex((prev) => (prev + 1) % activeBanners.length)}
+                aria-label="Next banner"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Bottom Dots with Orange Pill Active Dot */}
@@ -700,69 +793,75 @@ export const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* 4. CATCH THE COOLEST MONSOON DEALS (00:02 in Video) */}
-      <section className="max-w-7xl mx-auto bg-white pt-3 pb-2 shadow-2xs">
-        <h2 className="text-center text-[15px] sm:text-lg font-extrabold text-[#E0531F] px-3">
-          Catch the Coolest Monsoon Deals
-        </h2>
-        <div className="mt-1.5 py-1.5 border-y border-slate-200 text-center">
-          <span className="text-xs font-extrabold text-[#F26522] border-b-2 border-[#F26522] pb-1">
-            Monsoon Appliances
-          </span>
-        </div>
-
-        <div className="p-2 space-y-2">
-          <Link to="/products?category=home-appliances" className="block rounded overflow-hidden">
-            <SmartImage
-              src="https://img-prd-pim.poorvika.com/pageimg/Monsoon-Appliances-2027-mob.webp"
-              alt="Monsoon Appliances"
-              brand="Monsoon Deals"
-              category="home-appliances"
-              className="w-full h-auto object-cover"
-            />
-          </Link>
-
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              {
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Washer-and-dryer-mob-version.webp',
-                link: '/products?category=home-appliances',
-                alt: 'Washer and Dryer',
-              },
-              {
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Hair-DryerMobile-View.webp',
-                link: '/products?category=personal-care',
-                alt: 'Hair Dryer',
-              },
-              {
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Iron-Bar-Mobile-View.webp',
-                link: '/products?category=home-appliances',
-                alt: 'Iron Bar',
-              },
-              {
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Water-Heater-Mobile-View.webp',
-                link: '/products?category=home-appliances',
-                alt: 'Water Heater',
-              },
-            ].map((item) => (
-              <Link key={item.alt} to={item.link} className="block rounded overflow-hidden">
-                <SmartImage
-                  src={item.img}
-                  alt={item.alt}
-                  brand={item.alt}
-                  category="home-appliances"
-                  className="w-full h-auto object-cover"
-                />
-              </Link>
-            ))}
+      {/* 4. CATCH THE COOLEST MONSOON / SEASONAL DEALS (00:02 in Video) */}
+      {monsoonSection.enabled && (
+        <section className="max-w-7xl mx-auto bg-white pt-3 pb-2 shadow-2xs">
+          <h2 className="text-center text-[15px] sm:text-lg font-extrabold text-[#E0531F] px-3">
+            {storeSettings.seasonalDealsTitle || monsoonSection.title}
+          </h2>
+          <div className="mt-1.5 py-1.5 border-y border-slate-200 text-center">
+            <span className="text-xs font-extrabold text-[#F26522] border-b-2 border-[#F26522] pb-1">
+              {storeSettings.seasonalDealsSubtitle || 'Monsoon Appliances'}
+            </span>
           </div>
-        </div>
-      </section>
+
+          <div className="p-2 space-y-2">
+            <Link to="/products?category=home-appliances" className="block rounded overflow-hidden">
+              <SmartImage
+                src={
+                  storeSettings.seasonalMainBannerUrl ||
+                  'https://img-prd-pim.poorvika.com/pageimg/Monsoon-Appliances-2027-mob.webp'
+                }
+                alt={storeSettings.seasonalDealsSubtitle || 'Monsoon Appliances'}
+                brand="Monsoon Deals"
+                category="home-appliances"
+                className="w-full h-auto object-cover"
+              />
+            </Link>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Washer-and-dryer-mob-version.webp',
+                  link: '/products?category=home-appliances',
+                  alt: 'Washer and Dryer',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Hair-DryerMobile-View.webp',
+                  link: '/products?category=personal-care',
+                  alt: 'Hair Dryer',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Iron-Bar-Mobile-View.webp',
+                  link: '/products?category=home-appliances',
+                  alt: 'Iron Bar',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Water-Heater-Mobile-View.webp',
+                  link: '/products?category=home-appliances',
+                  alt: 'Water Heater',
+                },
+              ].map((item) => (
+                <Link key={item.alt} to={item.link} className="block rounded overflow-hidden">
+                  <SmartImage
+                    src={item.img}
+                    alt={item.alt}
+                    brand={item.alt}
+                    category="home-appliances"
+                    className="w-full h-auto object-cover"
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 5. MOBILES & ACCESSORIES SECTION (00:03 - 00:04 in Video) */}
+      {mobilesSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Mobiles &amp; Accessories
+          {mobilesSection.title}
         </h2>
 
         {/* 4 Interactive Tabs: Best seller | 5G Mobiles | Top Brands | Accessories */}
@@ -822,11 +921,13 @@ export const HomePage: React.FC = () => {
           mobileRailRef
         )}
       </section>
+      )}
 
       {/* 6. LAPTOP & TABLETS SECTION (00:04 - 00:05 in Video) */}
+      {laptopsSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Laptop &amp; Tablets
+          {laptopsSection.title}
         </h2>
 
         {/* 4 Interactive Tabs: Best Laptops | Desktop Pc | iPad & Tablets | Accessories */}
@@ -886,8 +987,10 @@ export const HomePage: React.FC = () => {
           laptopRailRef
         )}
       </section>
+      )}
 
       {/* 7. CIRCULAR BRAND LOGO SCROLLER (00:05 - 00:11 in Video) */}
+      {brandsSection.enabled && (
       <section className="max-w-7xl mx-auto py-3 px-2 sm:px-6 bg-[#E5E7EB]/70">
         <div className="relative flex items-center">
           <button
@@ -930,11 +1033,13 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
       </section>
+      )}
 
       {/* 8. TV & AUDIO SECTION (00:06 - 00:18 & 00:22 - 00:27 in Video) */}
+      {tvSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Tv &amp; Audio
+          {tvSection.title}
         </h2>
 
         {/* 4 Interactive Tabs: All categories | Television | Audio | Entertainment */}
@@ -990,11 +1095,13 @@ export const HomePage: React.FC = () => {
         {/* Product Slider with "See All < >" */}
         {renderProductRailWithControls(tvProducts, '/products?category=tv-audio', tvRailRef)}
       </section>
+      )}
 
       {/* 9. KITCHEN APPLIANCES SECTION (00:18 - 00:19 in Video) */}
+      {kitchenSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Kitchen Appliances
+          {kitchenSection.title}
         </h2>
 
         {/* 4 Interactive Tabs: All Categories | Kitchen Grinders | Cookwares | Steamers & Cookers */}
@@ -1054,11 +1161,13 @@ export const HomePage: React.FC = () => {
           kitchenRailRef
         )}
       </section>
+      )}
 
       {/* 10. HOME APPLIANCES SECTION (00:19 - 00:20 in Video) */}
+      {homeAppSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Home Appliances
+          {homeAppSection.title}
         </h2>
 
         {/* 4 Interactive Tabs: All Categories | Air Conditioner | Home Cleansers | Small Appliances */}
@@ -1118,14 +1227,16 @@ export const HomePage: React.FC = () => {
           homeRailRef
         )}
       </section>
+      )}
 
       {/* 11. SMART TECHNOLOGY SECTION (01:38 - 01:39 in Video) */}
+      {smartTechSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-2 shadow-2xs">
         <div className="p-2">
           <Link to="/products?category=smartwatches" className="block rounded overflow-hidden">
             <SmartImage
               src="https://img-prd-pim.poorvika.com/pageimg/Smart-Accessories-Mob-M-A-2026.webp"
-              alt="Smart Technology"
+              alt={smartTechSection.title}
               brand="Smart Technology"
               category="smartwatches"
               className="w-full h-auto object-cover"
@@ -1139,11 +1250,13 @@ export const HomePage: React.FC = () => {
           smartTechRailRef
         )}
       </section>
+      )}
 
       {/* 12. PERSONAL CARE SECTION (01:39 - 01:40 in Video) */}
+      {personalCareSection.enabled && (
       <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
         <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
-          Personal Care
+          {personalCareSection.title}
         </h2>
 
         {/* 2 Interactive Tabs: Trending Products | Personal Care */}
@@ -1227,6 +1340,7 @@ export const HomePage: React.FC = () => {
           personalCareRailRef
         )}
       </section>
+      )}
 
       {/* 13. SEO INFORMATIONAL BLOCK (01:40 - 01:42 in Video) */}
       <section className="max-w-7xl mx-auto bg-white p-4 sm:p-6 text-[#1E293B] space-y-3 border-t border-slate-200">

@@ -30,7 +30,7 @@ export const Footer: React.FC = () => {
           </a>
 
           <a
-            href="https://instagram.com"
+            href={storeSettings.instagramUrl || 'https://instagram.com'}
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
           </a>
 
           <a
-            href="https://facebook.com"
+            href={storeSettings.facebookUrl || 'https://facebook.com'}
             target="_blank"
             rel="noreferrer"
             aria-label="Facebook"
@@ -60,7 +60,7 @@ export const Footer: React.FC = () => {
           </a>
 
           <a
-            href="https://youtube.com"
+            href={storeSettings.youtubeUrl || 'https://youtube.com'}
             target="_blank"
             rel="noreferrer"
             aria-label="YouTube"
@@ -78,22 +78,22 @@ export const Footer: React.FC = () => {
           <h3 className="text-sm font-extrabold text-[#1E293B]">Contact Information</h3>
           <p className="font-bold text-[#1E293B]">Head Office</p>
           <p className="text-slate-600 leading-relaxed">
-            Charlie Mobiles &amp; Accessories Pvt Ltd, {storeSettings.address}
+            {storeSettings.businessName || 'Charlie Mobiles & Accessories'}, {storeSettings.address}
           </p>
           <p className="pt-1 text-slate-700">
             <strong className="text-[#1E293B]">For Support &amp; Order Inquiries :</strong>{' '}
             <a
-              href="mailto:charliegedekar@gmail.com"
+              href={`mailto:${storeSettings.email || 'charliegedekar@gmail.com'}`}
               className="text-[#F26522] font-semibold hover:underline"
             >
-              charliegedekar@gmail.com
+              {storeSettings.email || 'charliegedekar@gmail.com'}
             </a>{' '}
             |{' '}
             <a
-              href="tel:+918818850488"
+              href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`}
               className="text-[#1E293B] font-bold hover:text-[#F26522]"
             >
-              +91 8818850488
+              {storeSettings.phone || '+91 8818850488'}
             </a>
           </p>
         </div>
@@ -106,7 +106,7 @@ export const Footer: React.FC = () => {
               <li><Link to="/store" className="hover:text-[#F26522]">Contact Us</Link></li>
               <li><Link to="/store" className="hover:text-[#F26522]">Site Map</Link></li>
               <li><Link to="/offers" className="hover:text-[#F26522]">One Assist</Link></li>
-              <li><a href="tel:+918818850488" className="hover:text-[#F26522]">1800 / +91 8818850488</a></li>
+              <li><a href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`} className="hover:text-[#F26522]">{storeSettings.phone || '+91 8818850488'}</a></li>
             </ul>
           </div>
 
@@ -134,14 +134,14 @@ export const Footer: React.FC = () => {
         <div className="space-y-2 pt-2 border-t border-slate-100">
           <div className="flex items-center gap-3">
             <img
-              src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
-              alt="Charlie Mobiles & Accessories"
+              src={storeSettings.logoUrl || '/charlie-logo.png'}
+              alt={storeSettings.businessName || 'Charlie Mobiles & Accessories'}
               className="h-10 w-auto object-contain rounded bg-white p-0.5 border border-slate-200"
             />
             <h4 className="text-sm font-extrabold text-[#1E293B]">About Us :</h4>
           </div>
           <p className="text-slate-600 leading-relaxed">
-            Charlie Mobiles &amp; Accessories is a premier omnichannel electronics and smartphone retailer in India. With 100% genuine brand-sealed smartphones, laptops, tablets, smart TVs, home appliances, and original mobile accessories, Charlie Mobiles brings flagship showroom trust directly to your fingertips with instant store pickup, express local delivery, and zero-down-payment EMI options.
+            {storeSettings.businessName || 'Charlie Mobiles & Accessories'} is a premier omnichannel electronics and smartphone retailer in India. With 100% genuine brand-sealed smartphones, laptops, tablets, smart TVs, home appliances, and original mobile accessories, {storeSettings.storeName || 'Charlie Mobiles'} brings flagship showroom trust directly to your fingertips with instant store pickup, express local delivery, and zero-down-payment EMI options.
           </p>
         </div>
 

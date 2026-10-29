@@ -1538,6 +1538,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/products?category=vivo',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp',
+    mediaType: 'image',
+    order: 1,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1552,6 +1554,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/products?category=oppo',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/Oppo-Find-X10-Series-Pre-Book-Now-M.webp',
+    mediaType: 'image',
+    order: 2,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1566,6 +1570,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/offers',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/pre-book-apple-iphone-duo-in-poorvika-mobv-1.webp',
+    mediaType: 'image',
+    order: 3,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1580,6 +1586,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/products?category=iphone',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/iphone-18-updates-explore-now-ban-Mb-v.webp',
+    mediaType: 'image',
+    order: 4,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1594,6 +1602,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/products?category=tablets',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/Mini-Apple-little-do-it-all-available-now-M.webp',
+    mediaType: 'image',
+    order: 5,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1608,6 +1618,8 @@ export const INITIAL_BANNERS: HeroBanner[] = [
     secondaryCtaLink: '/products?category=entertainment',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/PS5-Play-Like-Never-Before-available-now-Mob.webp',
+    mediaType: 'image',
+    order: 6,
     accentColor: '#F26522',
     enabled: true,
   },
@@ -1651,6 +1663,15 @@ export const INITIAL_STORE_SETTINGS: StoreSettings = {
   businessName: 'CHARLIE MOBILES & ACCESSORIES',
   tagline:
     'Your Trusted Destination for Mobiles, Electronics, Gadgets & Everyday Essentials',
+  logoUrl: '/charlie-logo.png',
+  bannerIntervalSeconds: 5,
+  festiveStripBannerUrl:
+    'https://img-prd-pim.poorvika.com/pageimg/Festive-Deals-Offers-2027-M.webp',
+  festiveStripBannerLink: '/offers',
+  seasonalDealsTitle: 'Catch the Coolest Monsoon Deals',
+  seasonalDealsSubtitle: 'Monsoon Appliances',
+  seasonalMainBannerUrl:
+    'https://img-prd-pim.poorvika.com/pageimg/Monsoon-Appliances-2027-mob.webp',
   address: 'Main Showroom · Charlie Mobiles & Accessories',
   city: 'RAIPUR',
   phone: '+91 8818850488',
@@ -1676,6 +1697,7 @@ export const INITIAL_STORE_SETTINGS: StoreSettings = {
   cloudinaryUploadPreset: 'charliemobile',
   instagramUrl: '',
   facebookUrl: '',
+  youtubeUrl: '',
 };
 
 export const INITIAL_HOMEPAGE_SECTIONS: HomepageSectionConfig[] = [

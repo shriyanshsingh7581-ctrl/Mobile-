@@ -90,6 +90,7 @@ interface StoreContextValue {
   deleteCategory: (categoryId: string) => Promise<void>;
   saveBanner: (banner: HeroBanner) => Promise<void>;
   deleteBanner: (bannerId: string) => Promise<void>;
+  reorderBanners: (nextBanners: HeroBanner[]) => void;
   updateOrderStatus: (
     orderId: string,
     status: Order['status'],
@@ -671,6 +672,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Banner deleted');
   };
 
+  const reorderBanners = async (orderedBanners: HeroBanner[]) => {
+    const normalized = orderedBanners.map((b, idx) => ({ ...b, order: idx + 1 }));
+    setBanners(normalized);
+    showToast('Banner order updated');
+  };
+
   const updateOrderStatus = async (
     orderId: string,
     status: Order['status'],
@@ -1012,6 +1019,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteCategory,
         saveBanner,
         deleteBanner,
+        reorderBanners,
         updateOrderStatus,
         updateStoreSettings,
         updateHomepageSections,

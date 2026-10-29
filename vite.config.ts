@@ -12,6 +12,7 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [
+          'charlie-logo.png',
           'icon.svg',
           'apple-touch-icon.png',
           'pwa-192x192.png',
@@ -21,7 +22,7 @@ export default defineConfig(() => {
         manifest: {
           id: '/',
           name: 'Charlie Mobiles & Accessories',
-          short_name: 'CharlieMob',
+          short_name: 'CharlieMobiles',
           description:
             'Shop 5G smartphones, iPhones, laptops, tablets, smart TVs, home appliances, and genuine accessories at Charlie Mobiles & Accessories.',
           theme_color: '#F26522',
@@ -32,19 +33,19 @@ export default defineConfig(() => {
           scope: '/',
           icons: [
             {
-              src: '/pwa-192x192.png',
+              src: '/pwa-192x192.png?v=3',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-512x512.png',
+              src: '/pwa-512x512.png?v=3',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-maskable-512x512.png',
+              src: '/pwa-maskable-512x512.png?v=3',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',
@@ -52,6 +53,9 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
+          cleanupOutdatedCaches: true,
+          skipWaiting: true,
+          clientsClaim: true,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           globIgnores: ['**/Screen_Recording_*.mp4'],
           runtimeCaching: [

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Download, Share, Smartphone, X } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
+import { useStore } from '../context/StoreContext';
 
 interface PWAInstallBannerProps {
   variant?: 'home-card' | 'header-btn' | 'drawer-btn';
@@ -10,8 +11,11 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
   variant = 'home-card',
 }) => {
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const { storeSettings } = useStore();
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+
+  const logoSrc = storeSettings.logoUrl || '/charlie-logo.png';
 
   // Hide when already running as an installed standalone PWA
   if (isInstalled) {
@@ -45,13 +49,13 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <img
-                src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                src={logoSrc}
                 alt="Charlie Mobiles App"
                 className="w-9 h-9 rounded-lg object-contain bg-white border border-orange-200 p-0.5 shrink-0"
               />
               <div className="min-w-0">
                 <p className="text-xs font-extrabold text-[#1E293B] truncate">
-                  Charlie Mobiles App
+                  {storeSettings.storeName || 'Charlie Mobiles'} App
                 </p>
                 <p className="text-[10px] text-slate-600 truncate">
                   Fast 1-Tap Shopping &amp; Offers
@@ -76,7 +80,7 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-xs">
                 <img
-                  src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                  src={logoSrc}
                   alt="Charlie Mobiles PWA"
                   className="w-full h-full object-contain"
                 />
@@ -84,7 +88,7 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs sm:text-sm font-extrabold text-white truncate">
-                    Install Charlie Mobiles App
+                    Install {storeSettings.storeName || 'Charlie Mobiles'} App
                   </span>
                   <span className="hidden sm:inline-block text-[10px] font-bold text-[#F26522] bg-orange-500/15 px-1.5 py-0.5 rounded">
                     OFFICIAL PWA
@@ -125,7 +129,7 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
             <div className="bg-gradient-to-r from-[#F26522] to-[#EA580C] px-4 py-3.5 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Smartphone className="w-5 h-5" />
-                <h3 className="text-sm font-extrabold">Install Charlie Mobiles App</h3>
+                <h3 className="text-sm font-extrabold">Install {storeSettings.storeName || 'Charlie Mobiles'} App</h3>
               </div>
               <button
                 type="button"
@@ -139,13 +143,13 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({
             <div className="p-5 space-y-4 text-xs text-[#1E293B]">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-50/70 border border-orange-200">
                 <img
-                  src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                  src={logoSrc}
                   alt="Charlie Mobiles"
                   className="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200 object-contain shrink-0"
                 />
                 <div>
                   <p className="font-extrabold text-sm text-[#1E293B]">
-                    CHARLIE MOBILES &amp; ACCESSORIES
+                    {storeSettings.businessName || 'CHARLIE MOBILES & ACCESSORIES'}
                   </p>
                   <p className="text-[11px] text-slate-600">
                     Works on Android &amp; iPhone · Zero storage overhead

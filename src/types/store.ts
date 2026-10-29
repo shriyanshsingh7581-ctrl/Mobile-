@@ -65,6 +65,9 @@ export interface HeroBanner {
   secondaryCtaText?: string;
   secondaryCtaLink?: string;
   image: string;
+  mediaType?: 'image' | 'video';
+  videoUrl?: string;
+  order?: number;
   accentColor: string;
   enabled: boolean;
   campaignEnd?: string;
@@ -135,6 +138,13 @@ export interface StoreSettings {
   storeName: string;
   businessName: string;
   tagline: string;
+  logoUrl?: string;
+  bannerIntervalSeconds?: number;
+  festiveStripBannerUrl?: string;
+  festiveStripBannerLink?: string;
+  seasonalDealsTitle?: string;
+  seasonalDealsSubtitle?: string;
+  seasonalMainBannerUrl?: string;
   address: string;
   city: string;
   phone: string;
@@ -158,6 +168,7 @@ export interface StoreSettings {
   showroomPhotos?: ShowroomPhoto[];
   instagramUrl?: string;
   facebookUrl?: string;
+  youtubeUrl?: string;
 }
 
 export interface HomepageSectionConfig {

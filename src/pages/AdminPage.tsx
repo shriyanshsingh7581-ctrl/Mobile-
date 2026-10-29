@@ -5,11 +5,15 @@ import {
   ArrowUpRight,
   BarChart3,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Clock,
   CloudUpload,
   Edit3,
   ExternalLink,
   Eye,
   EyeOff,
+  Film,
   Image as ImageIcon,
   KeyRound,
   Layers,
@@ -18,6 +22,7 @@ import {
   LogOut,
   Package,
   Percent,
+  Play,
   Plus,
   RotateCcw,
   Save,
@@ -43,8 +48,10 @@ import {
   DEFAULT_CLOUDINARY_CLOUD_NAME,
   DEFAULT_CLOUDINARY_UPLOAD_PRESET,
   getCloudinaryConfig,
+  isVideoUrl,
   saveCloudinaryConfig,
   uploadImageToCloudinary,
+  uploadMediaToCloudinary,
   uploadMultipleImagesToCloudinary,
 } from '../utils/cloudinary';
 import { generateProductStudioSvg, generateStoreShowroomSvg } from '../utils/productVisuals';
@@ -69,6 +76,7 @@ export const AdminPage: React.FC = () => {
     deleteCategory,
     saveBanner,
     deleteBanner,
+    reorderBanners,
     saveCoupon,
     deleteCoupon,
     updateOrderStatus,
@@ -122,7 +130,7 @@ export const AdminPage: React.FC = () => {
   const [catBadge, setCatBadge] = useState('');
   const [catImage, setCatImage] = useState('');
 
-  // Banner Form State (Supports both Create & Edit)
+  // Banner Form State (Supports both Create & Edit + Photo & Video)
   const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
   const [bannerTitle, setBannerTitle] = useState('');
   const [bannerSub, setBannerSub] = useState('');
@@ -133,6 +141,8 @@ export const AdminPage: React.FC = () => {
   const [bannerSecCtaLink, setBannerSecCtaLink] = useState('/offers');
   const [bannerAccent, setBannerAccent] = useState('#2563EB');
   const [bannerImage, setBannerImage] = useState('');
+  const [bannerMediaType, setBannerMediaType] = useState<'image' | 'video'>('image');
+  const [bannerVideoUrl, setBannerVideoUrl] = useState('');
 
   // Coupon Form State (Supports both Create & Edit)
   const [couponCode, setCouponCode] = useState('');
@@ -404,10 +414,53 @@ export const AdminPage: React.FC = () => {
     setCatImage(cat.image);
   };
 
-  // Banner Submit (Create or Update)
+  // Banner Media Upload (Supports both Photo & Video via Cloudinary)
+  const handleBannerMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const result = await uploadMediaToCloudinary(file);
+      if (result.mediaType === 'video') {
+        setBannerMediaType('video');
+        setBannerVideoUrl(result.url);
+        if (!bannerImage) {
+          setBannerImage(result.url);
+        }
+        showToast(`Video Banner uploaded (${cloudinaryInfo.cloudName})`);
+      } else {
+        setBannerMediaType('image');
+        setBannerImage(result.url);
+        showToast(`Photo Banner uploaded (${cloudinaryInfo.cloudName})`);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to upload banner media');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleMoveBannerOrder = async (index: number, direction: 'up' | 'down') => {
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= banners.length) return;
+    const nextBanners = [...banners];
+    const [moved] = nextBanners.splice(index, 1);
+    nextBanners.splice(targetIdx, 0, moved);
+    await reorderBanners(nextBanners);
+  };
+
+  // Banner Submit (Create or Update with Photo or Video)
   const handleSaveBannerForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bannerTitle.trim()) return;
+    const resolvedIsVideo =
+      bannerMediaType === 'video' || isVideoUrl(bannerVideoUrl) || isVideoUrl(bannerImage);
+    const fallbackSvg = generateProductStudioSvg({
+      title: bannerTitle.trim(),
+      brand: 'Charlie Mobile',
+      category: 'smartphones',
+    });
     const newBanner: HeroBanner = {
       id: editingBannerId || `banner_${Date.now()}`,
       title: bannerTitle.trim(),
@@ -417,13 +470,9 @@ export const AdminPage: React.FC = () => {
       ctaLink: bannerCtaLink.trim() || '/products',
       secondaryCtaText: bannerSecCtaText.trim() || 'Explore Offers',
       secondaryCtaLink: bannerSecCtaLink.trim() || '/offers',
-      image:
-        bannerImage ||
-        generateProductStudioSvg({
-          title: bannerTitle.trim(),
-          brand: 'Charlie Mobile',
-          category: 'smartphones',
-        }),
+      mediaType: resolvedIsVideo ? 'video' : 'image',
+      videoUrl: resolvedIsVideo ? (bannerVideoUrl.trim() || bannerImage.trim()) : undefined,
+      image: bannerImage.trim() || fallbackSvg,
       accentColor: bannerAccent || '#2563EB',
       enabled: true,
     };
@@ -432,6 +481,8 @@ export const AdminPage: React.FC = () => {
     setBannerTitle('');
     setBannerSub('');
     setBannerImage('');
+    setBannerVideoUrl('');
+    setBannerMediaType('image');
   };
 
   const startEditBanner = (b: HeroBanner) => {
@@ -445,6 +496,9 @@ export const AdminPage: React.FC = () => {
     setBannerSecCtaLink(b.secondaryCtaLink || '/offers');
     setBannerAccent(b.accentColor || '#2563EB');
     setBannerImage(b.image);
+    const isVid = b.mediaType === 'video' || isVideoUrl(b.videoUrl) || isVideoUrl(b.image);
+    setBannerMediaType(isVid ? 'video' : 'image');
+    setBannerVideoUrl(b.videoUrl || (isVid ? b.image : ''));
   };
 
   // Coupon Submit
@@ -610,9 +664,9 @@ export const AdminPage: React.FC = () => {
       <div className="min-h-screen bg-[#101114] text-white flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[#181B22] rounded-3xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="text-center space-y-3">
-            <div className="w-24 h-14 mx-auto rounded-2xl bg-white p-2 flex items-center justify-center shadow-md">
+            <div className="w-28 h-16 mx-auto rounded-2xl bg-white p-2 flex items-center justify-center shadow-md">
               <img
-                src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                src={storeSettings.logoUrl || '/charlie-logo.png'}
                 alt="Charlie Mobiles & Accessories"
                 className="h-full w-auto object-contain"
               />
@@ -693,7 +747,7 @@ export const AdminPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="h-10 px-2 rounded-xl bg-white flex items-center justify-center shrink-0">
               <img
-                src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                src={storeSettings.logoUrl || '/charlie-logo.png'}
                 alt="Charlie Mobiles"
                 className="h-8 w-auto object-contain"
               />
@@ -1725,191 +1779,386 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 3: HERO BANNERS MANAGEMENT (CREATE + EDIT + CLOUDINARY UPLOAD)
+            TAB 3: HERO BANNERS MANAGEMENT (PHOTO + VIDEO + 5-SEC AUTO-SLIDE)
         ===================================================================== */}
         {activeTab === 'banners' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <form
-              onSubmit={handleSaveBannerForm}
-              className="lg:col-span-5 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3.5 text-xs"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-extrabold text-[#171717]">
-                  {editingBannerId ? 'Edit Hero Banner' : 'Add Promotional Hero Banner'}
-                </h2>
-                {editingBannerId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingBannerId(null);
-                      setBannerTitle('');
-                      setBannerSub('');
-                      setBannerImage('');
-                    }}
-                    className="text-rose-600 font-bold cursor-pointer"
-                  >
-                    Cancel Edit
-                  </button>
-                )}
-              </div>
-
-              <div>
-                <label className="block font-bold mb-1">Campaign Kicker Tag</label>
-                <input
-                  type="text"
-                  value={bannerTag}
-                  onChange={(e) => setBannerTag(e.target.value)}
-                  placeholder="CHARLIE MOBILE EXCLUSIVE"
-                  className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold mb-1">Main Banner Headline *</label>
-                <input
-                  type="text"
-                  required
-                  value={bannerTitle}
-                  onChange={(e) => setBannerTitle(e.target.value)}
-                  placeholder="e.g. Your Next Smartphone Awaits"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold mb-1">Subheadline</label>
-                <textarea
-                  rows={2}
-                  value={bannerSub}
-                  onChange={(e) => setBannerSub(e.target.value)}
-                  placeholder="Up to ₹9,000 instant exchange bonus..."
-                  className="w-full p-3 rounded-xl border border-[#E5E7EB]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-bold mb-1">Primary CTA Button</label>
-                  <input
-                    type="text"
-                    value={bannerCtaText}
-                    onChange={(e) => setBannerCtaText(e.target.value)}
-                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
+          <div className="space-y-5">
+            {/* Banner Auto-Slide Timer Bar (Default: 5 Seconds) */}
+            <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#F26522] flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <label className="block font-bold mb-1">Primary CTA Link</label>
-                  <input
-                    type="text"
-                    value={bannerCtaLink}
-                    onChange={(e) => setBannerCtaLink(e.target.value)}
-                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
+                  <h3 className="text-sm font-extrabold text-[#171717]">
+                    Hero Banner Auto-Change Timer (Currently: {storeSettings.bannerIntervalSeconds || 5} Seconds)
+                  </h3>
+                  <p className="text-[#737373] mt-0.5">
+                    Homepage banners (Photos &amp; Videos) automatically slide every{' '}
+                    <span className="font-bold text-[#171717]">
+                      {storeSettings.bannerIntervalSeconds || 5} seconds
+                    </span>
+                    . Change the timer speed anytime below.
+                  </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-bold mb-1">Secondary CTA Text</label>
-                  <input
-                    type="text"
-                    value={bannerSecCtaText}
-                    onChange={(e) => setBannerSecCtaText(e.target.value)}
-                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Secondary CTA Link</label>
-                  <input
-                    type="text"
-                    value={bannerSecCtaLink}
-                    onChange={(e) => setBannerSecCtaLink(e.target.value)}
-                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-[#F5F6F8] space-y-2">
-                <label className="block font-bold">
-                  Banner Image (Cloudinary Upload: {cloudinaryInfo.cloudName})
-                </label>
-                <input
-                  type="text"
-                  value={bannerImage}
-                  onChange={(e) => setBannerImage(e.target.value)}
-                  placeholder="Paste Image URL or Upload below"
-                  className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                />
-                <label className="w-full h-9 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>{uploadingImage ? 'Uploading...' : 'Upload Banner via Cloudinary'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleSingleImageUpload(e, setBannerImage)}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full h-10 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
-              >
-                {editingBannerId ? 'Save Banner Changes' : 'Publish Hero Banner'}
-              </button>
-            </form>
-
-            <div className="lg:col-span-7 space-y-3">
-              {banners.map((b) => (
-                <div
-                  key={b.id}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-20 h-20 rounded-xl bg-[#101114] p-1.5 shrink-0">
-                      <SmartImage src={b.image} alt={b.title} />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-extrabold text-[#2563EB] uppercase">
-                        {b.tag}
-                      </span>
-                      <p className="font-extrabold text-sm text-[#171717]">{b.title}</p>
-                      <p className="text-[#737373] line-clamp-2 mt-0.5">{b.subtitle}</p>
-                      <span className="inline-block mt-1 text-[11px] font-bold text-[#171717]">
-                        CTA: {b.ctaText} ({b.ctaLink})
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2">
+                {[3, 5, 7, 10].map((sec) => {
+                  const isCurrent = (storeSettings.bannerIntervalSeconds || 5) === sec;
+                  return (
                     <button
+                      key={sec}
                       type="button"
-                      onClick={() => startEditBanner(b)}
-                      className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#2563EB] font-bold cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => saveBanner({ ...b, enabled: !b.enabled })}
-                      className={`px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
-                        b.enabled
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-600'
+                      onClick={() =>
+                        updateStoreSettings({
+                          ...storeSettings,
+                          bannerIntervalSeconds: sec,
+                        })
+                      }
+                      className={`h-9 px-3.5 rounded-xl font-extrabold cursor-pointer transition-colors ${
+                        isCurrent
+                          ? 'bg-[#F26522] text-white shadow-xs'
+                          : 'bg-[#F5F6F8] border border-[#E5E7EB] text-[#171717] hover:border-[#F26522]'
                       }`}
                     >
-                      {b.enabled ? 'Active' : 'Hidden'}
+                      {sec}s {sec === 5 ? '(Default)' : ''}
+                    </button>
+                  );
+                })}
+                <div className="flex items-center gap-1.5 bg-[#F5F6F8] border border-[#E5E7EB] rounded-xl px-2.5 h-9">
+                  <span className="text-[11px] font-bold text-[#737373]">Custom (sec):</span>
+                  <input
+                    type="number"
+                    min={2}
+                    max={60}
+                    value={storeSettings.bannerIntervalSeconds || 5}
+                    onChange={(e) =>
+                      updateStoreSettings({
+                        ...storeSettings,
+                        bannerIntervalSeconds: Math.max(2, Number(e.target.value) || 5),
+                      })
+                    }
+                    className="w-12 text-center font-extrabold text-[#171717] bg-transparent focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <form
+                onSubmit={handleSaveBannerForm}
+                className="lg:col-span-5 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3.5 text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-extrabold text-[#171717]">
+                    {editingBannerId ? 'Edit Hero Banner' : 'Add Photo / Video Hero Banner'}
+                  </h2>
+                  {editingBannerId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingBannerId(null);
+                        setBannerTitle('');
+                        setBannerSub('');
+                        setBannerImage('');
+                        setBannerVideoUrl('');
+                        setBannerMediaType('image');
+                      }}
+                      className="text-rose-600 font-bold cursor-pointer"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+
+                {/* Media Type Toggle: Photo vs Video Banner */}
+                <div>
+                  <label className="block font-bold mb-1.5">Select Banner Media Type *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBannerMediaType('image')}
+                      className={`h-10 rounded-xl font-extrabold flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
+                        bannerMediaType === 'image'
+                          ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                          : 'bg-[#F5F6F8] text-[#171717] border-[#E5E7EB]'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Photo Banner</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteBanner(b.id)}
-                      className="p-2 rounded-lg bg-rose-50 text-rose-600 cursor-pointer"
+                      onClick={() => setBannerMediaType('video')}
+                      className={`h-10 rounded-xl font-extrabold flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
+                        bannerMediaType === 'video'
+                          ? 'bg-[#F26522] text-white border-[#F26522]'
+                          : 'bg-[#F5F6F8] text-[#171717] border-[#E5E7EB]'
+                      }`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Film className="w-4 h-4" />
+                      <span>Video Banner</span>
                     </button>
                   </div>
                 </div>
-              ))}
+
+                <div>
+                  <label className="block font-bold mb-1">Campaign Kicker Tag</label>
+                  <input
+                    type="text"
+                    value={bannerTag}
+                    onChange={(e) => setBannerTag(e.target.value)}
+                    placeholder="CHARLIE MOBILE EXCLUSIVE"
+                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">Main Banner Headline *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerTitle}
+                    onChange={(e) => setBannerTitle(e.target.value)}
+                    placeholder="e.g. Your Next Smartphone Awaits"
+                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">Subheadline</label>
+                  <textarea
+                    rows={2}
+                    value={bannerSub}
+                    onChange={(e) => setBannerSub(e.target.value)}
+                    placeholder="Up to ₹9,000 instant exchange bonus..."
+                    className="w-full p-3 rounded-xl border border-[#E5E7EB]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-bold mb-1">Primary CTA Button</label>
+                    <input
+                      type="text"
+                      value={bannerCtaText}
+                      onChange={(e) => setBannerCtaText(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Primary CTA Link</label>
+                    <input
+                      type="text"
+                      value={bannerCtaLink}
+                      onChange={(e) => setBannerCtaLink(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-bold mb-1">Secondary CTA Text</label>
+                    <input
+                      type="text"
+                      value={bannerSecCtaText}
+                      onChange={(e) => setBannerSecCtaText(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Secondary CTA Link</label>
+                    <input
+                      type="text"
+                      value={bannerSecCtaLink}
+                      onChange={(e) => setBannerSecCtaLink(e.target.value)}
+                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#F5F6F8] space-y-2.5">
+                  <label className="block font-bold">
+                    {bannerMediaType === 'video'
+                      ? `Upload Video or Paste Video URL (MP4 / WebM — Cloudinary: ${cloudinaryInfo.cloudName})`
+                      : `Upload Photo or Paste Image URL (Cloudinary: ${cloudinaryInfo.cloudName})`}
+                  </label>
+
+                  {bannerMediaType === 'video' ? (
+                    <>
+                      <input
+                        type="text"
+                        value={bannerVideoUrl}
+                        onChange={(e) => setBannerVideoUrl(e.target.value)}
+                        placeholder="Paste MP4 / Video URL or Upload Video below"
+                        className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                      />
+                      <input
+                        type="text"
+                        value={bannerImage}
+                        onChange={(e) => setBannerImage(e.target.value)}
+                        placeholder="Optional Fallback Poster Image URL"
+                        className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                      />
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      value={bannerImage}
+                      onChange={(e) => setBannerImage(e.target.value)}
+                      placeholder="Paste Image URL or Upload Photo/Video below"
+                      className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  )}
+
+                  <label className="w-full h-10 rounded-xl bg-[#101114] hover:bg-slate-800 text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
+                    <Upload className="w-3.5 h-3.5 text-[#F26522]" />
+                    <span>
+                      {uploadingImage
+                        ? 'Uploading to Cloudinary...'
+                        : 'Upload Photo or Video from Device'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleBannerMediaUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Live Preview inside Form */}
+                  {(bannerVideoUrl || bannerImage) && (
+                    <div className="pt-1">
+                      <p className="text-[10px] font-bold text-[#737373] mb-1">Live Banner Preview:</p>
+                      <div className="w-full h-32 rounded-xl bg-[#101114] overflow-hidden flex items-center justify-center border border-[#E5E7EB]">
+                        {bannerMediaType === 'video' || isVideoUrl(bannerVideoUrl || bannerImage) ? (
+                          <video
+                            src={bannerVideoUrl || bannerImage}
+                            className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            controls
+                          />
+                        ) : (
+                          <SmartImage
+                            src={bannerImage}
+                            alt="Preview"
+                            className="w-full h-full object-contain"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full h-10 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
+                >
+                  {editingBannerId ? 'Save Banner Changes' : 'Publish Hero Banner'}
+                </button>
+              </form>
+
+              <div className="lg:col-span-7 space-y-3">
+                {banners.map((b, idx) => {
+                  const isVid =
+                    b.mediaType === 'video' || isVideoUrl(b.videoUrl) || isVideoUrl(b.image);
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white rounded-2xl border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-24 h-20 rounded-xl bg-[#101114] p-1 shrink-0 relative overflow-hidden flex items-center justify-center">
+                          {isVid ? (
+                            <>
+                              <video
+                                src={b.videoUrl || b.image}
+                                className="w-full h-full object-cover rounded-lg"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                              />
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-[#F26522] text-white text-[9px] font-extrabold flex items-center gap-0.5">
+                                <Play className="w-2.5 h-2.5 fill-white" /> VIDEO
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <SmartImage src={b.image} alt={b.title} />
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-extrabold">
+                                PHOTO
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-extrabold text-[#2563EB] uppercase">
+                              #{idx + 1} · {b.tag}
+                            </span>
+                          </div>
+                          <p className="font-extrabold text-sm text-[#171717]">{b.title}</p>
+                          <p className="text-[#737373] line-clamp-2 mt-0.5">{b.subtitle}</p>
+                          <span className="inline-block mt-1 text-[11px] font-bold text-[#171717]">
+                            CTA: {b.ctaText} ({b.ctaLink})
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveBannerOrder(idx, 'up')}
+                          title="Move Banner Up"
+                          className="p-1.5 rounded-lg bg-slate-100 text-slate-700 disabled:opacity-35 cursor-pointer"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === banners.length - 1}
+                          onClick={() => handleMoveBannerOrder(idx, 'down')}
+                          title="Move Banner Down"
+                          className="p-1.5 rounded-lg bg-slate-100 text-slate-700 disabled:opacity-35 cursor-pointer"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startEditBanner(b)}
+                          className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#2563EB] font-bold cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => saveBanner({ ...b, enabled: !b.enabled })}
+                          className={`px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
+                            b.enabled
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {b.enabled ? 'Active' : 'Hidden'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteBanner(b.id)}
+                          className="p-2 rounded-lg bg-rose-50 text-rose-600 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -2419,6 +2668,241 @@ export const AdminPage: React.FC = () => {
                     }
                     className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
                   />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">
+                    Hero Banner Auto-Slide Speed (Seconds)
+                  </label>
+                  <input
+                    type="number"
+                    min={2}
+                    max={60}
+                    value={settingsForm.bannerIntervalSeconds || 5}
+                    onChange={(e) =>
+                      setSettingsForm({
+                        ...settingsForm,
+                        bannerIntervalSeconds: Math.max(2, Number(e.target.value) || 5),
+                      })
+                    }
+                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Website Logo, Festive Strip Banner & Seasonal Deals Banners Control */}
+              <div className="p-4 rounded-2xl bg-[#F5F6F8] border border-[#E5E7EB] space-y-4">
+                <h3 className="text-sm font-extrabold text-[#171717]">
+                  Website Logo, Festive Strip &amp; Promotional Banners Control
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                  <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-[#E5E7EB]">
+                    <img
+                      src={settingsForm.logoUrl || '/charlie-logo.png'}
+                      alt="Current Store Logo"
+                      className="h-12 w-auto object-contain shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="font-extrabold text-[#171717] text-xs">Active Store Logo</p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettingsForm({ ...settingsForm, logoUrl: '/charlie-logo.png' })
+                        }
+                        className="text-[11px] font-bold text-[#F26522] hover:underline cursor-pointer mt-0.5"
+                      >
+                        Reset to Default CM Logo
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Website Logo URL</label>
+                    <input
+                      type="text"
+                      value={settingsForm.logoUrl || '/charlie-logo.png'}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, logoUrl: e.target.value })
+                      }
+                      placeholder="/charlie-logo.png"
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Upload Custom Logo (Cloudinary)</label>
+                    <label className="w-full h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5 text-[#F26522]" />
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload New Logo'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleSingleImageUpload(e, (url) =>
+                            setSettingsForm((prev) => ({ ...prev, logoUrl: url }))
+                          )
+                        }
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Top Festive Deals Strip Banner & Seasonal Deals Banner */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 border-t border-[#E5E7EB]">
+                  <div>
+                    <label className="block font-bold mb-1">Top Festive Strip Banner URL</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={settingsForm.festiveStripBannerUrl || ''}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            festiveStripBannerUrl: e.target.value,
+                          })
+                        }
+                        placeholder="Image URL for top strip banner"
+                        className="flex-1 h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                      />
+                      <label className="h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center cursor-pointer shrink-0">
+                        <Upload className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setSettingsForm((prev) => ({
+                                ...prev,
+                                festiveStripBannerUrl: url,
+                              }))
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Top Festive Strip Click Link</label>
+                    <input
+                      type="text"
+                      value={settingsForm.festiveStripBannerLink || '/offers'}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          festiveStripBannerLink: e.target.value,
+                        })
+                      }
+                      placeholder="/offers"
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Seasonal Deals Main Banner</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={settingsForm.seasonalMainBannerUrl || ''}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            seasonalMainBannerUrl: e.target.value,
+                          })
+                        }
+                        placeholder="Image URL for seasonal deals banner"
+                        className="flex-1 h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                      />
+                      <label className="h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center cursor-pointer shrink-0">
+                        <Upload className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setSettingsForm((prev) => ({
+                                ...prev,
+                                seasonalMainBannerUrl: url,
+                              }))
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Seasonal Deals Section Heading</label>
+                    <input
+                      type="text"
+                      value={settingsForm.seasonalDealsTitle || 'Monsoon Appliance Deals'}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          seasonalDealsTitle: e.target.value,
+                        })
+                      }
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold mb-1">Seasonal Deals Subtitle</label>
+                    <input
+                      type="text"
+                      value={settingsForm.seasonalDealsSubtitle || ''}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          seasonalDealsSubtitle: e.target.value,
+                        })
+                      }
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+                </div>
+
+                {/* Social Media Links */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[#E5E7EB]">
+                  <div>
+                    <label className="block font-bold mb-1">Instagram Profile Link</label>
+                    <input
+                      type="text"
+                      value={settingsForm.instagramUrl || ''}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, instagramUrl: e.target.value })
+                      }
+                      placeholder="https://instagram.com/..."
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Facebook Page Link</label>
+                    <input
+                      type="text"
+                      value={settingsForm.facebookUrl || ''}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, facebookUrl: e.target.value })
+                      }
+                      placeholder="https://facebook.com/..."
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">YouTube Channel Link</label>
+                    <input
+                      type="text"
+                      value={settingsForm.youtubeUrl || ''}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, youtubeUrl: e.target.value })
+                      }
+                      placeholder="https://youtube.com/..."
+                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                    />
+                  </div>
                 </div>
               </div>
 
