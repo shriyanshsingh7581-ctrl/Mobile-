@@ -1,285 +1,623 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  CreditCard,
-  Flame,
-  Headphones,
-  MapPin,
-  MessageCircle,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-  Store,
-} from 'lucide-react';
-import { formatINR, useStore } from '../context/StoreContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
 import { SmartImage } from '../components/SmartImage';
-import { generateStoreShowroomSvg } from '../utils/productVisuals';
+import { PWAInstallBanner } from '../components/PWAInstallBanner';
+import { Product } from '../types/store';
+
+interface TabMediaGroup {
+  banner: string;
+  bannerLink: string;
+  grid: { img: string; link: string; alt: string }[];
+}
 
 export const HomePage: React.FC = () => {
-  const {
-    products,
-    categories,
-    banners,
-    storeSettings,
-    homepageSections,
-    openWhatsAppEnquiry,
-  } = useStore();
-
-  const getSection = (id: string, fallbackTitle: string) => {
-    const found = homepageSections.find((s) => s.id === id);
-    return {
-      enabled: found ? found.enabled : true,
-      title: found?.title || fallbackTitle,
-    };
-  };
+  const { products, categories, banners } = useStore();
 
   const activeBanners = banners.filter((b) => b.enabled);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [selectedBrandTab, setSelectedBrandTab] = useState<string>('All');
-  const [cameraOrMidTab, setCameraOrMidTab] = useState<'camera' | 'midrange'>('camera');
-  const [accessoryBrandTab, setAccessoryBrandTab] = useState<string>('All');
+
+  // Interactive Section Tabs matching the Video (00:03, 00:04, 00:06-00:27, 00:18, 00:19, 01:39)
+  const [mobileTab, setMobileTab] = useState<'best_seller' | '5g' | 'top_brands' | 'accessories'>('best_seller');
+  const [laptopTab, setLaptopTab] = useState<'best_laptops' | 'desktop_pc' | 'ipad_tablets' | 'accessories'>('best_laptops');
+  const [tvTab, setTvTab] = useState<'all' | 'television' | 'audio' | 'entertainment'>('all');
+  const [kitchenTab, setKitchenTab] = useState<'all' | 'grinders' | 'cookwares' | 'steamers'>('all');
+  const [homeAppTab, setHomeAppTab] = useState<'all' | 'ac' | 'cleansers' | 'small'>('all');
+  const [personalCareTab, setPersonalCareTab] = useState<'trending' | 'personal_care'>('trending');
+
+  // Horizontal slider refs for `<` `>` buttons in every product rail
+  const mobileRailRef = useRef<HTMLDivElement>(null);
+  const laptopRailRef = useRef<HTMLDivElement>(null);
+  const brandRailRef = useRef<HTMLDivElement>(null);
+  const tvRailRef = useRef<HTMLDivElement>(null);
+  const kitchenRailRef = useRef<HTMLDivElement>(null);
+  const homeRailRef = useRef<HTMLDivElement>(null);
+  const smartTechRailRef = useRef<HTMLDivElement>(null);
+  const personalCareRailRef = useRef<HTMLDivElement>(null);
+
+  const scrollRail = (ref: React.RefObject<HTMLDivElement | null>, dir: 'left' | 'right') => {
+    if (!ref.current) return;
+    const amount = dir === 'left' ? -320 : 320;
+    ref.current.scrollBy({ left: amount, behavior: 'smooth' });
+  };
 
   const currentBanner =
     activeBanners[bannerIndex % Math.max(1, activeBanners.length)] || banners[0];
 
-  // Filtered product collections
-  const bestSellers = products.filter((p) => p.isBestSeller);
-  const brandFilteredBestSellers =
-    selectedBrandTab === 'All'
-      ? bestSellers
-      : products.filter((p) => p.brand.toLowerCase() === selectedBrandTab.toLowerCase());
+  // Exact Poorvika Mobile & Accessories Tab Media Groups
+  const mobileTabMedia: Record<typeof mobileTab, TabMediaGroup> = {
+    best_seller: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/samsung-galaxy-z-fold8-z-flip7-m.webp',
+      bannerLink: '/products?category=smartphones',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Iphone-Mob-M-A-2026.webp',
+          link: '/products?brand=Apple',
+          alt: 'iPhones',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Galaxy-Ai-Mob-M-A-2026.webp',
+          link: '/products?brand=Samsung',
+          alt: 'Galaxy AI Phones',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Smart-Phones-Mob-M-A-2026.webp',
+          link: '/products?category=smartphones',
+          alt: 'Smartphones',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Accessories-Mob-M-A-2026.webp',
+          link: '/products?category=mobile-accessories',
+          alt: 'Mobile Accessories',
+        },
+      ],
+    },
+    '5g': {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Vivo-V80-Series-Banner-Mob.webp',
+      bannerLink: '/products?5g=true',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/OnePlus-N6X-5G-M.webp',
+          link: '/products?brand=OnePlus',
+          alt: 'OnePlus N6x 5G',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Oppo-Reno-16-Series-5G-M.webp',
+          link: '/products?brand=Oppo',
+          alt: 'Oppo Reno 16 5G',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Redmi-Note-16-5G-Mob.webp',
+          link: '/products?brand=Redmi',
+          alt: 'Redmi Note 16 5G',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-Galaxy-A58-A38-5G-Banner-M.webp',
+          link: '/products?brand=Samsung',
+          alt: 'Samsung Galaxy A58 5G',
+        },
+      ],
+    },
+    top_brands: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Apple-18e-Mob.webp',
+      bannerLink: '/products?brand=Apple',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Vivo-X300-FE-5G-Mob.webp',
+          link: '/products?brand=Vivo',
+          alt: 'Vivo X300 FE 5G',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-S26-Series-Banner-M.webp',
+          link: '/products?brand=Samsung',
+          alt: 'Samsung S26 Series',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Oppo-Find-X10-Series-Mob.webp',
+          link: '/products?brand=Oppo',
+          alt: 'Oppo Find X10 Series',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Realme-17-Pro-Series-5G-M.webp',
+          link: '/products?brand=Realme',
+          alt: 'Realme 17 Pro Series',
+        },
+      ],
+    },
+    accessories: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Mobile-Accessories-Home-Page-2026-mob.webp',
+      bannerLink: '/products?category=mobile-accessories',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Chargers-Adapter-Home-Page-2026-mob.webp',
+          link: '/products?category=chargers',
+          alt: 'Chargers & Adapters',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Headphones-Speakers-Home-Page-2026-mob.webp',
+          link: '/products?category=earbuds',
+          alt: 'Headphones & Speakers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Cases-Covers-Home-Page-2026-mob.webp',
+          link: '/products?category=mobile-accessories',
+          alt: 'Cases & Covers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Holders-Stands-Home-Page-2026-mob.webp',
+          link: '/products?category=mobile-accessories',
+          alt: 'Holders & Stands',
+        },
+      ],
+    },
+  };
 
-  const latest5G = products.filter((p) => p.is5G && p.category !== 'tablets');
-  const newReleases = products.filter((p) => p.isNewRelease);
-  const flagshipPhones = products.filter((p) => p.isFlagship || p.price >= 55000);
-  const bestCameraPhones = products.filter((p) => p.isBestCamera);
-  const midRangePhones = products.filter(
-    (p) => p.isMidRange || (p.price >= 15000 && p.price <= 58000)
+  // Exact Poorvika Laptop & Tablets Tab Media Groups (00:04 - 00:05)
+  const laptopTabMedia: Record<typeof laptopTab, TabMediaGroup> = {
+    best_laptops: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/MacBook-Neo-Banner-Mob.webp',
+      bannerLink: '/products?category=laptops',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Macbooks-Mob-M-A-2026.webp',
+          link: '/products?category=laptops',
+          alt: 'MacBooks',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Gaming-Laptop-Mob-M-A-2026.webp',
+          link: '/products?category=laptops',
+          alt: 'Gaming Laptops',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/2-in-1-laptop-Mob-M-A-2026.webp',
+          link: '/products?category=laptops',
+          alt: '2 in 1 Laptops',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Windows-Laptop-Mob-M-A-2026.webp',
+          link: '/products?category=laptops',
+          alt: 'Windows Laptops',
+        },
+      ],
+    },
+    desktop_pc: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Total-Protection-Starts-Here-W.webp',
+      bannerLink: '/products?category=laptops',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/All-In-One-PC-Best-Laptop-Mobile-View.webp',
+          link: '/products?category=laptops',
+          alt: 'All in One PC',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Tower-PC-Best-Laptop-Mobile-View.webp',
+          link: '/products?category=laptops',
+          alt: 'Tower PC',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Monitors-Best-Laptop-Mobile-View.webp',
+          link: '/products?category=laptops',
+          alt: 'Monitors',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Mac-Mini-Studio-M.webp',
+          link: '/products?category=laptops',
+          alt: 'Mac Mini & Studio',
+        },
+      ],
+    },
+    ipad_tablets: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-Galaxy-Tab-S10-Lite-Mob.webp',
+      bannerLink: '/products?category=tablets',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Ipad-Air-M4-Mob.webp',
+          link: '/products?category=tablets',
+          alt: 'iPad Air M4',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Apple-Ipad-12th-Gen-M.webp',
+          link: '/products?category=tablets',
+          alt: 'iPad',
+        },
+      ],
+    },
+    accessories: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Laptops-Tablets-Home-page-2026-mob.webp',
+      bannerLink: '/products?category=laptops',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Printers-Home-Page-2026-mob.webp',
+          link: '/products?category=laptops',
+          alt: 'Printers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Mouse-Keyboards-Home-Page-2026-mob.webp',
+          link: '/products?category=laptops',
+          alt: 'Mouse & Keyboards',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Pendrives-Memory-Card-Home-Page-2026-mob.webp',
+          link: '/products?category=mobile-accessories',
+          alt: 'Pendrives & Memory Cards',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Hard-Disks-SSD-Home-Page-2026-mob.webp',
+          link: '/products?category=laptops',
+          alt: 'Hard Disks & SSD',
+        },
+      ],
+    },
+  };
+
+  // Exact Poorvika Tv & Audio Tab Media Groups (00:06 - 00:27)
+  const tvTabMedia: Record<typeof tvTab, TabMediaGroup> = {
+    all: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Bring-The-Stadium-Home-Mob.webp',
+      bannerLink: '/products?category=tv-audio',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Smart-Tv-Mob-M-A-2026.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Smart TVs',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Entertainment-Mob-M-A-2026.webp',
+          link: '/products?category=gaming',
+          alt: 'Entertainment',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Sound-Bars-Mob-M-A-2026.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Sound Bars',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Streaming-device-Mob-M-A-2026.webp',
+          link: '/products?category=gaming',
+          alt: 'Streaming Devices',
+        },
+      ],
+    },
+    television: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Experience-Theater-Like-Visual-Every-Day-Mob.webp',
+      bannerLink: '/products?category=tv-audio',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Oled-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'OLED TV',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Qled-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'QLED TV',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Qned-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'QNED TV',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Led-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'LED TV',
+        },
+      ],
+    },
+    audio: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/LG-Xboom-360-Wireless-Speaker-Turn-up-the-Beat-Anytime-Anywhere-Mob.webp',
+      bannerLink: '/products?category=tv-audio',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Sound-Bar-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Sound Bar',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Party-Speakers-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Party Speakers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Bluetooth-Speaker-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Bluetooth Speakers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Smart-Speaker-TV-Audio-Mobile-View.webp',
+          link: '/products?category=tv-audio',
+          alt: 'Smart Speakers',
+        },
+      ],
+    },
+    entertainment: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Stream-Play-Conquer-Mob.webp',
+      bannerLink: '/products?category=gaming',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Consoles-TV-Audio-Mobile-View.webp',
+          link: '/products?category=gaming',
+          alt: 'Consoles',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Controllers-TV-Audio-Mobile-View.webp',
+          link: '/products?category=gaming',
+          alt: 'Controllers',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Handheld-Universes-TV-Audio-Mobile-View.webp',
+          link: '/products?category=gaming',
+          alt: 'Handheld Universes',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Straming-Devices-TV-Audio-Mobile-View.webp',
+          link: '/products?category=gaming',
+          alt: 'Streaming Devices',
+        },
+      ],
+    },
+  };
+
+  // Exact Poorvika Kitchen Appliances Tab Media Groups (00:18 - 00:19)
+  const kitchenTabMedia: Record<typeof kitchenTab, TabMediaGroup> = {
+    all: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Kitchen-Appliances-Mob-M-A-2026.webp',
+      bannerLink: '/products?category=kitchen-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Mixer-Mob-M-A-2026.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Mixer Grinder',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Hobs-Mob-M-A-2026.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Kitchen Hobs',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Grinder-Mob-M-A-2026.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Wet Grinder',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Gas-Stove-Mob-M-A-2026.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Gas Stove',
+        },
+      ],
+    },
+    grinders: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Juicer-Mixer-Grinders-Mob.webp',
+      bannerLink: '/products?category=kitchen-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Food-Processors-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Food Processors',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Blenders-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Blenders',
+        },
+      ],
+    },
+    cookwares: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Cookwares-Sets-Enjoy-Rapid-Heating-and-Long-Lasting-Durability-Mob.webp',
+      bannerLink: '/products?category=kitchen-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Cookware-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Cookware',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Gas-Stove-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Gas Stove',
+        },
+      ],
+    },
+    steamers: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Healthy-Steaming-Happy-Living-Mob.webp',
+      bannerLink: '/products?category=kitchen-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Rice-Cooker-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Rice Cooker',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Idli-Maker-Kitchen-Appliances-Mobile-View.webp',
+          link: '/products?category=kitchen-appliances',
+          alt: 'Idli Maker',
+        },
+      ],
+    },
+  };
+
+  // Exact Poorvika Home Appliances Tab Media Groups (00:19 - 00:20)
+  const homeAppTabMedia: Record<typeof homeAppTab, TabMediaGroup> = {
+    all: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Home-Appliances-Mob-M-A-2026.webp',
+      bannerLink: '/products?category=home-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Fans-Mob-M-A-2026.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Fans',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Washing-Machine-Mob-M-A-2026.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Washing Machine',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Referigerator-Mob-M-A-2026.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Refrigerator',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Water-Heater-Mob-M-A-2026.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Water Heater',
+        },
+      ],
+    },
+    ac: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/AC-Summer-ready-banner-mob.webp',
+      bannerLink: '/products?category=home-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Inverter-Split-AC-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Inverter Split AC',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Air-Coolers-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Air Coolers',
+        },
+      ],
+    },
+    cleansers: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Pure-Air-Pure-Water-Pure-Living-Mob.webp',
+      bannerLink: '/products?category=home-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Vacuum-Cleaner-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Vacuum Cleaner',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Water-Purifier-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Water Purifier',
+        },
+      ],
+    },
+    small: {
+      banner: 'https://img-prd-pim.poorvika.com/pageimg/Everyday-Comfort-Starts-with-Small-Appliances-Mob.webp',
+      bannerLink: '/products?category=home-appliances',
+      grid: [
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Iron-Home-Appliances-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Irons',
+        },
+        {
+          img: 'https://img-prd-pim.poorvika.com/pageimg/Fans-Home-Appliances-Mobile-View.webp',
+          link: '/products?category=home-appliances',
+          alt: 'Fans',
+        },
+      ],
+    },
+  };
+
+  // Exact Poorvika Circular Brand Logos Scroller (00:05 - 00:11)
+  const circularBrandLogos = [
+    { name: 'Apple', img: 'https://img-prd-pim.poorvika.com/pageimg/Apple-Logo-Web.webp', link: '/products?brand=Apple' },
+    { name: 'Lenovo', img: 'https://img-prd-pim.poorvika.com/pageimg/Lenovo-Logo-Web.webp', link: '/products?brand=Lenovo' },
+    { name: 'Samsung', img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-Logo-Web.webp', link: '/products?brand=Samsung' },
+    { name: 'Oppo', img: 'https://img-prd-pim.poorvika.com/pageimg/Oppo-Logo-Web.webp', link: '/products?brand=Oppo' },
+    { name: 'Yarr', img: 'https://img-prd-pim.poorvika.com/pageimg/Yarr-Logo-Web.webp', link: '/products?brand=Yarr' },
+    { name: 'Tecno', img: 'https://img-prd-pim.poorvika.com/pageimg/Tecno-Logo-Web.webp', link: '/products?category=smartphones' },
+    { name: 'Realme', img: 'https://img-prd-pim.poorvika.com/pageimg/Realme-Logo-Web.webp', link: '/products?brand=Realme' },
+    { name: 'Nokia', img: 'https://img-prd-pim.poorvika.com/pageimg/Nokia-Logo-Web.webp', link: '/products?category=smartphones' },
+    { name: 'Vivo', img: 'https://img-prd-pim.poorvika.com/pageimg/Vivo-Logo-Web.webp', link: '/products?brand=Vivo' },
+    { name: 'Amazon', img: 'https://img-prd-pim.poorvika.com/pageimg/Amazon-Logo-Web.webp', link: '/products?category=tv-audio' },
+    { name: 'OnePlus', img: 'https://img-prd-pim.poorvika.com/pageimg/Oneplus-Logo-Web.webp', link: '/products?brand=OnePlus' },
+    { name: 'Bose', img: 'https://img-prd-pim.poorvika.com/pageimg/Bose-Logo-Web.webp', link: '/products?category=tv-audio' },
+    { name: 'Fingers', img: 'https://img-prd-pim.poorvika.com/pageimg/Fingers-Logo-Web.webp', link: '/products?category=mobile-accessories' },
+    { name: 'LG', img: 'https://img-prd-pim.poorvika.com/pageimg/LG-Logo-Web.webp', link: '/products?brand=LG' },
+    { name: 'Noise', img: 'https://img-prd-pim.poorvika.com/pageimg/Noise-Logo-Web.webp', link: '/products?brand=Noise' },
+  ];
+
+  // Category Product Lists matching the exact video cards
+  const mobileProducts = products.filter((p) =>
+    ['smartphones', 'realme', 'samsung', 'vivo', 'oppo', 'iphone', 'oneplus'].includes(p.category)
   );
-  const allAccessories = products.filter((p) =>
-    ['chargers', 'power-banks', 'mobile-accessories', 'earbuds'].includes(p.category)
+  const laptopProducts = products.filter((p) => ['laptops', 'tablets'].includes(p.category));
+  const tvProducts = products.filter((p) => ['tv-audio', 'gaming'].includes(p.category));
+  const kitchenProducts = products.filter((p) => p.category === 'kitchen-appliances');
+  const homeAppProducts = products.filter((p) => p.category === 'home-appliances');
+  const smartTechProducts = products.filter((p) => p.category === 'smartwatches');
+  const personalCareProducts = products.filter((p) => p.category === 'personal-care');
+
+  // Helper to render the exact "See All  <  >" bar and 2-column horizontal product rail from the video
+  const renderProductRailWithControls = (
+    items: Product[],
+    seeAllLink: string,
+    railRef: React.RefObject<HTMLDivElement | null>
+  ) => (
+    <div className="bg-white">
+      {/* "See All < >" Right-Aligned Header Bar (Exact Video 00:04, 00:05, 00:18, 00:20, 01:39) */}
+      <div className="flex items-center justify-end gap-2 px-3 py-2 bg-[#F5F6F8] border-y border-slate-200">
+        <Link
+          to={seeAllLink}
+          className="text-xs font-bold text-[#475569] hover:text-[#F26522] mr-1"
+        >
+          See All
+        </Link>
+        <button
+          type="button"
+          onClick={() => scrollRail(railRef, 'left')}
+          aria-label="Scroll left"
+          className="w-6 h-6 rounded bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:text-[#F26522] cursor-pointer shadow-2xs"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollRail(railRef, 'right')}
+          aria-label="Scroll right"
+          className="w-6 h-6 rounded bg-white border border-slate-300 flex items-center justify-center text-slate-600 hover:text-[#F26522] cursor-pointer shadow-2xs"
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* 2-Column Mobile / 4-Column Desktop Horizontal Scroller */}
+      <div
+        ref={railRef}
+        className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory border-t border-slate-100"
+      >
+        {items.map((product) => (
+          <div
+            key={product.id}
+            className="w-1/2 sm:w-1/3 lg:w-1/4 shrink-0 snap-start"
+          >
+            <ProductCard product={product} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
-  const filteredAccessories =
-    accessoryBrandTab === 'All'
-      ? allAccessories
-      : allAccessories.filter((p) => p.brand.toLowerCase() === accessoryBrandTab.toLowerCase());
-
-  const smartwatchesAndGadgets = products.filter((p) =>
-    ['smartwatches', 'tablets', 'earbuds'].includes(p.category)
-  );
-
-  // Real Poorvika Mobile Brand Badges (El[9])
-  const poorvikaMobileBrands = [
-    {
-      name: 'Apple',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Apple-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Apple',
-    },
-    {
-      name: 'Samsung',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Samsung',
-    },
-    {
-      name: 'Vivo',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Vivo-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Vivo',
-    },
-    {
-      name: 'Oppo',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Oppo-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Oppo',
-    },
-    {
-      name: 'Redmi',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/MI-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Redmi',
-    },
-    {
-      name: 'Realme',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Realme-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Realme',
-    },
-    {
-      name: 'Nothing',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Nothing-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Nothing',
-    },
-    {
-      name: 'Google',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Google-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Google',
-    },
-    {
-      name: 'Xiaomi',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Xiaomi-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Xiaomi',
-    },
-    {
-      name: 'OnePlus',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Oneplus-Accessories-mobile-2026.webp',
-      link: '/products?brand=OnePlus',
-    },
-  ];
-
-  // Real Poorvika Budget Brackets (El[14])
-  const poorvikaBudgetCards = [
-    {
-      label: '₹10,000 – ₹14,999',
-      min: 0,
-      max: 15000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/10k-to-14999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: '₹15,000 – ₹19,999',
-      min: 15000,
-      max: 20000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/15k-to-19999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: '₹20,000 – ₹29,999',
-      min: 20000,
-      max: 30000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/20k-to-29999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: '₹30,000 – ₹49,999',
-      min: 30000,
-      max: 50000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/30k-to-49999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: '₹50,000 – ₹74,999',
-      min: 50000,
-      max: 75000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/50k-to-74999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: '₹75,000 – ₹99,999',
-      min: 75000,
-      max: 100000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/75k-to-99999-Mobile-and-Accessories-2026-mob.webp',
-    },
-    {
-      label: 'Above ₹1,00,000',
-      min: 100000,
-      max: 300000,
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Above-1L-Mobile-and-Accessories-2026-mob.webp',
-    },
-  ];
-
-  // Real Poorvika New Release Launch Posters (El[28])
-  const poorvikaNewReleasePosters = [
-    {
-      title: 'iPhone 17 Series',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Iphone-17-Series-Mobile-and-Accessories-Mob.webp',
-      link: '/products?category=iphone',
-    },
-    {
-      title: 'Galaxy S26 Ultra 5G',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-S26-Ultra-Mobile-and-Accessories-2026-Mob.webp',
-      link: '/product/prod_samsung_s26_ultra',
-    },
-    {
-      title: 'Galaxy Z Fold8 Ultra 5G',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Galaxy-Z-Fold8-Ultra-5G-Mobile-and-Accessories-2026-Mob.webp',
-      link: '/product/prod_samsung_z_fold8_ultra',
-    },
-    {
-      title: 'Nothing Phone (4b) 5G',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Nothing-4B-5G-Mobile-and-Accessories-2026-Mob.webp',
-      link: '/product/prod_nothing_phone_4b',
-    },
-    {
-      title: 'Oppo Reno 16c 5G',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Oppo-Reno-16C-5G-Mobile-and-Accessories-2026-Mob.webp',
-      link: '/product/prod_oppo_reno_16c',
-    },
-    {
-      title: 'OnePlus N6x 5G',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Oneplus-N6x-5G-Mobile-and-Accessories-2026-Mob.webp',
-      link: '/product/prod_oneplus_n6x_5g',
-    },
-  ];
-
-  // Real Poorvika Accessory Brand Tiles (El[32])
-  const poorvikaAccessoryBrands = [
-    {
-      name: 'Apple',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Apple-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Apple',
-    },
-    {
-      name: 'Samsung',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Samsung-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Samsung',
-    },
-    {
-      name: 'MI / Xiaomi',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/MI-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Xiaomi',
-    },
-    {
-      name: 'Boat',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Boat-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Boat',
-    },
-    {
-      name: 'OnePlus',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Oneplus-Accessories-mobile-2026.webp',
-      link: '/products?brand=OnePlus',
-    },
-    {
-      name: 'Yarr',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Yarr-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Yarr',
-    },
-    {
-      name: 'Realme',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Realme-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?brand=Realme',
-    },
-    {
-      name: 'Sandisk',
-      img: 'https://img-prd-pim.poorvika.com/pageimg/Sandisk-Accessories-Mobile-and-Accessories-2026-mob.webp',
-      link: '/products?category=mobile-accessories',
-    },
-  ];
 
   return (
-    <div className="space-y-5 sm:space-y-7 pb-8">
-      {/* POORVIKA PATTERN 1: Top Category Icon Carousel (El[4] Style) */}
-      <section className="bg-white border-b border-[#E5E7EB] py-3">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+    <div className="bg-[#F5F6F8] pb-6 space-y-3">
+      {/* 1. TOP CIRCULAR CATEGORY BUBBLES (00:00 in Video) */}
+      <section className="bg-white py-3 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6">
           <div className="flex items-start gap-3 sm:gap-5 overflow-x-auto no-scrollbar snap-x">
-            {categories.map((cat, idx) => (
+            {categories.map((cat) => (
               <Link
                 key={cat.id}
-                to={`/products?category=${cat.slug}`}
-                className="group flex flex-col items-center shrink-0 w-[72px] sm:w-[88px] snap-start"
+                to={cat.slug === 'offers' ? '/offers' : `/products?category=${cat.slug}`}
+                className="group flex flex-col items-center shrink-0 w-[76px] sm:w-[92px] snap-start"
               >
-                <div
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl p-[2px] transition-transform duration-150 group-hover:scale-105 shadow-2xs ${
-                    idx % 2 === 0
-                      ? 'bg-gradient-to-tr from-[#F26522] to-[#FF8A00]'
-                      : 'bg-gradient-to-tr from-[#101114] to-[#2563EB]'
-                  }`}
-                >
-                  <div className="w-full h-full rounded-[14px] bg-white p-1.5 flex items-center justify-center overflow-hidden">
-                    <SmartImage
-                      src={cat.image}
-                      alt={cat.name}
-                      brand={cat.name}
-                      category={cat.slug}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                <div className="w-[68px] h-[68px] sm:w-20 sm:h-20 rounded-full bg-[#F8FAFC] border border-slate-200 group-hover:border-[#F26522] p-1.5 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 shadow-2xs">
+                  <SmartImage
+                    src={cat.image}
+                    alt={cat.name}
+                    brand={cat.name}
+                    category={cat.slug}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <span className="mt-1.5 text-[11px] sm:text-xs font-extrabold text-[#171717] group-hover:text-[#F26522] text-center leading-tight line-clamp-1">
+                <span className="mt-1.5 text-[11px] sm:text-xs font-bold text-[#1E293B] group-hover:text-[#F26522] text-center leading-tight line-clamp-2">
                   {cat.name}
                 </span>
               </Link>
@@ -288,850 +626,633 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* POORVIKA PATTERN 2: Full-Width Hero Campaign Banner + Bank Cashback Strip */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-2.5">
-        {currentBanner && (
-          <div className="relative rounded-2xl sm:rounded-3xl bg-[#101114] text-white overflow-hidden border border-white/10 shadow-md">
-            {/* Full Poorvika Banner Image on Top + Quick Action Strip Below */}
-            <Link to={currentBanner.ctaLink || '/products'} className="block relative bg-[#0B0F19]">
+      {/* PWA INSTALL APP BANNER ON HOME PAGE */}
+      <PWAInstallBanner variant="home-card" />
+
+      {/* 2. FESTIVE DEALS & OFFERS TOP STRIP BANNER (00:00 in Video) */}
+      <section className="max-w-7xl mx-auto px-2 sm:px-6">
+        <Link to="/offers" className="block rounded-lg overflow-hidden shadow-2xs">
+          <SmartImage
+            src="https://img-prd-pim.poorvika.com/pageimg/Festive-Deals-Offers-2027-M.webp"
+            alt="Festive Deals & Offers"
+            brand="Charlie Mobile"
+            category="smartphones"
+            className="w-full h-auto object-cover"
+          />
+        </Link>
+      </section>
+
+      {/* 3. HERO BANNER CAROUSEL WITH LEFT/RIGHT `<` `>` ARROWS & ORANGE PILL DOT INDICATOR (00:01 & 01:25-01:31 in Video) */}
+      {currentBanner && (
+        <section className="max-w-7xl mx-auto px-2 sm:px-6">
+          <div className="relative rounded-lg overflow-hidden bg-white shadow-2xs">
+            <Link to={currentBanner.ctaLink || '/products'} className="block">
               <SmartImage
                 src={currentBanner.image}
                 alt={currentBanner.title}
                 brand="Charlie Mobile"
                 category="smartphones"
-                className="w-full max-h-[220px] sm:max-h-[340px] object-cover sm:object-contain mx-auto"
+                className="w-full h-auto max-h-[360px] object-cover mx-auto"
               />
             </Link>
 
-            <div className="p-3.5 sm:px-6 sm:py-4 bg-gradient-to-r from-[#101114] via-[#181B22] to-[#101114] flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/10">
-              <div className="space-y-0.5 min-w-0">
-                <div className="inline-flex items-center gap-1 text-[10px] font-extrabold tracking-wider uppercase text-[#F97316]">
-                  <Sparkles className="w-3 h-3" />
-                  <span>{currentBanner.tag || 'CHARLIE MOBILE EXCLUSIVE'}</span>
-                </div>
-                <h1 className="text-sm sm:text-lg font-extrabold tracking-tight truncate">
-                  {currentBanner.title}
-                </h1>
-                <p className="text-[11px] sm:text-xs text-slate-300 line-clamp-1">
-                  {currentBanner.subtitle}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-                {activeBanners.length > 1 && (
-                  <div className="flex items-center gap-1.5 mr-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setBannerIndex(
-                          (prev) => (prev - 1 + activeBanners.length) % activeBanners.length
-                        )
-                      }
-                      aria-label="Previous slide"
-                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    {activeBanners.map((b, idx) => (
-                      <button
-                        key={b.id}
-                        type="button"
-                        onClick={() => setBannerIndex(idx)}
-                        aria-label={`Banner ${idx + 1}`}
-                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                          idx === bannerIndex % activeBanners.length
-                            ? 'w-5 bg-[#F26522]'
-                            : 'w-1.5 bg-white/30'
-                        }`}
-                      />
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setBannerIndex((prev) => (prev + 1) % activeBanners.length)}
-                      aria-label="Next slide"
-                      className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                <Link
-                  to={currentBanner.ctaLink || '/products'}
-                  className="h-9 px-4 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors whitespace-nowrap"
-                >
-                  <span>{currentBanner.ctaText || 'Shop Now'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Poorvika-Style Instant Bank Cashback & EMI Partner Strip */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#F26522] border border-orange-200 flex items-center justify-center font-extrabold text-xs">
-              %
-            </div>
-            <div>
-              <p className="text-xs font-extrabold text-[#171717] whitespace-nowrap">
-                {storeSettings.bankOfferTitle ||
-                  'Up to ₹10,000 Instant Bank Cashback & Zero Down-Payment EMI'}
-              </p>
-              <p className="text-[11px] text-[#737373] whitespace-nowrap">
-                {storeSettings.bankOfferSubtitle ||
-                  'HDFC · ICICI · SBI · Axis · Bajaj Finserv · IDFC First'}
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/offers"
-            className="px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#F26522] text-xs font-extrabold shrink-0 flex items-center gap-1"
-          >
-            <span>View Offers</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 3: Quick Mobile & Accessories Visual Row (Exact El[4] Tiles from Poorvika) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3">
-          {[
-            {
-              title: 'Mobiles',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Mobile-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=smartphones',
-            },
-            {
-              title: 'Chargers',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Chargers-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=chargers',
-            },
-            {
-              title: 'Adapters',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Adapters-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=chargers',
-            },
-            {
-              title: 'Tempered Glass',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Tempered-Glass-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=mobile-accessories',
-            },
-            {
-              title: 'Power Bank',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Power-Bank-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=power-banks',
-            },
-            {
-              title: 'Case & Covers',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/Case-Covers-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=mobile-accessories',
-            },
-            {
-              title: 'True Wireless',
-              img: 'https://img-prd-pim.poorvika.com/pageimg/True-Wireless-Mobile-and-Accessories-2026.webp',
-              link: '/products?category=earbuds',
-            },
-          ].map((tile) => (
-            <Link
-              key={tile.title}
-              to={tile.link}
-              className="group bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#F26522] p-2 flex flex-col items-center transition-all shadow-2xs"
-            >
-              <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
-                <SmartImage
-                  src={tile.img}
-                  alt={tile.title}
-                  brand={tile.title}
-                  category="smartphones"
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <span className="mt-1 text-[10px] sm:text-xs font-extrabold text-[#171717] group-hover:text-[#F26522] text-center line-clamp-1">
-                {tile.title}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 4: Best Selling Smartphones (El[5]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-[#F26522]" />
-            <div>
-              <h2 className="text-base sm:text-xl font-extrabold text-[#171717] leading-tight">
-                {getSection('best_selling', 'Best Selling Smartphones').title}
-              </h2>
-              <p className="text-[11px] sm:text-xs text-[#737373]">
-                Most popular smartphones at {storeSettings.storeName} today
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/products?sort=popularity"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1 shrink-0"
-          >
-            <span>View All</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Interactive Brand Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {[
-            'All',
-            'Apple',
-            'Samsung',
-            'Vivo',
-            'Oppo',
-            'OnePlus',
-            'Redmi',
-            'Realme',
-            'Nothing',
-            'Google',
-          ].map((brandName) => (
-            <button
-              key={brandName}
-              type="button"
-              onClick={() => setSelectedBrandTab(brandName)}
-              className={`h-8 px-3.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                selectedBrandTab === brandName
-                  ? 'bg-[#F26522] text-white shadow-2xs'
-                  : 'bg-white border border-[#E5E7EB] text-[#171717] hover:border-[#F26522]'
-              }`}
-            >
-              {brandName}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {(brandFilteredBestSellers.length > 0 ? brandFilteredBestSellers : bestSellers)
-            .slice(0, 8)
-            .map((product) => (
-              <div
-                key={product.id}
-                className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 5: Shop By Mobile Brands (El[6]–El[9] with Real Poorvika Brand Graphics) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div className="text-center sm:text-left">
-          <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-            {getSection('top_brands', 'Shop By Mobile Brands').title}
-          </h2>
-          <p className="text-[11px] sm:text-xs text-[#737373]">
-            100% Sealed Pack Phones with Official Brand Warranty
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
-          {poorvikaMobileBrands.map((brand) => (
-            <Link
-              key={brand.name}
-              to={brand.link}
-              className="group bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#F26522] p-2 flex items-center justify-center overflow-hidden shadow-2xs transition-all h-16 sm:h-20"
-            >
-              <SmartImage
-                src={brand.img}
-                alt={brand.name}
-                brand={brand.name}
-                category="smartphones"
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-              />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 6: 5G Smartphones Product Rail (El[10]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-              {getSection('latest_5g', '5G Smartphones').title}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-[#737373]">
-              Ultra-fast 5G smartphones ready for instant store pickup or 2-hour delivery
-            </p>
-          </div>
-          <Link
-            to="/products?5g=true"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1 shrink-0"
-          >
-            <span>See All 5G</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {latest5G.slice(0, 8).map((product) => (
-            <div
-              key={product.id}
-              className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 7: Shop Mobile By Budget (El[11]–El[14] Real Poorvika Budget Cards) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-              {getSection('shop_by_budget', 'Shop Mobile By Budget').title}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-[#737373]">
-              Pick your price bracket — Easy No-Cost EMI available on every range
-            </p>
-          </div>
-        </div>
-
-        <div className="flex sm:grid sm:grid-cols-4 lg:grid-cols-7 gap-2.5 overflow-x-auto no-scrollbar snap-x">
-          {poorvikaBudgetCards.map((b) => (
-            <Link
-              key={b.label}
-              to={`/products?minPrice=${b.min}&maxPrice=${b.max}`}
-              className="group w-[135px] sm:w-auto shrink-0 snap-start bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#F26522] overflow-hidden shadow-2xs transition-all flex flex-col"
-            >
-              <div className="aspect-[4/3] w-full bg-[#F8FAFC] overflow-hidden">
-                <SmartImage
-                  src={b.img}
-                  alt={b.label}
-                  brand={b.label}
-                  category="smartphones"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <div className="p-2 text-center bg-white border-t border-[#F1F5F9]">
-                <span className="text-[11px] font-extrabold text-[#171717] group-hover:text-[#F26522] tabular-nums">
-                  {b.label}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 8: Featured Categories & Choose Your Comfort (El[15]–El[20]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Featured Categories: Apple, Android, Feature Phone */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm sm:text-lg font-extrabold text-[#171717]">
-              Featured Categories
-            </h2>
-            <Link to="/products" className="text-xs font-bold text-[#F26522]">
-              Explore All
-            </Link>
-          </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {[
-              {
-                name: 'Apple iPhones',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Apple-Mobile-and-Accessories-2026.webp',
-                link: '/products?category=iphone',
-              },
-              {
-                name: 'Android 5G',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Android-Mobile-and-Accessories-2026.webp',
-                link: '/products?category=smartphones',
-              },
-              {
-                name: 'Keypad & Budget',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Feature-Phone-Mobile-and-Accessories-2026.webp',
-                link: '/products?maxPrice=20000',
-              },
-            ].map((item) => (
-              <Link
-                key={item.name}
-                to={item.link}
-                className="group rounded-xl overflow-hidden border border-[#E5E7EB] hover:border-[#F26522] flex flex-col items-center bg-[#F8FAFC]"
-              >
-                <SmartImage
-                  src={item.img}
-                  alt={item.name}
-                  brand={item.name}
-                  category="smartphones"
-                  className="w-full aspect-square object-cover group-hover:scale-105 transition-transform"
-                />
-                <span className="py-1.5 text-[11px] font-extrabold text-[#171717] text-center">
-                  {item.name}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Choose Your Comfort: Wireless, Wired, True Wireless */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-3.5 sm:p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm sm:text-lg font-extrabold text-[#171717]">
-              Choose Your Audio Comfort
-            </h2>
-            <Link to="/products?category=earbuds" className="text-xs font-bold text-[#F26522]">
-              Shop Audio
-            </Link>
-          </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {[
-              {
-                name: 'True Wireless',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/True-Wireless-Mobile-and-Accessories-2026.webp',
-                link: '/products?category=earbuds',
-              },
-              {
-                name: 'Wireless Neckband',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Wireless-Mobile-and-Accessories-2026.webp',
-                link: '/products?category=earbuds',
-              },
-              {
-                name: 'Wired Audio',
-                img: 'https://img-prd-pim.poorvika.com/pageimg/Wired-Mobile-and-Accessories-2026.webp',
-                link: '/products?category=earbuds',
-              },
-            ].map((item) => (
-              <Link
-                key={item.name}
-                to={item.link}
-                className="group rounded-xl overflow-hidden border border-[#E5E7EB] hover:border-[#F26522] flex flex-col items-center bg-[#F8FAFC]"
-              >
-                <SmartImage
-                  src={item.img}
-                  alt={item.name}
-                  brand={item.name}
-                  category="earbuds"
-                  className="w-full aspect-square object-cover group-hover:scale-105 transition-transform"
-                />
-                <span className="py-1.5 text-[11px] font-extrabold text-[#171717] text-center">
-                  {item.name}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 9: New Releases Posters + Product Rail (El[25]–El[28]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-              {getSection('new_releases', 'New Releases').title}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-[#737373]">
-              Just launched smartphones &amp; foldables available at Charlie Mobile
-            </p>
-          </div>
-          <Link
-            to="/products?sort=newest"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1"
-          >
-            <span>Explore Launches</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Real Poorvika New Release Launch Poster Cards */}
-        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-2.5 overflow-x-auto no-scrollbar snap-x">
-          {poorvikaNewReleasePosters.map((poster) => (
-            <Link
-              key={poster.title}
-              to={poster.link}
-              className="group w-[145px] sm:w-auto shrink-0 snap-start rounded-2xl overflow-hidden border border-[#E5E7EB] hover:border-[#F26522] bg-white shadow-2xs"
-            >
-              <SmartImage
-                src={poster.img}
-                alt={poster.title}
-                brand={poster.title}
-                category="smartphones"
-                className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform"
-              />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 10: A Flagship Experience Banner + Flagship Phones Rail (El[38]–El[40]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <Link
-          to="/products?minPrice=55000"
-          className="block rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-2xs bg-[#101114]"
-        >
-          <SmartImage
-            src="https://img-prd-pim.poorvika.com/pageimg/A-Flagship-Experence-Mobile-and-Accessories-2026.webp"
-            alt="A Flagship Experience"
-            brand="Flagship Smartphones"
-            category="smartphones"
-            className="w-full max-h-[200px] object-cover"
-          />
-        </Link>
-
-        <div className="flex items-center justify-between pt-1">
-          <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-            {getSection('flagship_smartphones', 'Flagship Phones').title}
-          </h2>
-          <Link
-            to="/products?minPrice=55000"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1"
-          >
-            <span>See All Flagships</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {flagshipPhones.slice(0, 8).map((product) => (
-            <div
-              key={product.id}
-              className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 11: Best Camera Smartphones Banner + Camera / Mid-Range Tabs (El[41]–El[44]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <Link
-          to="/products?category=smartphones"
-          className="block rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-2xs bg-[#101114]"
-        >
-          <SmartImage
-            src="https://img-prd-pim.poorvika.com/pageimg/Best-Camera-Smart-Phones-Mobile-and-Accessories-2026.webp"
-            alt="Best Camera Smartphones"
-            brand="Pro Camera Phones"
-            category="smartphones"
-            className="w-full max-h-[200px] object-cover"
-          />
-        </Link>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-          <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-[#E5E7EB] self-start">
+            {/* Left `<` Button */}
             <button
               type="button"
-              onClick={() => setCameraOrMidTab('camera')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-colors cursor-pointer ${
-                cameraOrMidTab === 'camera'
-                  ? 'bg-[#F26522] text-white'
-                  : 'text-[#171717] hover:bg-slate-100'
-              }`}
-            >
-              Best Camera Smart Phones
-            </button>
-            <button
-              type="button"
-              onClick={() => setCameraOrMidTab('midrange')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-colors cursor-pointer ${
-                cameraOrMidTab === 'midrange'
-                  ? 'bg-[#F26522] text-white'
-                  : 'text-[#171717] hover:bg-slate-100'
-              }`}
-            >
-              Best Budget &amp; Mid-Range
-            </button>
-          </div>
-          <Link
-            to="/products?category=smartphones"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1"
-          >
-            <span>View Full Collection</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {(cameraOrMidTab === 'camera' ? bestCameraPhones : midRangePhones)
-            .slice(0, 8)
-            .map((product) => (
-              <div
-                key={product.id}
-                className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 12: Shop Accessories By Brands (El[29]–El[32]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div>
-          <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-            {getSection('accessories_by_brand', 'Shop Accessories By Brands').title}
-          </h2>
-          <p className="text-[11px] sm:text-xs text-[#737373]">
-            Original Apple, Samsung, Xiaomi, Boat, Yarr &amp; OnePlus accessories
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          {poorvikaAccessoryBrands.map((b) => (
-            <Link
-              key={b.name}
-              to={b.link}
-              className="group bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#F26522] p-2 flex items-center justify-center h-16 overflow-hidden shadow-2xs"
-            >
-              <SmartImage
-                src={b.img}
-                alt={b.name}
-                brand={b.name}
-                category="chargers"
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-              />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 13: Genuine Chargers, Power Banks, Tempered Glass & Cases (El[45]–El[55]) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        {/* Poorvika 3-Banner Strip for Screen Protectors, Cables & Chargers */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-          <Link
-            to="/products?category=chargers"
-            className="rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-2xs"
-          >
-            <SmartImage
-              src="https://img-prd-pim.poorvika.com/pageimg/Charger-Adaptors-Mobile-and-Accessories-2026-mob.webp"
-              alt="Chargers & Adapters"
-              brand="Chargers"
-              category="chargers"
-              className="w-full h-28 sm:h-36 object-cover"
-            />
-          </Link>
-          <Link
-            to="/products?category=mobile-accessories"
-            className="rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-2xs"
-          >
-            <SmartImage
-              src="https://img-prd-pim.poorvika.com/pageimg/Screen-Protectors-Mobile-and-Accessories-2026-mob0.webp"
-              alt="Screen Protectors"
-              brand="Screen Protectors"
-              category="mobile-accessories"
-              className="w-full h-28 sm:h-36 object-cover"
-            />
-          </Link>
-          <Link
-            to="/products?category=chargers"
-            className="rounded-2xl overflow-hidden border border-[#E5E7EB] shadow-2xs"
-          >
-            <SmartImage
-              src="https://img-prd-pim.poorvika.com/pageimg/Cables-Connectors-Mobile-and-Accessories-2026-mob.webp"
-              alt="Cables & Connectors"
-              brand="Cables"
-              category="chargers"
-              className="w-full h-28 sm:h-36 object-cover"
-            />
-          </Link>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-          <div>
-            <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-              Mobile Accessories, Chargers, Power Banks &amp; Earbuds
-            </h2>
-            <p className="text-[11px] sm:text-xs text-[#737373]">
-              Original adapters, 165W power banks, MagSafe cases, privacy glass &amp; ANC buds
-            </p>
-          </div>
-
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            {['All', 'Apple', 'Xiaomi', 'Urban', 'Noise', 'Yarr'].map((b) => (
-              <button
-                key={b}
-                type="button"
-                onClick={() => setAccessoryBrandTab(b)}
-                className={`h-8 px-3 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
-                  accessoryBrandTab === b
-                    ? 'bg-[#F26522] text-white'
-                    : 'bg-white border border-[#E5E7EB] text-[#171717]'
-                }`}
-              >
-                {b === 'All' ? 'All Brands' : b}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {(filteredAccessories.length > 0 ? filteredAccessories : allAccessories)
-            .slice(0, 8)
-            .map((product) => (
-              <div
-                key={product.id}
-                className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 14: Smartwatches, iPads & Audio Wearables */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base sm:text-xl font-extrabold text-[#171717]">
-              iPads, Smartwatches &amp; AirPods
-            </h2>
-            <p className="text-[11px] sm:text-xs text-[#737373]">
-              Apple iPad Air M4, AirPods Pro 3rd Gen, Boat Wave Sigma 3 &amp; ANC Buds
-            </p>
-          </div>
-          <Link
-            to="/products?category=smartwatches"
-            className="text-xs font-extrabold text-[#F26522] flex items-center gap-1 shrink-0"
-          >
-            <span>View All</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="flex lg:grid lg:grid-cols-4 gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
-          {smartwatchesAndGadgets.slice(0, 4).map((product) => (
-            <div
-              key={product.id}
-              className="w-[172px] sm:w-[220px] lg:w-auto shrink-0 snap-start"
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 15: Exchange & EMI Value Banners */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-          <div className="rounded-2xl bg-[#101114] text-white p-4 sm:p-6 border border-white/10 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#F97316] uppercase tracking-wider">
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Charlie Mobile Smart Exchange</span>
-              </div>
-              <h3 className="mt-1.5 text-base sm:text-xl font-extrabold">
-                Trade In Your Old Phone — Get Up to{' '}
-                {formatINR(storeSettings.exchangeMaxBonus || 12000)} Bonus
-              </h3>
-              <p className="mt-1 text-xs text-slate-300 leading-relaxed">
-                Instant evaluation in 2 minutes. Upgrade from any old 4G/5G device right at our counter or during doorstep delivery.
-              </p>
-            </div>
-            <div className="mt-3.5">
-              <Link
-                to="/offers"
-                className="inline-flex h-9 px-4 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-bold items-center gap-1.5"
-              >
-                <span>Check Exchange Value</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-white text-[#171717] p-4 sm:p-6 border border-[#E5E7EB] flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#F26522] uppercase tracking-wider">
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>Paperless Instant Finance</span>
-              </div>
-              <h3 className="mt-1.5 text-base sm:text-xl font-extrabold">
-                No-Cost EMI Starting at {formatINR(storeSettings.emiStartingPrice || 649)}/Month
-              </h3>
-              <p className="mt-1 text-xs text-[#737373] leading-relaxed">
-                Available on Credit Cards, Debit Card EMI, and in-store consumer finance with zero processing fee on flagship phones.
-              </p>
-            </div>
-            <div className="mt-3.5">
-              <Link
-                to="/offers"
-                className="inline-flex h-9 px-4 rounded-xl bg-[#101114] text-white text-xs font-bold items-center gap-1.5"
-              >
-                <span>Calculate Monthly EMI</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* POORVIKA PATTERN 16: Physical Store & Customer Care Showcase */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-          <div className="lg:col-span-5 bg-[#101114] p-3 sm:p-4 flex items-center justify-center">
-            <img
-              src={
-                storeSettings.showroomPhotos && storeSettings.showroomPhotos.length > 0
-                  ? storeSettings.showroomPhotos[0].src
-                  : generateStoreShowroomSvg('storefront')
+              onClick={() =>
+                setBannerIndex(
+                  (prev) => (prev - 1 + activeBanners.length) % activeBanners.length
+                )
               }
-              alt="Charlie Mobile & Accessories Showroom"
-              className="w-full max-h-[220px] object-contain rounded-2xl"
-            />
-          </div>
-          <div className="lg:col-span-7 p-4 sm:p-6 flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#F26522] uppercase tracking-wider">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Authorized Retail Showroom</span>
-              </div>
-              <h2 className="mt-1 text-lg sm:text-2xl font-extrabold text-[#171717]">
-                {storeSettings.businessName}
-              </h2>
-              <p className="mt-1 text-xs text-[#737373] leading-relaxed">
-                Visit our physical showroom to experience live demo devices, get free screen guard installation, instant data transfer, and 30-minute Store Pickup.
-              </p>
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-[#F5F6F8] flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#F26522] shrink-0" />
-                  <span className="truncate font-semibold">
-                    Call / WhatsApp: {storeSettings.phone || '+91 8818850488'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-[#F5F6F8] flex items-center gap-2">
-                  <Headphones className="w-4 h-4 text-[#F26522] shrink-0" />
-                  <span className="truncate font-semibold">
-                    Email: {storeSettings.email || 'charliegedekar@gmail.com'}
-                  </span>
-                </div>
-              </div>
-            </div>
+              aria-label="Previous banner"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              <a
-                href={`tel:${(storeSettings.phone || '8818850488').replace(/[^0-9+]/g, '')}`}
-                className="h-10 px-4 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors"
-              >
-                <span>Call {storeSettings.phone || '+91 8818850488'}</span>
-              </a>
-              <button
-                type="button"
-                onClick={() => openWhatsAppEnquiry({})}
-                className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>WhatsApp 8818850488</span>
-              </button>
-              <Link
-                to="/store"
-                className="h-10 px-4 rounded-xl bg-[#101114] hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
-              >
-                <Store className="w-4 h-4" />
-                <span>Showroom Info</span>
-              </Link>
-            </div>
+            {/* Right `>` Button */}
+            <button
+              type="button"
+              onClick={() => setBannerIndex((prev) => (prev + 1) % activeBanners.length)}
+              aria-label="Next banner"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-10 rounded bg-black/60 hover:bg-black/80 text-white flex items-center justify-center cursor-pointer"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
+
+          {/* Bottom Dots with Orange Pill Active Dot */}
+          <div className="flex items-center justify-center gap-1.5 pt-2">
+            {activeBanners.map((b, idx) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setBannerIndex(idx)}
+                aria-label={`Slide ${idx + 1}`}
+                className={`h-2 rounded-full transition-all cursor-pointer ${
+                  idx === bannerIndex % activeBanners.length
+                    ? 'w-5 bg-[#F26522]'
+                    : 'w-2 bg-slate-300'
+                }`}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4. CATCH THE COOLEST MONSOON DEALS (00:02 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 pb-2 shadow-2xs">
+        <h2 className="text-center text-[15px] sm:text-lg font-extrabold text-[#E0531F] px-3">
+          Catch the Coolest Monsoon Deals
+        </h2>
+        <div className="mt-1.5 py-1.5 border-y border-slate-200 text-center">
+          <span className="text-xs font-extrabold text-[#F26522] border-b-2 border-[#F26522] pb-1">
+            Monsoon Appliances
+          </span>
+        </div>
+
+        <div className="p-2 space-y-2">
+          <Link to="/products?category=home-appliances" className="block rounded overflow-hidden">
+            <SmartImage
+              src="https://img-prd-pim.poorvika.com/pageimg/Monsoon-Appliances-2027-mob.webp"
+              alt="Monsoon Appliances"
+              brand="Monsoon Deals"
+              category="home-appliances"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              {
+                img: 'https://img-prd-pim.poorvika.com/pageimg/Washer-and-dryer-mob-version.webp',
+                link: '/products?category=home-appliances',
+                alt: 'Washer and Dryer',
+              },
+              {
+                img: 'https://img-prd-pim.poorvika.com/pageimg/Hair-DryerMobile-View.webp',
+                link: '/products?category=personal-care',
+                alt: 'Hair Dryer',
+              },
+              {
+                img: 'https://img-prd-pim.poorvika.com/pageimg/Iron-Bar-Mobile-View.webp',
+                link: '/products?category=home-appliances',
+                alt: 'Iron Bar',
+              },
+              {
+                img: 'https://img-prd-pim.poorvika.com/pageimg/Water-Heater-Mobile-View.webp',
+                link: '/products?category=home-appliances',
+                alt: 'Water Heater',
+              },
+            ].map((item) => (
+              <Link key={item.alt} to={item.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={item.img}
+                  alt={item.alt}
+                  brand={item.alt}
+                  category="home-appliances"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. MOBILES & ACCESSORIES SECTION (00:03 - 00:04 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Mobiles &amp; Accessories
+        </h2>
+
+        {/* 4 Interactive Tabs: Best seller | 5G Mobiles | Top Brands | Accessories */}
+        <div className="mt-2 grid grid-cols-4 border-y border-slate-200 bg-white text-center">
+          {[
+            { id: 'best_seller', label: 'Best seller' },
+            { id: '5g', label: '5G Mobiles' },
+            { id: 'top_brands', label: 'Top Brands' },
+            { id: 'accessories', label: 'Accessories' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setMobileTab(t.id as typeof mobileTab)}
+              className={`py-2.5 text-[11px] sm:text-xs font-bold border-r last:border-r-0 border-slate-200 transition-colors cursor-pointer ${
+                mobileTab === t.id
+                  ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                  : 'text-[#1E293B] hover:text-[#F26522]'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Tab Banner + 2x2 Grid */}
+        <div className="p-2 space-y-2">
+          <Link to={mobileTabMedia[mobileTab].bannerLink} className="block rounded overflow-hidden">
+            <SmartImage
+              src={mobileTabMedia[mobileTab].banner}
+              alt="Mobiles & Accessories Featured"
+              brand="Charlie Mobile"
+              category="smartphones"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {mobileTabMedia[mobileTab].grid.map((g) => (
+              <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={g.img}
+                  alt={g.alt}
+                  brand={g.alt}
+                  category="smartphones"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Slider with "See All < >" */}
+        {renderProductRailWithControls(
+          mobileProducts,
+          '/products?category=smartphones',
+          mobileRailRef
+        )}
+      </section>
+
+      {/* 6. LAPTOP & TABLETS SECTION (00:04 - 00:05 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Laptop &amp; Tablets
+        </h2>
+
+        {/* 4 Interactive Tabs: Best Laptops | Desktop Pc | iPad & Tablets | Accessories */}
+        <div className="mt-2 grid grid-cols-4 border-y border-slate-200 bg-white text-center">
+          {[
+            { id: 'best_laptops', label: 'Best Laptops' },
+            { id: 'desktop_pc', label: 'Desktop Pc' },
+            { id: 'ipad_tablets', label: 'iPad & Tablets' },
+            { id: 'accessories', label: 'Accessories' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setLaptopTab(t.id as typeof laptopTab)}
+              className={`py-2.5 text-[11px] sm:text-xs font-bold border-r last:border-r-0 border-slate-200 transition-colors cursor-pointer ${
+                laptopTab === t.id
+                  ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                  : 'text-[#1E293B] hover:text-[#F26522]'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Tab Banner + 2x2 Grid */}
+        <div className="p-2 space-y-2">
+          <Link to={laptopTabMedia[laptopTab].bannerLink} className="block rounded overflow-hidden">
+            <SmartImage
+              src={laptopTabMedia[laptopTab].banner}
+              alt="Laptops & Tablets"
+              brand="Charlie Mobile"
+              category="laptops"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {laptopTabMedia[laptopTab].grid.map((g) => (
+              <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={g.img}
+                  alt={g.alt}
+                  brand={g.alt}
+                  category="laptops"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Slider with "See All < >" */}
+        {renderProductRailWithControls(
+          laptopProducts,
+          '/products?category=laptops',
+          laptopRailRef
+        )}
+      </section>
+
+      {/* 7. CIRCULAR BRAND LOGO SCROLLER (00:05 - 00:11 in Video) */}
+      <section className="max-w-7xl mx-auto py-3 px-2 sm:px-6 bg-[#E5E7EB]/70">
+        <div className="relative flex items-center">
+          <button
+            type="button"
+            onClick={() => scrollRail(brandRailRef, 'left')}
+            aria-label="Previous brands"
+            className="w-6 h-6 rounded-full bg-white shadow-xs flex items-center justify-center text-slate-600 shrink-0 z-10 cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div
+            ref={brandRailRef}
+            className="flex items-center gap-3 overflow-x-auto no-scrollbar px-2 py-1"
+          >
+            {circularBrandLogos.map((brand) => (
+              <Link
+                key={brand.name}
+                to={brand.link}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-2 shrink-0 hover:border-[#F26522] transition-transform hover:scale-105"
+              >
+                <SmartImage
+                  src={brand.img}
+                  alt={brand.name}
+                  brand={brand.name}
+                  category="smartphones"
+                  className="w-full h-full object-contain"
+                />
+              </Link>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollRail(brandRailRef, 'right')}
+            aria-label="Next brands"
+            className="w-6 h-6 rounded-full bg-white shadow-xs flex items-center justify-center text-slate-600 shrink-0 z-10 cursor-pointer"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </section>
+
+      {/* 8. TV & AUDIO SECTION (00:06 - 00:18 & 00:22 - 00:27 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Tv &amp; Audio
+        </h2>
+
+        {/* 4 Interactive Tabs: All categories | Television | Audio | Entertainment */}
+        <div className="mt-2 grid grid-cols-4 border-y border-slate-200 bg-white text-center">
+          {[
+            { id: 'all', label: 'All categories' },
+            { id: 'television', label: 'Television' },
+            { id: 'audio', label: 'Audio' },
+            { id: 'entertainment', label: 'Entertainment' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTvTab(t.id as typeof tvTab)}
+              className={`py-2.5 text-[11px] sm:text-xs font-bold border-r last:border-r-0 border-slate-200 transition-colors cursor-pointer ${
+                tvTab === t.id
+                  ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                  : 'text-[#1E293B] hover:text-[#F26522]'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Tab Banner + 2x2 Grid */}
+        <div className="p-2 space-y-2">
+          <Link to={tvTabMedia[tvTab].bannerLink} className="block rounded overflow-hidden">
+            <SmartImage
+              src={tvTabMedia[tvTab].banner}
+              alt="TV & Audio"
+              brand="Charlie Mobile"
+              category="tv-audio"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {tvTabMedia[tvTab].grid.map((g) => (
+              <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={g.img}
+                  alt={g.alt}
+                  brand={g.alt}
+                  category="tv-audio"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Slider with "See All < >" */}
+        {renderProductRailWithControls(tvProducts, '/products?category=tv-audio', tvRailRef)}
+      </section>
+
+      {/* 9. KITCHEN APPLIANCES SECTION (00:18 - 00:19 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Kitchen Appliances
+        </h2>
+
+        {/* 4 Interactive Tabs: All Categories | Kitchen Grinders | Cookwares | Steamers & Cookers */}
+        <div className="mt-2 grid grid-cols-4 border-y border-slate-200 bg-white text-center">
+          {[
+            { id: 'all', label: 'All Categories' },
+            { id: 'grinders', label: 'Kitchen Grinders' },
+            { id: 'cookwares', label: 'Cookwares' },
+            { id: 'steamers', label: 'Steamers & Cookers' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setKitchenTab(t.id as typeof kitchenTab)}
+              className={`py-2.5 text-[10px] sm:text-xs font-bold border-r last:border-r-0 border-slate-200 transition-colors cursor-pointer ${
+                kitchenTab === t.id
+                  ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                  : 'text-[#1E293B] hover:text-[#F26522]'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Tab Banner + 2x2 Grid */}
+        <div className="p-2 space-y-2">
+          <Link to={kitchenTabMedia[kitchenTab].bannerLink} className="block rounded overflow-hidden">
+            <SmartImage
+              src={kitchenTabMedia[kitchenTab].banner}
+              alt="Kitchen Appliances"
+              brand="Charlie Mobile"
+              category="kitchen-appliances"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {kitchenTabMedia[kitchenTab].grid.map((g) => (
+              <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={g.img}
+                  alt={g.alt}
+                  brand={g.alt}
+                  category="kitchen-appliances"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Slider with "See All < >" */}
+        {renderProductRailWithControls(
+          kitchenProducts,
+          '/products?category=kitchen-appliances',
+          kitchenRailRef
+        )}
+      </section>
+
+      {/* 10. HOME APPLIANCES SECTION (00:19 - 00:20 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Home Appliances
+        </h2>
+
+        {/* 4 Interactive Tabs: All Categories | Air Conditioner | Home Cleansers | Small Appliances */}
+        <div className="mt-2 grid grid-cols-4 border-y border-slate-200 bg-white text-center">
+          {[
+            { id: 'all', label: 'All Categories' },
+            { id: 'ac', label: 'Air Conditioner' },
+            { id: 'cleansers', label: 'Home Cleansers' },
+            { id: 'small', label: 'Small Appliances' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setHomeAppTab(t.id as typeof homeAppTab)}
+              className={`py-2.5 text-[10px] sm:text-xs font-bold border-r last:border-r-0 border-slate-200 transition-colors cursor-pointer ${
+                homeAppTab === t.id
+                  ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                  : 'text-[#1E293B] hover:text-[#F26522]'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Tab Banner + 2x2 Grid */}
+        <div className="p-2 space-y-2">
+          <Link to={homeAppTabMedia[homeAppTab].bannerLink} className="block rounded overflow-hidden">
+            <SmartImage
+              src={homeAppTabMedia[homeAppTab].banner}
+              alt="Home Appliances"
+              brand="Charlie Mobile"
+              category="home-appliances"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+
+          <div className="grid grid-cols-2 gap-2">
+            {homeAppTabMedia[homeAppTab].grid.map((g) => (
+              <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                <SmartImage
+                  src={g.img}
+                  alt={g.alt}
+                  brand={g.alt}
+                  category="home-appliances"
+                  className="w-full h-auto object-cover"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Slider with "See All < >" */}
+        {renderProductRailWithControls(
+          homeAppProducts,
+          '/products?category=home-appliances',
+          homeRailRef
+        )}
+      </section>
+
+      {/* 11. SMART TECHNOLOGY SECTION (01:38 - 01:39 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-2 shadow-2xs">
+        <div className="p-2">
+          <Link to="/products?category=smartwatches" className="block rounded overflow-hidden">
+            <SmartImage
+              src="https://img-prd-pim.poorvika.com/pageimg/Smart-Accessories-Mob-M-A-2026.webp"
+              alt="Smart Technology"
+              brand="Smart Technology"
+              category="smartwatches"
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+        </div>
+
+        {renderProductRailWithControls(
+          smartTechProducts,
+          '/products?category=smartwatches',
+          smartTechRailRef
+        )}
+      </section>
+
+      {/* 12. PERSONAL CARE SECTION (01:39 - 01:40 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white pt-3 shadow-2xs">
+        <h2 className="text-center text-base sm:text-lg font-extrabold text-[#1E293B]">
+          Personal Care
+        </h2>
+
+        {/* 2 Interactive Tabs: Trending Products | Personal Care */}
+        <div className="mt-2 grid grid-cols-2 border-y border-slate-200 bg-white text-center">
+          <button
+            type="button"
+            onClick={() => setPersonalCareTab('trending')}
+            className={`py-2.5 text-xs font-bold border-r border-slate-200 transition-colors cursor-pointer ${
+              personalCareTab === 'trending'
+                ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                : 'text-[#1E293B]'
+            }`}
+          >
+            Trending Products
+          </button>
+          <button
+            type="button"
+            onClick={() => setPersonalCareTab('personal_care')}
+            className={`py-2.5 text-xs font-bold transition-colors cursor-pointer ${
+              personalCareTab === 'personal_care'
+                ? 'text-[#F26522] border-b-2 border-b-[#F26522] bg-orange-50/20'
+                : 'text-[#1E293B]'
+            }`}
+          >
+            Personal Care
+          </button>
+        </div>
+
+        <div className="p-2 space-y-2">
+          {personalCareTab === 'trending' ? (
+            <Link to="/products?category=personal-care" className="block rounded overflow-hidden">
+              <SmartImage
+                src="https://img-prd-pim.poorvika.com/pageimg/Personal-care-home-page-mob.webp"
+                alt="Personal Care"
+                brand="Personal Care"
+                category="personal-care"
+                className="w-full h-auto object-cover"
+              />
+            </Link>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/ Hair-Dryers-Personal-Care-Mobile-View.webp',
+                  link: '/products?category=personal-care',
+                  alt: 'Hair Dryers',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Hair-Straighteners-Personal-Care-Mobile-View.webp',
+                  link: '/products?category=personal-care',
+                  alt: 'Hair Straighteners',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Hair-Styler-Personal-Care-Mobile-View.webp',
+                  link: '/products?category=personal-care',
+                  alt: 'Hair Styler',
+                },
+                {
+                  img: 'https://img-prd-pim.poorvika.com/pageimg/Trimmers-Personal-Care-Mobile-View.webp',
+                  link: '/products?category=personal-care',
+                  alt: 'Trimmers',
+                },
+              ].map((g) => (
+                <Link key={g.alt} to={g.link} className="block rounded overflow-hidden">
+                  <SmartImage
+                    src={g.img}
+                    alt={g.alt}
+                    brand={g.alt}
+                    category="personal-care"
+                    className="w-full h-auto object-cover"
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {renderProductRailWithControls(
+          personalCareProducts,
+          '/products?category=personal-care',
+          personalCareRailRef
+        )}
+      </section>
+
+      {/* 13. SEO INFORMATIONAL BLOCK (01:40 - 01:42 in Video) */}
+      <section className="max-w-7xl mx-auto bg-white p-4 sm:p-6 text-[#1E293B] space-y-3 border-t border-slate-200">
+        <h2 className="text-sm sm:text-base font-extrabold leading-snug">
+          Charlie Mobiles – Your Trusted Destination for Mobiles, Electronics, Gadgets &amp; Everyday Essentials
+        </h2>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Charlie Mobiles &amp; Accessories is your trusted multi-brand retail destination for smartphones, laptops, tablets, smart TVs, home appliances, kitchen essentials, gaming consoles, and personal care gadgets. Whether you shop online or visit our showroom, enjoy 100% genuine sealed products, instant store pickup, and easy No-Cost EMI options.
+        </p>
+
+        <h3 className="text-xs sm:text-sm font-extrabold pt-1">
+          Top Categories Available at Charlie Mobiles
+        </h3>
+        <div className="space-y-2 text-xs text-slate-600 leading-relaxed">
+          <p>
+            <strong className="text-[#1E293B]">1. Mobiles &amp; Accessories:</strong> Explore the latest 5G smartphones from Apple iPhone, Samsung Galaxy, Vivo, Oppo, OnePlus, Realme, Redmi, and Nothing along with original fast chargers, power banks, TWS earbuds, and protective cases.
+          </p>
+          <p>
+            <strong className="text-[#1E293B]">2. Laptops, Tablets &amp; Computers:</strong> Shop Apple MacBooks, iPads, HP Victus Gaming Laptops, Acer Aspire, Dell, Lenovo, and Asus laptops for work, study, and gaming.
+          </p>
+          <p>
+            <strong className="text-[#1E293B]">3. Smart TVs, Audio &amp; Gaming Entertainment:</strong> Upgrade your living room with 4K QLED, OLED &amp; QNED Smart TVs, Dolby Atmos Soundbars, Sony PlayStation 5 Consoles, PS VR2 controllers, and Asus ROG Ally handhelds.
+          </p>
+          <p>
+            <strong className="text-[#1E293B]">4. Home, Kitchen &amp; Personal Care Appliances:</strong> Discover 5-Star Inverter Air Conditioners, Washing Machines, Refrigerators, Air Fryers, Chimneys, Dyson Airwrap Stylers, and Philips grooming appliances.
+          </p>
         </div>
       </section>
     </div>

@@ -1,8 +1,12 @@
 node_modules/
-build/
 dist/
-coverage/
+dev-dist/
+build/
 .DS_Store
 *.log
-.env*
+.env
+.env.*
 !.env.example
+*.mp4
+*.mov
+*.zip

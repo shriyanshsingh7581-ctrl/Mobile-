@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+.env
+.env.local
+firestore.rules.test.ts
+DRAFT_firestore.rules
+security_spec.md
+public/assets/aistudio/*.mp4

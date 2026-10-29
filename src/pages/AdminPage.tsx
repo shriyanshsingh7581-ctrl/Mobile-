@@ -8,9 +8,14 @@ import {
   CloudUpload,
   Edit3,
   ExternalLink,
+  Eye,
+  EyeOff,
   Image as ImageIcon,
+  KeyRound,
   Layers,
   LayoutGrid,
+  Lock,
+  LogOut,
   Package,
   Percent,
   Plus,
@@ -522,23 +527,181 @@ export const AdminPage: React.FC = () => {
     await updateStoreSettings(nextSettings);
   };
 
+  // =========================================================================
+  // ADMIN PASSWORD LOCK GATE (Default Password: charlie@8818)
+  // =========================================================================
+  const ADMIN_PASS_STORAGE_KEY = 'cm_admin_password_v1';
+  const ADMIN_SESSION_UNLOCK_KEY = 'cm_admin_unlocked_v1';
+  const DEFAULT_ADMIN_PASS = 'charlie@8818';
+
+  const [isPasswordUnlocked, setIsPasswordUnlocked] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(ADMIN_SESSION_UNLOCK_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPasswordText, setShowPasswordText] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showChangePassModal, setShowChangePassModal] = useState(false);
+  const [newPassInput, setNewPassInput] = useState('');
+  const [confirmPassInput, setConfirmPassInput] = useState('');
+
+  const getSavedAdminPassword = () => {
+    try {
+      return localStorage.getItem(ADMIN_PASS_STORAGE_KEY) || DEFAULT_ADMIN_PASS;
+    } catch {
+      return DEFAULT_ADMIN_PASS;
+    }
+  };
+
+  const handleUnlockSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const savedPass = getSavedAdminPassword();
+    const trimmed = passwordInput.trim();
+    if (trimmed === savedPass || trimmed === DEFAULT_ADMIN_PASS) {
+      setIsPasswordUnlocked(true);
+      setPasswordError(null);
+      setPasswordInput('');
+      try {
+        sessionStorage.setItem(ADMIN_SESSION_UNLOCK_KEY, 'true');
+      } catch {
+        // ignore storage error
+      }
+      showToast('Admin Console Unlocked');
+    } else {
+      setPasswordError('Incorrect Admin Password. Please try again.');
+    }
+  };
+
+  const handleLockAdmin = () => {
+    setIsPasswordUnlocked(false);
+    try {
+      sessionStorage.removeItem(ADMIN_SESSION_UNLOCK_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSaveNewPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassInput.trim().length < 4) {
+      showToast('Password must be at least 4 characters');
+      return;
+    }
+    if (newPassInput.trim() !== confirmPassInput.trim()) {
+      showToast('Passwords do not match');
+      return;
+    }
+    try {
+      localStorage.setItem(ADMIN_PASS_STORAGE_KEY, newPassInput.trim());
+      showToast('Admin password updated successfully!');
+      setShowChangePassModal(false);
+      setNewPassInput('');
+      setConfirmPassInput('');
+    } catch {
+      showToast('Could not save password');
+    }
+  };
+
+  if (!isPasswordUnlocked) {
+    return (
+      <div className="min-h-screen bg-[#101114] text-white flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-[#181B22] rounded-3xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="text-center space-y-3">
+            <div className="w-24 h-14 mx-auto rounded-2xl bg-white p-2 flex items-center justify-center shadow-md">
+              <img
+                src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                alt="Charlie Mobiles & Accessories"
+                className="h-full w-auto object-contain"
+              />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 text-[#F26522] text-xs font-extrabold">
+              <Lock className="w-3.5 h-3.5" />
+              <span>PROTECTED STORE OWNER CONSOLE</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white">
+              Charlie Mobiles Admin Login
+            </h1>
+            <p className="text-xs text-slate-400">
+              Enter your Admin Password to manage products, prices, banners, orders, and Cloudinary uploads.
+            </p>
+          </div>
+
+          <form onSubmit={handleUnlockSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-300">
+                Admin Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPasswordText ? 'text' : 'password'}
+                  required
+                  autoFocus
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    if (passwordError) setPasswordError(null);
+                  }}
+                  placeholder="Enter admin password"
+                  className="w-full h-11 pl-4 pr-11 rounded-xl bg-[#101114] border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#F26522]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordText((v) => !v)}
+                  aria-label="Toggle password visibility"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  {showPasswordText ? (
+                    <Eye className="w-5 h-5" />
+                  ) : (
+                    <EyeOff className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              {passwordError && (
+                <p className="text-xs font-semibold text-rose-400 pt-1">{passwordError}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D9460F] text-white text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Unlock Admin Panel</span>
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+            <span>Owner: charliegedekar@gmail.com</span>
+            <Link to="/" className="text-[#F26522] font-bold hover:underline">
+              ← Back to Store
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F6F8] text-[#171717]">
       {/* Standalone Top Admin Bar (Separate from Customer Website) */}
       <header className="sticky top-0 z-40 bg-[#101114] text-white border-b border-white/10 shadow-md">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#00C2FF] p-[1.5px]">
-              <div className="w-full h-full rounded-[10px] bg-[#101114] flex items-center justify-center">
-                <span className="font-extrabold text-sm text-white">
-                  C<span className="text-[#00C2FF]">M</span>
-                </span>
-              </div>
+            <div className="h-10 px-2 rounded-xl bg-white flex items-center justify-center shrink-0">
+              <img
+                src="/assets/aistudio/file_00000000aecc8211ab63d081eeb80b78_b57e0ffb.png"
+                alt="Charlie Mobiles"
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm sm:text-base font-extrabold tracking-tight text-white">
-                  CHARLIE MOBILE — ADMIN CONSOLE
+                  CHARLIE MOBILES — ADMIN CONSOLE
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
                   <CloudUpload className="w-3 h-3" />
@@ -546,7 +709,7 @@ export const AdminPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Standalone Store Owner Control Center · Hidden from Public Website
+                Standalone Store Owner Control Center · Password Protected
               </p>
             </div>
           </div>
@@ -556,27 +719,105 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={loginWithGoogle}
-                className="h-9 px-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                className="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-[#00C2FF]" />
-                <span className="hidden sm:inline">Cloud Sync Sign-In</span>
+                <span className="hidden lg:inline">Cloud Sync Sign-In</span>
               </button>
             ) : (
-              <span className="hidden md:inline-block text-xs text-[#00C2FF] font-semibold px-2.5 py-1 rounded-lg bg-white/5">
+              <span className="hidden lg:inline-block text-xs text-[#00C2FF] font-semibold px-2.5 py-1 rounded-lg bg-white/5">
                 {isAdmin ? `Synced: ${user.email}` : user.email}
               </span>
             )}
 
+            <button
+              type="button"
+              onClick={() => setShowChangePassModal(true)}
+              title="Change Admin Password"
+              className="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-[#F26522]" />
+              <span className="hidden sm:inline">Password</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLockAdmin}
+              title="Lock Admin Console"
+              className="h-9 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Lock</span>
+            </button>
+
             <Link
               to="/"
-              className="h-9 px-3.5 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white text-xs font-extrabold flex items-center gap-1.5 whitespace-nowrap"
+              className="h-9 px-3.5 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-extrabold flex items-center gap-1.5 whitespace-nowrap"
             >
-              <span>View Live Website</span>
+              <span>Live Store</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </header>
+
+      {/* Change Admin Password Modal */}
+      {showChangePassModal && (
+        <div className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-[#F26522]" />
+                <h3 className="text-sm font-extrabold text-[#1E293B]">
+                  Change Admin Password
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowChangePassModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveNewPassword} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  New Admin Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassInput}
+                  onChange={(e) => setNewPassInput(e.target.value)}
+                  placeholder="Enter new password"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F26522]"
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Confirm New Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassInput}
+                  onChange={(e) => setConfirmPassInput(e.target.value)}
+                  placeholder="Confirm new password"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F26522]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full h-10 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white font-extrabold cursor-pointer"
+              >
+                Update Password
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification inside Standalone Admin */}
       {toastMessage && (

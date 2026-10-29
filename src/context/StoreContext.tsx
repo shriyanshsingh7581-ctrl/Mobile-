@@ -130,18 +130,18 @@ export function getVariantKey(item: {
 }
 
 const STORAGE_KEYS = {
-  CART: 'charlie_mobile_cart_v4',
-  SAVED: 'charlie_mobile_saved_v4',
-  WISHLIST: 'charlie_mobile_wishlist_v4',
-  SEARCHES: 'charlie_mobile_searches_v4',
-  PRODUCTS: 'charlie_mobile_products_v4',
-  CATEGORIES: 'charlie_mobile_categories_v4',
-  BANNERS: 'charlie_mobile_banners_v4',
-  SETTINGS: 'charlie_mobile_settings_v4',
-  SECTIONS: 'charlie_mobile_sections_v4',
-  COUPONS: 'charlie_mobile_coupons_v4',
-  ORDERS: 'charlie_mobile_orders_v4',
-  CITY: 'charlie_mobile_city_v4',
+  CART: 'charlie_mobile_cart_v5',
+  SAVED: 'charlie_mobile_saved_v5',
+  WISHLIST: 'charlie_mobile_wishlist_v5',
+  SEARCHES: 'charlie_mobile_searches_v5',
+  PRODUCTS: 'charlie_mobile_products_v5',
+  CATEGORIES: 'charlie_mobile_categories_v5',
+  BANNERS: 'charlie_mobile_banners_v5',
+  SETTINGS: 'charlie_mobile_settings_v5',
+  SECTIONS: 'charlie_mobile_sections_v5',
+  COUPONS: 'charlie_mobile_coupons_v5',
+  ORDERS: 'charlie_mobile_orders_v5',
+  CITY: 'charlie_mobile_city_v5',
 };
 
 function loadLocal<T>(key: string, fallback: T): T {
@@ -184,14 +184,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     loadLocal(STORAGE_KEYS.SAVED, [])
   );
   const [wishlist, setWishlist] = useState<string[]>(() =>
-    loadLocal(STORAGE_KEYS.WISHLIST, ['prod_iphone_17_pro_max', 'prod_samsung_s26_ultra'])
+    loadLocal(STORAGE_KEYS.WISHLIST, ['prod_realme_narzo_100_lite', 'prod_samsung_galaxy_a08'])
   );
   const [recentSearches, setRecentSearches] = useState<string[]>(() =>
-    loadLocal(STORAGE_KEYS.SEARCHES, ['iPhone 17 Pro Max', 'Galaxy S26 Ultra', 'Vivo V80 5G', 'Apple 20W Adapter'])
+    loadLocal(STORAGE_KEYS.SEARCHES, ['Sony PlayStation 5', 'Vivo V80 5G', 'iPhone 17 Pro Max', 'HP Victus Gaming'])
   );
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [selectedCity, setSelectedCityState] = useState<string>(() =>
-    loadLocal(STORAGE_KEYS.CITY, 'Main Showroom')
+    loadLocal(STORAGE_KEYS.CITY, 'RAIPUR')
   );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
