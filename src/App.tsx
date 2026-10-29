@@ -19,6 +19,7 @@ import { AccountPage } from './pages/AccountPage';
 import { OffersPage } from './pages/OffersPage';
 import { StoreLocatorPage } from './pages/StoreLocatorPage';
 import { AdminPage } from './pages/AdminPage';
+import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
 
 const ScrollToTop: React.FC = () => {
   const { pathname, search } = useLocation();
@@ -62,6 +63,7 @@ const AppShell: React.FC = () => {
         </Routes>
       </main>
       <Footer />
+      <FloatingWhatsAppButton />
     </div>
   );
 };

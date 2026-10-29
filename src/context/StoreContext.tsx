@@ -102,11 +102,25 @@ interface StoreContextValue {
   resetCatalogToDefaults: () => void;
   openWhatsAppEnquiry: (params: {
     productName?: string;
+    productId?: string;
     price?: number;
     variant?: string;
     quantity?: number;
     orderId?: string;
+    customerName?: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    deliveryMethod?: string;
+    paymentMethod?: string;
     customMessage?: string;
+  }) => void;
+  sendOrderViaWhatsApp: (order: Order) => void;
+  sendCartOrderViaWhatsApp: (customerInfo?: {
+    customerName?: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    deliveryMethod?: string;
+    paymentMethod?: string;
   }) => void;
 }
 
@@ -741,32 +755,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Restored default Charlie Mobile catalog & settings');
   };
 
-  const openWhatsAppEnquiry = (params: {
-    productName?: string;
-    price?: number;
-    variant?: string;
-    quantity?: number;
-    orderId?: string;
-    customMessage?: string;
-  }) => {
-    const lines: string[] = [`Hello *${storeSettings.businessName}*,`];
-    if (params.productName) {
-      lines.push(`I would like to enquire about purchasing:`);
-      lines.push(`• *Product:* ${params.productName}`);
-      if (params.variant) lines.push(`• *Variant:* ${params.variant}`);
-      if (params.price) lines.push(`• *Listed Price:* ${formatINR(params.price)}`);
-      if (params.quantity) lines.push(`• *Quantity:* ${params.quantity}`);
-    } else if (params.orderId) {
-      lines.push(`I would like an update regarding my Order *#${params.orderId}*.`);
-    } else if (params.customMessage) {
-      lines.push(params.customMessage);
-    } else {
-      lines.push(`I have an enquiry regarding smartphones and current offers at Charlie Mobile.`);
-    }
-    lines.push(`Please share availability and best store offer.`);
-
-    const encoded = encodeURIComponent(lines.join('\n'));
-    const cleanPhone = (storeSettings.whatsappNumber || '').replace(/[^0-9]/g, '');
+  const launchWhatsAppUrl = (messageLines: string[]) => {
+    const encoded = encodeURIComponent(messageLines.join('\n'));
+    const rawNumber = (storeSettings.whatsappNumber || '918818850488').replace(/[^0-9]/g, '');
+    const cleanPhone = rawNumber.length === 10 ? `91${rawNumber}` : rawNumber;
     const waUrl = cleanPhone
       ? `https://wa.me/${cleanPhone}?text=${encoded}`
       : `https://wa.me/?text=${encoded}`;
@@ -778,6 +770,203 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const openWhatsAppEnquiry = (params: {
+    productName?: string;
+    productId?: string;
+    price?: number;
+    variant?: string;
+    quantity?: number;
+    orderId?: string;
+    customerName?: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    deliveryMethod?: string;
+    paymentMethod?: string;
+    customMessage?: string;
+  }) => {
+    const lines: string[] = [
+      `🛍️ *WHATSAPP ORDER — ${storeSettings.businessName}*`,
+      `--------------------------------`,
+    ];
+
+    if (params.productName) {
+      const qty = params.quantity || 1;
+      const unitPrice = params.price || 0;
+      const total = unitPrice * qty;
+      lines.push(`📱 *Product:* ${params.productName}`);
+      if (params.variant) lines.push(`🎨 *Variant:* ${params.variant}`);
+      lines.push(`🔢 *Quantity:* ${qty}`);
+      if (unitPrice > 0) {
+        lines.push(`💰 *Unit Price:* ${formatINR(unitPrice)}`);
+        lines.push(`💵 *Total Payable:* *${formatINR(total)}*`);
+      }
+      if (params.orderId) {
+        lines.push(`📋 *Order ID:* #${params.orderId}`);
+      }
+      if (params.customerName) {
+        lines.push(`--------------------------------`);
+        lines.push(`👤 *Customer Name:* ${params.customerName}`);
+        if (params.customerPhone) lines.push(`📞 *Mobile:* ${params.customerPhone}`);
+        if (params.deliveryMethod) lines.push(`🚚 *Delivery Mode:* ${params.deliveryMethod}`);
+        if (params.shippingAddress) lines.push(`📍 *Address:* ${params.shippingAddress}`);
+        if (params.paymentMethod) lines.push(`💳 *Payment Mode:* ${params.paymentMethod}`);
+      }
+      if (params.productId && typeof window !== 'undefined') {
+        lines.push(`🔗 *Product Link:* ${window.location.origin}/product/${params.productId}`);
+      }
+      lines.push(`--------------------------------`);
+      lines.push(`Please confirm my order and share delivery/pickup details.`);
+    } else if (params.orderId) {
+      const foundOrder = orders.find((o) => o.id === params.orderId);
+      if (foundOrder) {
+        sendOrderViaWhatsApp(foundOrder);
+        return;
+      }
+      lines.push(`📋 *Order ID:* #${params.orderId}`);
+      lines.push(`Please share the status and delivery update for my order.`);
+    } else if (params.customMessage) {
+      lines.push(params.customMessage);
+    } else {
+      lines.push(`Hello *${storeSettings.businessName}*, I would like to place an order.`);
+      lines.push(`📍 *Selected City:* ${selectedCity}`);
+    }
+
+    launchWhatsAppUrl(lines);
+  };
+
+  const sendOrderViaWhatsApp = (order: Order) => {
+    const deliveryLabel =
+      order.deliveryMethod === 'store_pickup'
+        ? 'Store Pickup at Showroom'
+        : order.deliveryMethod === 'local_delivery'
+        ? 'Same-Day Local Delivery'
+        : 'Courier Home Delivery';
+
+    const paymentLabel =
+      order.paymentMethod === 'cod'
+        ? 'Cash / UPI on Delivery (Pay at Pickup/Doorstep)'
+        : order.paymentMethod === 'upi'
+        ? `Direct UPI Transfer${order.upiReference ? ` (Ref: ${order.upiReference})` : ''}`
+        : 'Online Payment / EMI';
+
+    const lines: string[] = [
+      `🛍️ *NEW ORDER — ${storeSettings.businessName}*`,
+      `📋 *Order ID:* #${order.id}`,
+      `📅 *Date:* ${new Date(order.createdAt).toLocaleString('en-IN')}`,
+      `--------------------------------`,
+      `👤 *Customer Details:*`,
+      `• *Name:* ${order.customerName}`,
+      `• *Mobile:* ${order.customerPhone}`,
+      ...(order.customerEmail ? [`• *Email:* ${order.customerEmail}`] : []),
+      `• *Delivery Mode:* ${deliveryLabel}`,
+      `• *Address:* ${order.shippingAddress}`,
+      `• *Payment Mode:* ${paymentLabel}`,
+      `--------------------------------`,
+      `📦 *Ordered Items:*`,
+    ];
+
+    if (order.items && order.items.length > 0) {
+      order.items.forEach((item, idx) => {
+        lines.push(
+          `${idx + 1}. *${item.name}* (${item.variant}) × ${item.quantity} = *${formatINR(
+            item.price * item.quantity
+          )}*`
+        );
+      });
+    } else {
+      lines.push(`• ${order.itemsSummary}`);
+    }
+
+    lines.push(`--------------------------------`);
+    lines.push(`💰 *Bill Summary:*`);
+    lines.push(`• Subtotal: ${formatINR(order.subtotal)}`);
+    if (order.discount > 0) {
+      lines.push(`• Coupon Discount: -${formatINR(order.discount)}`);
+    }
+    lines.push(
+      `• Delivery Charge: ${order.deliveryFee === 0 ? 'FREE' : formatINR(order.deliveryFee)}`
+    );
+    lines.push(`💵 *TOTAL PAYABLE: ${formatINR(order.totalAmount)}*`);
+    lines.push(`--------------------------------`);
+    lines.push(`Please confirm my Order *#${order.id}*. Thank you!`);
+
+    launchWhatsAppUrl(lines);
+  };
+
+  const sendCartOrderViaWhatsApp = (customerInfo?: {
+    customerName?: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    deliveryMethod?: string;
+    paymentMethod?: string;
+  }) => {
+    if (cart.length === 0) {
+      showToast('Your cart is empty! Add products first.');
+      return;
+    }
+
+    const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    let couponDiscount = 0;
+    if (appliedCoupon && subtotal >= appliedCoupon.minOrderAmount) {
+      if (appliedCoupon.discountType === 'flat') {
+        couponDiscount = appliedCoupon.discountValue;
+      } else {
+        couponDiscount = Math.round((subtotal * appliedCoupon.discountValue) / 100);
+        if (appliedCoupon.maxDiscount) {
+          couponDiscount = Math.min(couponDiscount, appliedCoupon.maxDiscount);
+        }
+      }
+    }
+    const finalTotal = Math.max(0, subtotal - couponDiscount);
+
+    const lines: string[] = [
+      `🛍️ *CART ORDER — ${storeSettings.businessName}*`,
+      `--------------------------------`,
+      `📦 *Items to Order (${cart.reduce((s, i) => s + i.quantity, 0)}):*`,
+    ];
+
+    cart.forEach((item, idx) => {
+      const variant = [
+        item.selectedColor,
+        item.selectedRam !== 'Standard' ? item.selectedRam : null,
+        item.selectedStorage !== 'Standard' ? item.selectedStorage : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      lines.push(
+        `${idx + 1}. *${item.product.name}* (${variant}) × ${item.quantity} = *${formatINR(
+          item.unitPrice * item.quantity
+        )}*`
+      );
+    });
+
+    lines.push(`--------------------------------`);
+    lines.push(`💰 *Order Summary:*`);
+    lines.push(`• Subtotal: ${formatINR(subtotal)}`);
+    if (couponDiscount > 0 && appliedCoupon) {
+      lines.push(`• Coupon (${appliedCoupon.code}): -${formatINR(couponDiscount)}`);
+    }
+    lines.push(`• Delivery / Pickup: FREE`);
+    lines.push(`💵 *TOTAL PAYABLE: ${formatINR(finalTotal)}*`);
+
+    if (customerInfo?.customerName || customerInfo?.customerPhone || customerInfo?.shippingAddress) {
+      lines.push(`--------------------------------`);
+      lines.push(`👤 *Customer Details:*`);
+      if (customerInfo.customerName) lines.push(`• *Name:* ${customerInfo.customerName}`);
+      if (customerInfo.customerPhone) lines.push(`• *Mobile:* ${customerInfo.customerPhone}`);
+      if (customerInfo.deliveryMethod) lines.push(`• *Delivery Mode:* ${customerInfo.deliveryMethod}`);
+      if (customerInfo.shippingAddress) lines.push(`• *Address:* ${customerInfo.shippingAddress}`);
+      if (customerInfo.paymentMethod) lines.push(`• *Payment Mode:* ${customerInfo.paymentMethod}`);
+    } else {
+      lines.push(`📍 *City:* ${selectedCity}`);
+    }
+
+    lines.push(`--------------------------------`);
+    lines.push(`Please confirm my order and share payment/delivery details!`);
+
+    launchWhatsAppUrl(lines);
   };
 
   return (
@@ -830,6 +1019,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteCoupon,
         resetCatalogToDefaults,
         openWhatsAppEnquiry,
+        sendOrderViaWhatsApp,
+        sendCartOrderViaWhatsApp,
       }}
     >
       {children}

@@ -19,6 +19,7 @@ import {
 import { formatINR, useStore } from '../context/StoreContext';
 import { SmartImage } from '../components/SmartImage';
 import { ProductCard } from '../components/ProductCard';
+import { WhatsAppOrderModal } from '../components/WhatsAppOrderModal';
 import { generateProductStudioSvg, VisualAngle } from '../utils/productVisuals';
 
 export const ProductDetailPage: React.FC = () => {
@@ -43,6 +44,7 @@ export const ProductDetailPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [waModalOpen, setWaModalOpen] = useState(false);
   const [pinCode, setPinCode] = useState('');
   const [pinStatus, setPinStatus] = useState<string | null>(null);
 
@@ -248,6 +250,48 @@ export const ProductDetailPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Direct WhatsApp Order Callout Box */}
+            <div className="rounded-xl bg-emerald-50/80 border border-emerald-200 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0">
+                  <MessageCircle className="w-5 h-5 fill-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-extrabold text-[#1E293B]">
+                    Order Directly on WhatsApp
+                  </p>
+                  <p className="text-[11px] text-slate-600">
+                    Send this product &amp; variant directly to Charlie Mobile WhatsApp (8818850488)
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    openWhatsAppEnquiry({
+                      productName: product.name,
+                      productId: product.id,
+                      price: effectivePrice,
+                      variant: variantSummary,
+                      quantity,
+                    })
+                  }
+                  className="flex-1 sm:flex-initial px-3 py-2 rounded-lg border border-[#25D366] bg-white text-[#1E293B] hover:bg-emerald-50 text-xs font-extrabold cursor-pointer"
+                >
+                  1-Click WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWaModalOpen(true)}
+                  className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 fill-white" />
+                  <span>Order on WhatsApp</span>
+                </button>
+              </div>
+            </div>
+
             {/* Color & Storage Selectors */}
             {product.colors.length > 1 && (
               <div className="space-y-1.5 pt-1">
@@ -410,22 +454,15 @@ export const ProductDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* STICKY BOTTOM CTA BAR: Add to Cart | Buy Now | WhatsApp */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-between gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+      {/* STICKY BOTTOM CTA BAR: WhatsApp Order | Add to Cart | Buy Now */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-2.5 sm:px-4 py-2 flex items-center justify-between gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
         <button
           type="button"
-          onClick={() =>
-            openWhatsAppEnquiry({
-              productName: product.name,
-              price: effectivePrice,
-              variant: variantSummary,
-              quantity,
-            })
-          }
-          className="h-11 px-3 rounded-lg bg-[#25D366] text-white text-xs font-extrabold flex items-center gap-1.5 shrink-0 cursor-pointer"
+          onClick={() => setWaModalOpen(true)}
+          className="flex-1 h-11 px-2.5 rounded-lg bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
         >
-          <MessageCircle className="w-4 h-4 fill-white" />
-          <span className="hidden sm:inline">WhatsApp</span>
+          <MessageCircle className="w-4 h-4 fill-white shrink-0" />
+          <span>WhatsApp Order</span>
         </button>
 
         <button
@@ -433,21 +470,37 @@ export const ProductDetailPage: React.FC = () => {
           onClick={() =>
             addToCart(product, quantity, activeColor.name, selectedRam, selectedStorage)
           }
-          className="flex-1 h-11 rounded-lg border-2 border-[#F26522] text-[#F26522] bg-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 h-11 px-2.5 rounded-lg border-2 border-[#F26522] text-[#F26522] bg-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <ShoppingBag className="w-4 h-4" />
+          <ShoppingBag className="w-4 h-4 shrink-0" />
           <span>Add to Cart</span>
         </button>
 
         <button
           type="button"
           onClick={handleBuyNow}
-          className="flex-1 h-11 rounded-lg bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+          className="flex-1 h-11 px-2.5 rounded-lg bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <Zap className="w-4 h-4" />
+          <Zap className="w-4 h-4 shrink-0" />
           <span>Buy Now</span>
         </button>
       </div>
+
+      {/* WhatsApp Express Order Modal */}
+      <WhatsAppOrderModal
+        isOpen={waModalOpen}
+        onClose={() => setWaModalOpen(false)}
+        mode="single_product"
+        singleProduct={{
+          product,
+          variant: variantSummary,
+          selectedColor: activeColor.name,
+          selectedRam,
+          selectedStorage,
+          unitPrice: effectivePrice,
+          quantity,
+        }}
+      />
 
       {/* FULL-SCREEN IMAGE ZOOM MODAL (Exact Video 00:48 - 00:49 with Top-Left X and "1/2" Counter) */}
       {zoomOpen && (

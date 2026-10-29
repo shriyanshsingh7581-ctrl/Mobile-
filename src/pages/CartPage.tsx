@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Bookmark,
   ChevronRight,
+  MessageCircle,
   Minus,
   Plus,
   ShoppingCart,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { formatINR, getVariantKey, useStore } from '../context/StoreContext';
 import { SmartImage } from '../components/SmartImage';
+import { WhatsAppOrderModal } from '../components/WhatsAppOrderModal';
 
 export const CartPage: React.FC = () => {
   const {
@@ -26,11 +28,13 @@ export const CartPage: React.FC = () => {
     removeSavedItem,
     applyCouponCode,
     removeCoupon,
+    sendCartOrderViaWhatsApp,
   } = useStore();
   const navigate = useNavigate();
 
   const [couponInput, setCouponInput] = useState('');
   const [couponFeedback, setCouponFeedback] = useState<string | null>(null);
+  const [waModalOpen, setWaModalOpen] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const mrpTotal = cart.reduce(
@@ -277,17 +281,43 @@ export const CartPage: React.FC = () => {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => navigate('/checkout')}
-              className="w-full h-12 rounded-lg bg-[#F26522] hover:bg-[#EA580C] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-            >
-              <span>Proceed to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => setWaModalOpen(true)}
+                className="w-full h-12 rounded-lg bg-[#25D366] hover:bg-[#1EBE5D] text-white text-sm font-extrabold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+              >
+                <MessageCircle className="w-4 h-4 fill-white" />
+                <span>Order Cart on WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => sendCartOrderViaWhatsApp()}
+                className="w-full h-10 rounded-lg border border-[#25D366] bg-emerald-50/60 hover:bg-emerald-50 text-[#1E293B] text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                <span>1-Click Direct WhatsApp Order</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/checkout')}
+                className="w-full h-12 rounded-lg bg-[#F26522] hover:bg-[#EA580C] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <span>Proceed to Checkout</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <WhatsAppOrderModal
+        isOpen={waModalOpen}
+        onClose={() => setWaModalOpen(false)}
+        mode="cart"
+      />
 
       {savedForLater.length > 0 && (
         <section className="space-y-3 pt-6 border-t border-slate-200">

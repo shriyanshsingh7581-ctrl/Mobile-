@@ -20,7 +20,8 @@ export const CheckoutPage: React.FC = () => {
     appliedCoupon,
     storeSettings,
     placeOrder,
-    openWhatsAppEnquiry,
+    sendOrderViaWhatsApp,
+    sendCartOrderViaWhatsApp,
   } = useStore();
 
   const [customerName, setCustomerName] = useState(user?.displayName || '');
@@ -38,6 +39,7 @@ export const CheckoutPage: React.FC = () => {
   );
   const [upiReference, setUpiReference] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [sendToWhatsAppOnSubmit, setSendToWhatsAppOnSubmit] = useState(true);
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
 
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
@@ -108,6 +110,9 @@ export const CheckoutPage: React.FC = () => {
       });
 
       setPlacedOrder(created);
+      if (sendToWhatsAppOnSubmit) {
+        sendOrderViaWhatsApp(created);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -170,11 +175,11 @@ export const CheckoutPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="button"
-              onClick={() => openWhatsAppEnquiry({ orderId: placedOrder.id })}
-              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 cursor-pointer"
+              onClick={() => sendOrderViaWhatsApp(placedOrder)}
+              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-extrabold flex items-center gap-2 cursor-pointer shadow-sm"
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Send Order #{placedOrder.id} to Store WhatsApp</span>
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Send Full Order #{placedOrder.id} Bill on WhatsApp</span>
             </button>
             <Link
               to="/account"
@@ -496,20 +501,54 @@ export const CheckoutPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full h-12 rounded-xl bg-[#2563EB] hover:bg-blue-500 disabled:bg-slate-400 text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-          >
-            <CreditCard className="w-4 h-4" />
-            <span>
-              {submitting
-                ? 'Placing Order...'
-                : paymentMethod === 'cod'
-                ? `Place Order (${formatINR(totalAmount)})`
-                : `Submit Order for Payment Verification`}
-            </span>
-          </button>
+          <div className="space-y-2.5 pt-1">
+            <button
+              type="submit"
+              disabled={submitting}
+              onClick={() => setSendToWhatsAppOnSubmit(true)}
+              className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] disabled:bg-slate-400 text-white text-sm font-extrabold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+            >
+              <MessageCircle className="w-5 h-5 fill-white" />
+              <span>
+                {submitting
+                  ? 'Sending Order...'
+                  : `Place Order on WhatsApp (${formatINR(totalAmount)})`}
+              </span>
+            </button>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              onClick={() => setSendToWhatsAppOnSubmit(false)}
+              className="w-full h-11 rounded-xl bg-[#F26522] hover:bg-[#EA580C] disabled:bg-slate-400 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>
+                {submitting
+                  ? 'Placing Order...'
+                  : `Place Website Order Only (${formatINR(totalAmount)})`}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                sendCartOrderViaWhatsApp({
+                  customerName: customerName.trim(),
+                  customerPhone: customerPhone.trim(),
+                  shippingAddress: address
+                    ? `${address}, ${city} ${pinCode}`
+                    : undefined,
+                  deliveryMethod,
+                  paymentMethod,
+                })
+              }
+              className="w-full h-10 rounded-xl border border-[#25D366] bg-emerald-50/50 hover:bg-emerald-50 text-[#171717] text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+              <span>Quick WhatsApp Order Without Form</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
