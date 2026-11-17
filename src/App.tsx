@@ -19,7 +19,8 @@ import { AccountPage } from './pages/AccountPage';
 import { OffersPage } from './pages/OffersPage';
 import { StoreLocatorPage } from './pages/StoreLocatorPage';
 import { AdminPage } from './pages/AdminPage';
-import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
+import { RewardsPopupModal } from './components/RewardsPopupModal';
+import { AIChatbotModal } from './components/AIChatbotModal';
 
 const ScrollToTop: React.FC = () => {
   const { pathname, search } = useLocation();
@@ -36,7 +37,7 @@ const AppShell: React.FC = () => {
   if (isAdminRoute) {
     // Standalone dedicated Admin Console page — completely separate from the customer storefront
     return (
-      <div className="min-h-screen bg-[#F5F6F8] text-[#171717]">
+      <div className="min-h-screen bg-[#FAF7F2] text-[#1A1A1A]">
         <Routes>
           <Route path="/admin/*" element={<AdminPage />} />
         </Routes>
@@ -45,8 +46,9 @@ const AppShell: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F6F8] text-[#171717]">
+    <div className="min-h-screen flex flex-col bg-[#FFFFFF] text-[#1A1A1A]">
       <Navbar />
+      <RewardsPopupModal />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -63,7 +65,7 @@ const AppShell: React.FC = () => {
         </Routes>
       </main>
       <Footer />
-      <FloatingWhatsAppButton />
+      <AIChatbotModal />
     </div>
   );
 };

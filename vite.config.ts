@@ -25,7 +25,7 @@ export default defineConfig(() => {
           short_name: 'CharlieMobiles',
           description:
             'Shop 5G smartphones, iPhones, laptops, tablets, smart TVs, home appliances, and genuine accessories at Charlie Mobiles & Accessories.',
-          theme_color: '#F26522',
+          theme_color: '#B5893D',
           background_color: '#FFFFFF',
           display: 'standalone',
           orientation: 'portrait',
@@ -53,11 +53,13 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
           cleanupOutdatedCaches: true,
           skipWaiting: true,
           clientsClaim: true,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           globIgnores: ['**/Screen_Recording_*.mp4'],
+          navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -104,7 +106,7 @@ export default defineConfig(() => {
           ],
         },
         devOptions: {
-          enabled: true,
+          enabled: false,
           type: 'module',
         },
       }),

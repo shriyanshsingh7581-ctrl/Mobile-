@@ -18,8 +18,9 @@ import { Order } from '../types/store';
 export const AccountPage: React.FC = () => {
   const {
     user,
-    isAdmin,
+    mobileUser,
     loginWithGoogle,
+    setLoginModalOpen,
     logout,
     orders,
     wishlist,
@@ -81,22 +82,38 @@ export const AccountPage: React.FC = () => {
       {/* Top User Banner */}
       <div className="bg-[#101114] text-white rounded-3xl p-5 sm:p-7 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#2563EB] flex items-center justify-center text-xl font-extrabold">
-            {user?.displayName ? user.displayName.slice(0, 1).toUpperCase() : 'C'}
+          <div className="w-14 h-14 rounded-2xl bg-[#B5893D] flex items-center justify-center text-xl font-extrabold">
+            {user?.displayName
+              ? user.displayName.slice(0, 1).toUpperCase()
+              : mobileUser
+              ? 'M'
+              : 'C'}
           </div>
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#00C2FF]">
-              {user ? 'Verified Charlie Mobile Member' : 'Guest Shopper Account'}
+            <span className="text-xs font-bold uppercase tracking-wider text-[#F4D993]">
+              {user
+                ? 'Verified Charlie Mobile Member'
+                : mobileUser
+                ? 'Verified Mobile Member'
+                : 'Guest Shopper Account'}
             </span>
             <h1 className="text-xl sm:text-2xl font-extrabold">
-              {user ? user.displayName || user.email : 'Welcome to Charlie Mobile'}
+              {user
+                ? user.displayName || user.email
+                : mobileUser
+                ? `+91 ${mobileUser.phone}`
+                : 'Welcome to Charlie Mobile'}
             </h1>
-            {user?.email && <p className="text-xs text-slate-400">{user.email}</p>}
+            {(user?.email || mobileUser?.phone) && (
+              <p className="text-xs text-slate-400">
+                {user?.email || `+91 ${mobileUser?.phone}`}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {user ? (
+          {user || mobileUser ? (
             <button
               type="button"
               onClick={logout}
@@ -106,19 +123,28 @@ export const AccountPage: React.FC = () => {
               <span>Sign Out</span>
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={loginWithGoogle}
-              className="min-h-[42px] px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white text-xs font-bold cursor-pointer"
-            >
-              Sign In with Google
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setLoginModalOpen(true)}
+                className="min-h-[42px] px-5 py-2.5 rounded-xl bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold cursor-pointer"
+              >
+                Mobile Sign In
+              </button>
+              <button
+                type="button"
+                onClick={loginWithGoogle}
+                className="min-h-[42px] px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold cursor-pointer"
+              >
+                Google Sign In
+              </button>
+            </div>
           )}
         </div>
       </div>
 
       {/* Authentication Card when signed out */}
-      {!user && (
+      {!user && !mobileUser && (
         <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6">
           <div className="flex items-center gap-2 border-b border-[#E5E7EB] pb-3 mb-4 text-xs font-bold">
             <button

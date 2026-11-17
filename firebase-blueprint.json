@@ -328,6 +328,97 @@
         "upiId",
         "updatedAt"
       ]
+    },
+    "SupportChat": {
+      "title": "SupportChat",
+      "description": "Live AI chatbot conversation session header per customer",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "customerEmail": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "productId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "productName": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "lastMessage": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "lastSender": {
+          "type": "string",
+          "enum": ["user", "assistant", "admin"]
+        },
+        "messageCount": {
+          "type": "number"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "customerName",
+        "lastMessage",
+        "lastSender",
+        "messageCount",
+        "updatedAt"
+      ]
+    },
+    "SupportMessage": {
+      "title": "SupportMessage",
+      "description": "Immutable AI chatbot or concierge message record",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "sender": {
+          "type": "string",
+          "enum": ["user", "assistant", "admin"]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "productId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "productName": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "sender", "text", "timestamp"]
     }
   },
   "firestore": {
@@ -354,6 +445,14 @@
     "/settings/{settingId}": {
       "schema": "StoreSettings",
       "description": "Public store settings readable by all and editable by admin"
+    },
+    "/support_chats/{chatUserId}": {
+      "schema": "SupportChat",
+      "description": "Customer AI support chat session header isolated to chat owner or admin"
+    },
+    "/support_chats/{chatUserId}/messages/{messageId}": {
+      "schema": "SupportMessage",
+      "description": "Individual AI chat messages isolated to chat owner or admin"
     }
   }
 }

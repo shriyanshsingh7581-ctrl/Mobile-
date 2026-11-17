@@ -9,20 +9,16 @@ export const FloatingWhatsAppButton: React.FC = () => {
   const location = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Product detail page has its own sticky bottom bar with a prominent WhatsApp Order button
   const isProductDetail = location.pathname.startsWith('/product/');
-  if (isProductDetail) return null;
-
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  if (isProductDetail || totalItems === 0) return null;
 
   const handleClick = () => {
     if (cart.length > 0) {
       setModalOpen(true);
     } else {
-      openWhatsAppEnquiry({
-        customMessage:
-          'Hello *CHARLIE MOBILES & ACCESSORIES*, I want to place an order on WhatsApp. Please share available models and offers.',
-      });
+      openWhatsAppEnquiry({});
     }
   };
 
@@ -32,11 +28,11 @@ export const FloatingWhatsAppButton: React.FC = () => {
         type="button"
         onClick={handleClick}
         aria-label="Order on WhatsApp"
-        className="fixed bottom-4 right-4 z-40 h-12 px-4 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white shadow-lg flex items-center gap-2 transition-transform active:scale-95 cursor-pointer border-2 border-white"
+        className="fixed bottom-16 md:bottom-5 left-1/2 -translate-x-1/2 z-40 h-10 px-5 bg-[#2A1810] hover:bg-[#1A1A1A] text-[#F4D993] border border-[#B5893D] shadow-xl flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
       >
-        <MessageCircle className="w-5 h-5 fill-white text-white shrink-0" />
-        <span className="text-xs sm:text-sm font-extrabold tracking-tight">
-          {totalItems > 0 ? `Order Cart (${totalItems}) on WhatsApp` : 'Order on WhatsApp'}
+        <MessageCircle className="w-4 h-4 fill-[#25D366] text-[#25D366] shrink-0" />
+        <span className="text-[11px] font-bold uppercase tracking-wider">
+          Order Bag ({totalItems}) on WhatsApp
         </span>
       </button>
 
@@ -48,3 +44,4 @@ export const FloatingWhatsAppButton: React.FC = () => {
     </>
   );
 };
+

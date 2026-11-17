@@ -24,6 +24,9 @@ export interface Product {
   description: string;
   mainImage: string;
   gallery: string[];
+  videoUrl?: string;
+  goldTagline?: string;
+  bestsellerTab?: string;
   colors: ColorVariant[];
   ramOptions: string[];
   storageOptions: string[];
@@ -71,6 +74,59 @@ export interface HeroBanner {
   accentColor: string;
   enabled: boolean;
   campaignEnd?: string;
+}
+
+export interface CelebrityReelItem {
+  id: string;
+  title: string;
+  celebrityName?: string;
+  videoUrl: string;
+  posterUrl?: string;
+  linkedProductId: string;
+  enabled: boolean;
+  order: number;
+}
+
+export interface VisualCardItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  image: string;
+  link: string;
+}
+
+export interface TestimonialItem {
+  id: string;
+  quote: string;
+  authorName: string;
+  authorRole: string;
+  avatarUrl: string;
+  rating: number;
+}
+
+export interface BlogPostItem {
+  id: string;
+  title: string;
+  excerpt?: string;
+  image: string;
+  ctaText: string;
+  link: string;
+}
+
+export interface RewardLeadItem {
+  id: string;
+  phone: string;
+  email: string;
+  birthday: string;
+  createdAt: string;
+}
+
+export interface NotifyMeRequestItem {
+  id: string;
+  productId: string;
+  productName: string;
+  customerContact: string;
+  createdAt: string;
 }
 
 export interface CartItem {
@@ -132,6 +188,7 @@ export interface ShowroomPhoto {
   title: string;
   caption: string;
   src: string;
+  mediaType?: 'image' | 'video';
 }
 
 export interface StoreSettings {
@@ -145,6 +202,25 @@ export interface StoreSettings {
   seasonalDealsTitle?: string;
   seasonalDealsSubtitle?: string;
   seasonalMainBannerUrl?: string;
+  megaMenuCards?: VisualCardItem[];
+  megaMenuBannerUrl?: string;
+  megaMenuBannerTitle?: string;
+  megaMenuBannerSubtitle?: string;
+  megaMenuBannerLink?: string;
+  luxuryGiftingBannerTitle?: string;
+  luxuryGiftingBannerSubtitle?: string;
+  luxuryGiftingBannerImage?: string;
+  luxuryGiftingBannerLink?: string;
+  brandStoryTitle?: string;
+  brandStoryVideoUrl?: string;
+  brandStoryPosterUrl?: string;
+  rewardPopupEnabled?: boolean;
+  rewardPopupTitle?: string;
+  rewardPopupSubtitle?: string;
+  rewardPopupImage?: string;
+  rewardCouponCode?: string;
+  bestsellerTabs?: string[];
+  featuredFavouritesTitle?: string;
   address: string;
   city: string;
   phone: string;
@@ -177,4 +253,34 @@ export interface HomepageSectionConfig {
   subtitle?: string;
   enabled: boolean;
   order: number;
+}
+
+export interface SupportChatMessage {
+  id: string;
+  sender: 'user' | 'assistant' | 'admin';
+  text: string;
+  productId?: string;
+  productName?: string;
+  timestamp: string;
+}
+
+export interface SupportChatSession {
+  userId: string;
+  customerName: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  productId?: string;
+  productName?: string;
+  lastMessage: string;
+  lastSender: 'user' | 'assistant' | 'admin';
+  messageCount: number;
+  updatedAt: string;
+  messages: SupportChatMessage[];
+}
+
+export interface MobileUserSession {
+  phone: string;
+  name?: string;
+  notifyOffers: boolean;
+  signedInAt: string;
 }

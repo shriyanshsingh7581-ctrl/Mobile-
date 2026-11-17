@@ -1,10 +1,14 @@
 import {
+  BlogPostItem,
   CategoryItem,
+  CelebrityReelItem,
   Coupon,
   HeroBanner,
   HomepageSectionConfig,
   Product,
   StoreSettings,
+  TestimonialItem,
+  VisualCardItem,
 } from '../types/store';
 import { generateProductStudioSvg } from '../utils/productVisuals';
 
@@ -1523,48 +1527,83 @@ export const INITIAL_PRODUCTS: Product[] = [
       Privacy: '28° Two-Way Anti-Peep Privacy Filter',
     },
   },
+  {
+    id: 'prod_luxury_collector_edition',
+    name: 'Signature Gold Collector Gift Edition — Limited Vault',
+    brand: 'Charlie Luxury',
+    category: 'mobile-accessories',
+    price: 970,
+    mrp: 1299,
+    stock: 0,
+    goldTagline: 'BESPOKE / ARTISANAL / LIMITED VAULT',
+    bestsellerTab: 'GIFTING',
+    description:
+      'Limited collector edition gift box crafted in metallic gold finish. Currently sold out — tap Notify Me to reserve the next batch.',
+    mainImage:
+      'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+    gallery: [
+      'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+    ],
+    colors: [{ name: 'Royal Gold', hex: '#B5893D' }],
+    ramOptions: ['Standard'],
+    storageOptions: ['Collector Box'],
+    os: 'Accessory',
+    is5G: false,
+    isBestSeller: false,
+    isFeatured: true,
+    isNewRelease: true,
+    rating: 4.9,
+    reviewCount: 64,
+    warranty: '1 Year Official Warranty',
+    exchangeBonus: 0,
+    emiStartingAt: 199,
+    specs: {
+      Edition: 'Limited Royal Gold Gift Box',
+      Packaging: 'Signature Embossed Presentation Case',
+    },
+  },
 ];
 
-// Exact Hero Carousel Slides shown in the Video (00:01 & 01:25–01:31)
+// Exact Hero Carousel Slides shown in the Video (00:31 - 00:35)
 export const INITIAL_BANNERS: HeroBanner[] = [
   {
-    id: 'banner_vivo_v80',
-    title: 'Vivo V80 5G · ZEISS Portrait So Pro · Available Now',
-    subtitle: 'With Easy EMI ₹2,625 Per Month* + 10% Instant Cashback at Charlie Mobile',
-    tag: 'AVAILABLE NOW',
-    ctaText: 'Buy Vivo V80',
-    ctaLink: '/product/prod_vivo_v80_5g',
-    secondaryCtaText: 'View All Vivo',
-    secondaryCtaLink: '/products?category=vivo',
+    id: 'banner_too_cool_ordinary',
+    title: 'Too Cool For ORDINARY',
+    subtitle: 'Signature Flagship Collection · Crafted for those who command presence',
+    tag: 'ROYAL EDITION',
+    ctaText: 'SHOP NOW',
+    ctaLink: '/products',
+    secondaryCtaText: 'EXPLORE GIFTING',
+    secondaryCtaLink: '/offers',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp',
     mediaType: 'image',
     order: 1,
-    accentColor: '#F26522',
+    accentColor: '#B5893D',
     enabled: true,
   },
   {
     id: 'banner_oppo_find_x10',
-    title: 'Oppo Find X10 Series · Co-engineered with Hasselblad',
-    subtitle: '200MP Camera, True to the Moment · Pre-Book & Buy Now at Charlie Mobile',
-    tag: 'HASSELBLAD 200MP',
-    ctaText: 'Shop Oppo Find X10',
+    title: 'Artistry Meets Flagship Precision',
+    subtitle: '200MP Hasselblad Master Edition · Exclusive Royal Privileges & Instant Exchange',
+    tag: 'SIGNATURE SERIES',
+    ctaText: 'SHOP NOW',
     ctaLink: '/product/prod_oppo_find_x10_pro_max',
-    secondaryCtaText: 'Explore Oppo',
+    secondaryCtaText: 'Explore Collection',
     secondaryCtaLink: '/products?category=oppo',
     image:
       'https://img-prd-pim.poorvika.com/pageimg/Oppo-Find-X10-Series-Pre-Book-Now-M.webp',
     mediaType: 'image',
     order: 2,
-    accentColor: '#F26522',
+    accentColor: '#B5893D',
     enabled: true,
   },
   {
     id: 'banner_iphone_duo',
-    title: 'Apple iPhone Duo · Hello, hello. Available Now',
-    subtitle: 'Get Benefits up to ₹17,500* with Instant Bank Cashback & Exchange Bonus',
-    tag: 'APPLE AUTHORIZED',
-    ctaText: 'Shop iPhone Series',
+    title: 'The Titanium Reserve Collection',
+    subtitle: 'Experience iPhone 17 Pro Max & Signature Accessories with Bespoke Concierge Delivery',
+    tag: 'LUXURY RESERVE',
+    ctaText: 'SHOP NOW',
     ctaLink: '/products?category=iphone',
     secondaryCtaText: 'Explore Offers',
     secondaryCtaLink: '/offers',
@@ -1572,60 +1611,217 @@ export const INITIAL_BANNERS: HeroBanner[] = [
       'https://img-prd-pim.poorvika.com/pageimg/pre-book-apple-iphone-duo-in-poorvika-mobv-1.webp',
     mediaType: 'image',
     order: 3,
-    accentColor: '#F26522',
-    enabled: true,
-  },
-  {
-    id: 'banner_iphone_pro_further',
-    title: 'iPhone Pro Further · Powerful Performance, Advanced Possibilities',
-    subtitle: 'Built to take everything further · Available in Ready Stock',
-    tag: 'PRO SERIES',
-    ctaText: 'Explore Now',
-    ctaLink: '/product/prod_iphone_17_pro_max',
-    secondaryCtaText: 'All iPhones',
-    secondaryCtaLink: '/products?category=iphone',
-    image:
-      'https://img-prd-pim.poorvika.com/pageimg/iphone-18-updates-explore-now-ban-Mb-v.webp',
-    mediaType: 'image',
-    order: 4,
-    accentColor: '#F26522',
-    enabled: true,
-  },
-  {
-    id: 'banner_mac_mini',
-    title: 'Apple Little Do-It-All · Available Now from ₹99,990',
-    subtitle: 'Supercharged Apple Silicon performance available at Charlie Mobile',
-    tag: 'APPLE COMPUTING',
-    ctaText: 'Available Now',
-    ctaLink: '/products?category=tablets',
-    secondaryCtaText: 'View Laptops & Macs',
-    secondaryCtaLink: '/products?category=tablets',
-    image:
-      'https://img-prd-pim.poorvika.com/pageimg/Mini-Apple-little-do-it-all-available-now-M.webp',
-    mediaType: 'image',
-    order: 5,
-    accentColor: '#F26522',
-    enabled: true,
-  },
-  {
-    id: 'banner_ps5_play',
-    title: 'Sony PlayStation 5 Slim · Play Like Never Before',
-    subtitle: 'PS5 Standard Edition ₹69,990 & Digital Edition ₹64,990 Available Now',
-    tag: 'GAMING ZONE',
-    ctaText: 'Shop PlayStation 5',
-    ctaLink: '/products?category=entertainment',
-    secondaryCtaText: 'View Gaming',
-    secondaryCtaLink: '/products?category=entertainment',
-    image:
-      'https://img-prd-pim.poorvika.com/pageimg/PS5-Play-Like-Never-Before-available-now-Mob.webp',
-    mediaType: 'image',
-    order: 6,
-    accentColor: '#F26522',
+    accentColor: '#B5893D',
     enabled: true,
   },
 ];
 
+// Auto-playing Vertical 9:16 Video Reels ("LOVED BY CELEBRITIES" — 00:00 - 00:11)
+export const INITIAL_CELEBRITY_REELS: CelebrityReelItem[] = [
+  {
+    id: 'reel_1',
+    title: 'iPhone 17 Pro Max Cosmic Titanium — Royal Unboxing',
+    celebrityName: 'Aarav Khanna · Style Icon',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-woman-taking-pictures-with-her-smartphone-41871-large.mp4',
+    posterUrl:
+      'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+    linkedProductId: 'prod_iphone_17_pro_max',
+    enabled: true,
+    order: 1,
+  },
+  {
+    id: 'reel_2',
+    title: 'Vivo V80 5G ZEISS Portrait — Red Carpet Favourite',
+    celebrityName: 'Kabir & Mira · Celebrity Couple',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-man-holding-a-modern-smartphone-42619-large.mp4',
+    posterUrl:
+      'https://img-prd-pim.poorvika.com/product/Vivo-V80-5G-Horizon-Blue-8GB-512GB-front-back-view.webp',
+    linkedProductId: 'prod_vivo_v80_5g',
+    enabled: true,
+    order: 2,
+  },
+  {
+    id: 'reel_3',
+    title: 'Samsung Galaxy S26 Ultra Titanium — Executive Choice',
+    celebrityName: 'Vikramaditya Roy · Entrepreneur',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-using-his-smartphone-42621-large.mp4',
+    posterUrl:
+      'https://img-prd-pim.poorvika.com/product/Samsung-galaxy-s26-ultra-5g-cobalt-violet-16gb-1Tb-Front-Back-View.webp',
+    linkedProductId: 'prod_samsung_s26_ultra',
+    enabled: true,
+    order: 3,
+  },
+  {
+    id: 'reel_4',
+    title: 'Oppo Find X10 Pro Max — Studio Signature Look',
+    celebrityName: 'Rohan Mehra · Fashion Director',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-young-man-listening-to-music-with-wireless-earphones-41566-large.mp4',
+    posterUrl:
+      'https://img-prd-pim.poorvika.com/product/Oppo-find-x10-pro-max-5g-titanium-grey-12gb-512gb-Front-Back-View.webp',
+    linkedProductId: 'prod_oppo_find_x10_pro_max',
+    enabled: true,
+    order: 4,
+  },
+  {
+    id: 'reel_5',
+    title: 'Realme Narzo 100 Lite 5G — Everyday Luxury Performance',
+    celebrityName: 'Zoya Siddiqui · Creator',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-girl-taking-a-selfie-with-her-phone-39873-large.mp4',
+    posterUrl:
+      'https://img-prd-pim.poorvika.com/product/Realme-Narzo-100-Lite-5G-Thunder-Black-6GB-128GB-front-view.webp',
+    linkedProductId: 'prod_realme_narzo_100_lite',
+    enabled: true,
+    order: 5,
+  },
+];
+
+// "SHOP BY NOTES / HIGHLIGHTS" (00:12 - 00:13 in Video)
+export const INITIAL_SHOP_BY_NOTES: VisualCardItem[] = [
+  {
+    id: 'note_titanium',
+    title: 'Titanium Craft',
+    subtitle: 'Deep, Opulent, Timeless',
+    image:
+      'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+    link: '/products?category=iphone',
+  },
+  {
+    id: 'note_zeiss',
+    title: 'Cinema Optics',
+    subtitle: 'Elegant, Soft, Romantic',
+    image:
+      'https://img-prd-pim.poorvika.com/product/Vivo-V80-5G-Horizon-Blue-8GB-512GB-front-back-view.webp',
+    link: '/products?category=vivo',
+  },
+  {
+    id: 'note_ultra_speed',
+    title: 'Hyper 5G Core',
+    subtitle: 'Zesty, Vibrant, Playful',
+    image:
+      'https://img-prd-pim.poorvika.com/product/Samsung-galaxy-s26-ultra-5g-cobalt-violet-16gb-1Tb-Front-Back-View.webp',
+    link: '/products?category=samsung',
+  },
+  {
+    id: 'note_acoustic',
+    title: 'Pure Acoustics',
+    subtitle: 'Delicate, Creamy, Sensual',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/TV-Audio-Home-page-Mob.webp',
+    link: '/products?category=tv-audio',
+  },
+];
+
+// "SHOP BY OCCASIONS" (00:13 - 00:14 in Video)
+export const INITIAL_SHOP_BY_OCCASIONS: VisualCardItem[] = [
+  {
+    id: 'occ_office',
+    title: 'Executive Office',
+    subtitle: 'Clean, Confident',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/Laptops-tablets-Home-page-Mob.webp',
+    link: '/products?category=tablets',
+  },
+  {
+    id: 'occ_date',
+    title: 'Evening Gala',
+    subtitle: 'Intimate, Unforgettable',
+    image:
+      'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+    link: '/products?category=iphone',
+  },
+  {
+    id: 'occ_everyday',
+    title: 'Everyday Wear',
+    subtitle: 'Light, Refined',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/Smart-Technology-Home-page-Mob.webp',
+    link: '/products?category=smartwatches',
+  },
+  {
+    id: 'occ_party',
+    title: 'Celebration & Gifting',
+    subtitle: 'Confident, Magnetic',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/Mobiles-Accessories-Home-page-Mob.webp',
+    link: '/offers',
+  },
+];
+
+// "FROM OUR LOVED ONES" Testimonials (00:14 - 00:16 in Video)
+export const INITIAL_TESTIMONIALS: TestimonialItem[] = [
+  {
+    id: 'test_1',
+    quote:
+      'I like things that feel effortless yet premium, and this hits right in smooth, balanced, and something you can rely on anytime.',
+    authorName: 'Ranveer Singh',
+    authorRole: 'Actor, Brand Ambassador',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80',
+    rating: 5,
+  },
+  {
+    id: 'test_2',
+    quote:
+      'It is understated yet distinctive, something that complements your presence without overpowering it, which is what truly makes it stand out.',
+    authorName: 'Saif Ali Khan',
+    authorRole: 'Actor, Luxury Connoisseur',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&auto=format&fit=crop&q=80',
+    rating: 5,
+  },
+  {
+    id: 'test_3',
+    quote:
+      'Been using this regularly and honestly, it just feels right, easy, smooth, and something that people actually notice without trying too hard.',
+    authorName: 'Munawar Faruqui',
+    authorRole: 'Comedian, Entertainer',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
+    rating: 5,
+  },
+];
+
+// "BLOGS" Editorial Cards (00:15 - 00:24 in Video)
+export const INITIAL_BLOG_POSTS: BlogPostItem[] = [
+  {
+    id: 'blog_1',
+    title: 'How To Choose The Perfect Flagship Companion For Yourself Online',
+    excerpt: 'A curated guide to selecting titanium finishes, optics, and luxury editions.',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/pre-book-apple-iphone-duo-in-poorvika-mobv-1.webp',
+    ctaText: 'Explore Guide',
+    link: '/products?category=iphone',
+  },
+  {
+    id: 'blog_2',
+    title: 'How To Style Luxury Wearables Like Royalty: The Complete Guide',
+    excerpt: 'Master the art of pairing gold & titanium smartwatches with formal and evening attire.',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/Oppo-Find-X10-Series-Pre-Book-Now-M.webp',
+    ctaText: 'Explore Guide',
+    link: '/products?category=smartwatches',
+  },
+  {
+    id: 'blog_3',
+    title: 'Top 5 Signature Gift Sets For Every Milestone Occasion',
+    excerpt: 'Unforgettable luxury unboxing experiences crafted for weddings, anniversaries, and corporate gifting.',
+    image:
+      'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp',
+    ctaText: 'Explore Guide',
+    link: '/offers',
+  },
+];
+
 export const INITIAL_COUPONS: Coupon[] = [
+  {
+    code: 'ROYAL500',
+    title: '₹500 Exclusive Welcome Reward',
+    description: 'Instant privilege discount unlocked via our Royal Rewards Club.',
+    discountType: 'flat',
+    discountValue: 500,
+    minOrderAmount: 1999,
+    active: true,
+  },
   {
     code: 'CHARLIE1500',
     title: 'Flat ₹1,500 Instant Discount',
@@ -1661,30 +1857,72 @@ export const INITIAL_COUPONS: Coupon[] = [
 export const INITIAL_STORE_SETTINGS: StoreSettings = {
   storeName: 'CHARLIE MOBILES',
   businessName: 'CHARLIE MOBILES & ACCESSORIES',
-  tagline:
-    'Your Trusted Destination for Mobiles, Electronics, Gadgets & Everyday Essentials',
+  tagline: 'Royal Luxury Edition · Flagship Smartphones, Gift Sets & Signature Tech',
   logoUrl: '/charlie-logo.png',
   bannerIntervalSeconds: 5,
   festiveStripBannerUrl:
     'https://img-prd-pim.poorvika.com/pageimg/Festive-Deals-Offers-2027-M.webp',
   festiveStripBannerLink: '/offers',
-  seasonalDealsTitle: 'Catch the Coolest Monsoon Deals',
-  seasonalDealsSubtitle: 'Monsoon Appliances',
+  seasonalDealsTitle: 'DISCOVER Luxury Gifting',
+  seasonalDealsSubtitle: 'Premium Collection For Every Occasion.',
   seasonalMainBannerUrl:
-    'https://img-prd-pim.poorvika.com/pageimg/Monsoon-Appliances-2027-mob.webp',
-  address: 'Main Showroom · Charlie Mobiles & Accessories',
+    'https://img-prd-pim.poorvika.com/pageimg/pre-book-apple-iphone-duo-in-poorvika-mobv-1.webp',
+  megaMenuCards: [
+    {
+      id: 'mm_1',
+      title: 'BESTSELLERS',
+      image:
+        'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+      link: '/products?category=iphone',
+    },
+    {
+      id: 'mm_2',
+      title: 'GIFT SETS',
+      image:
+        'https://img-prd-pim.poorvika.com/product/Samsung-galaxy-s26-ultra-5g-cobalt-violet-16gb-1Tb-Front-Back-View.webp',
+      link: '/offers',
+    },
+    {
+      id: 'mm_3',
+      title: 'LUXURY SERIES',
+      image:
+        'https://img-prd-pim.poorvika.com/product/Vivo-V80-5G-Horizon-Blue-8GB-512GB-front-back-view.webp',
+      link: '/products?category=vivo',
+    },
+  ],
+  megaMenuBannerUrl:
+    'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp',
+  megaMenuBannerTitle: 'Too Cool For ORDINARY',
+  megaMenuBannerSubtitle: 'Signature Collection',
+  megaMenuBannerLink: '/products',
+  luxuryGiftingBannerTitle: 'Luxury Gifting',
+  luxuryGiftingBannerSubtitle: 'Premium Collection For Every Occasion.',
+  luxuryGiftingBannerImage:
+    'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+  luxuryGiftingBannerLink: '/offers',
+  brandStoryTitle: 'LET US WALK YOU THROUGH',
+  brandStoryVideoUrl:
+    'https://assets.mixkit.co/videos/preview/mixkit-man-holding-a-modern-smartphone-42619-large.mp4',
+  brandStoryPosterUrl:
+    'https://img-prd-pim.poorvika.com/pageimg/pre-book-apple-iphone-duo-in-poorvika-mobv-1.webp',
+  rewardPopupEnabled: true,
+  rewardPopupTitle: 'Unlock Your Exclusive Royal Rewards',
+  rewardPopupSubtitle: 'Get Special Offers & Instant Privilege Rewards',
+  rewardPopupImage:
+    'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+  rewardCouponCode: 'ROYAL500',
+  bestsellerTabs: ['ALL', 'HIM', 'HER', 'ATTAR / PRO', 'GIFTING'],
+  featuredFavouritesTitle: "RANVEER'S FAVOURITE",
+  address: 'Main Flagship Showroom · Charlie Mobiles & Accessories, Raipur',
   city: 'RAIPUR',
   phone: '+91 8818850488',
   whatsappNumber: '918818850488',
   email: 'charliegedekar@gmail.com',
-  openingHours: 'Mon – Sun: 10:00 AM – 9:30 PM',
+  openingHours: 'Monday to Friday / 10am to 6pm',
   mapLink: 'https://maps.google.com',
-  announcementText:
-    'Festive Deals · Call/WhatsApp 8818850488 · Same-Day Delivery & Store Pickup',
-  bankOfferTitle:
-    'With Easy EMI from ₹2,625/month* + 10% Instant Cashback',
-  bankOfferSubtitle:
-    'Bajaj Finserv · HDFC Bank · Home Credit · ICICI · SBI · Axis',
+  announcementText: '❤ Look Good. Feel Royal. Shop Bestsellers ❤',
+  bankOfferTitle: 'With Easy EMI from ₹2,625/month* + 10% Instant Cashback',
+  bankOfferSubtitle: 'Bajaj Finserv · HDFC Bank · Home Credit · ICICI · SBI · Axis',
   exchangeMaxBonus: 12000,
   emiStartingPrice: 649,
   codEnabled: true,
@@ -1695,21 +1933,22 @@ export const INITIAL_STORE_SETTINGS: StoreSettings = {
   upiId: '8818850488@ybl',
   cloudinaryCloudName: 'dxeuzdwkz',
   cloudinaryUploadPreset: 'charliemobile',
-  instagramUrl: '',
-  facebookUrl: '',
-  youtubeUrl: '',
+  instagramUrl: 'https://instagram.com',
+  facebookUrl: 'https://facebook.com',
+  youtubeUrl: 'https://youtube.com',
 };
 
 export const INITIAL_HOMEPAGE_SECTIONS: HomepageSectionConfig[] = [
-  { id: 'shop_by_categories', title: 'Top Categories', enabled: true, order: 1 },
-  { id: 'festive_deals', title: 'Festive Deals & Hero Slider', enabled: true, order: 2 },
-  { id: 'monsoon_deals', title: 'Catch the Coolest Monsoon Deals', enabled: true, order: 3 },
-  { id: 'best_selling', title: 'Mobiles & Accessories', enabled: true, order: 4 },
-  { id: 'laptops_tablets', title: 'Laptop & Tablets', enabled: true, order: 5 },
-  { id: 'top_brands', title: 'Top Brands Scroller', enabled: true, order: 6 },
-  { id: 'tv_audio', title: 'Tv & Audio', enabled: true, order: 7 },
-  { id: 'kitchen_appliances', title: 'Kitchen Appliances', enabled: true, order: 8 },
-  { id: 'home_appliances', title: 'Home Appliances', enabled: true, order: 9 },
-  { id: 'smartwatches_wearables', title: 'Smart Technology & Wearables', enabled: true, order: 10 },
-  { id: 'personal_care', title: 'Personal Care', enabled: true, order: 11 },
+  { id: 'our_bestsellers', title: 'OUR BESTSELLERS', enabled: true, order: 1 },
+  { id: 'loved_by_celebrities', title: 'LOVED BY CELEBRITIES', enabled: true, order: 2 },
+  { id: 'visual_categories', title: 'SIGNATURE COLLECTIONS', enabled: true, order: 3 },
+  { id: 'luxury_gifting', title: 'DISCOVER LUXURY GIFTING', enabled: true, order: 4 },
+  { id: 'shop_by_notes', title: 'SHOP BY NOTES', enabled: true, order: 5 },
+  { id: 'featured_favourites', title: "RANVEER'S FAVOURITE", enabled: true, order: 6 },
+  { id: 'shop_by_occasions', title: 'SHOP BY OCCASIONS', enabled: true, order: 7 },
+  { id: 'new_arrivals', title: 'NEW ARRIVALS', enabled: true, order: 8 },
+  { id: 'from_our_loved_ones', title: 'FROM OUR LOVED ONES', enabled: true, order: 9 },
+  { id: 'blogs_section', title: 'BLOGS', enabled: true, order: 10 },
+  { id: 'walk_you_through', title: 'LET US WALK YOU THROUGH', enabled: true, order: 11 },
 ];
+

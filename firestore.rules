@@ -228,5 +228,58 @@ service cloud.firestore {
         ]);
       allow delete: if isVerified() && isValidId(settingId) && isAdmin();
     }
+
+    // Validation Blueprint: SupportChat & SupportMessage
+    function isValidSupportChat(data) {
+      return data.keys().hasAll([
+          'userId', 'customerName', 'customerPhone', 'customerEmail',
+          'productId', 'productName', 'lastMessage', 'lastSender', 'messageCount', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'customerName', 'customerPhone', 'customerEmail',
+          'productId', 'productName', 'lastMessage', 'lastSender', 'messageCount', 'updatedAt'
+        ]) &&
+        data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 && data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120 &&
+        data.customerPhone is string && data.customerPhone.size() <= 24 &&
+        data.customerEmail is string && data.customerEmail.size() <= 160 &&
+        data.productId is string && data.productId.size() <= 128 &&
+        data.productName is string && data.productName.size() <= 180 &&
+        data.lastMessage is string && data.lastMessage.size() <= 500 &&
+        data.lastSender in ['user', 'assistant', 'admin'] &&
+        data.messageCount is number && data.messageCount >= 0 &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidSupportMessage(data) {
+      return data.keys().hasAll(['id', 'sender', 'text', 'productId', 'productName', 'timestamp']) &&
+        data.keys().hasOnly(['id', 'sender', 'text', 'productId', 'productName', 'timestamp']) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.sender in ['user', 'assistant', 'admin'] &&
+        data.text is string && data.text.size() >= 1 && data.text.size() <= 2000 &&
+        data.productId is string && data.productId.size() <= 128 &&
+        data.productName is string && data.productName.size() <= 180 &&
+        data.timestamp == request.time;
+    }
+
+    // Live AI Support Chats (Isolated to owner or Admin)
+    match /support_chats/{chatUserId} {
+      allow get: if isSignedIn() && isValidId(chatUserId) && (request.auth.uid == chatUserId || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(chatUserId) && isValidSupportChat(incoming()) &&
+        incoming().userId == chatUserId && (request.auth.uid == chatUserId || isAdmin());
+      allow update: if isVerified() && isValidId(chatUserId) && isValidSupportChat(incoming()) &&
+        incoming().userId == existing().userId && (request.auth.uid == chatUserId || isAdmin());
+      allow delete: if isVerified() && isValidId(chatUserId) && isAdmin();
+
+      match /messages/{messageId} {
+        allow get: if isSignedIn() && isValidId(chatUserId) && isValidId(messageId) && (request.auth.uid == chatUserId || isAdmin());
+        allow list: if isSignedIn() && isValidId(chatUserId) && (request.auth.uid == chatUserId || isAdmin());
+        allow create: if isVerified() && isValidId(chatUserId) && isValidId(messageId) &&
+          isValidSupportMessage(incoming()) && (request.auth.uid == chatUserId || isAdmin());
+        allow update: if false;
+        allow delete: if isVerified() && isValidId(chatUserId) && isValidId(messageId) && isAdmin();
+      }
+    }
   }
 }

@@ -1,235 +1,312 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Facebook, Instagram, MessageCircle, Phone, Youtube } from 'lucide-react';
+import {
+  ArrowRight,
+  Crown,
+  Facebook,
+  Instagram,
+  MessageCircle,
+  Youtube,
+} from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 export const Footer: React.FC = () => {
-  const { storeSettings, openWhatsAppEnquiry } = useStore();
-  const [knowMoreOpen, setKnowMoreOpen] = useState(true);
+  const { storeSettings, openWhatsAppEnquiry, showToast } = useStore();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    showToast('Thank you for subscribing to our Royal Privilege Newsletter!');
+    setNewsletterEmail('');
+  };
+
+  const mostSearchedLinks = [
+    { label: 'iPhone 17 Pro Max', to: '/product/prod_iphone_17_pro_max' },
+    { label: 'Vivo V80 5G', to: '/product/prod_vivo_v80_5g' },
+    { label: 'Samsung S26 Ultra', to: '/product/prod_samsung_s26_ultra' },
+    { label: 'Oppo Find X10 Pro', to: '/product/prod_oppo_find_x10_pro_max' },
+    { label: 'Luxury Gift Sets', to: '/offers' },
+    { label: '5G Smartphones', to: '/products?category=smartphones' },
+    { label: 'Smartwatches', to: '/products?category=smartwatches' },
+    { label: 'Laptops & Tablets', to: '/products?category=tablets' },
+    { label: 'TV & Home Audio', to: '/products?category=tv-audio' },
+    { label: 'PlayStation 5', to: '/products?category=entertainment' },
+  ];
 
   return (
-    <footer className="bg-white text-[#1E293B] border-t border-slate-200 pb-6">
-      {/* 1. 6-Column Social & Contact Icon Bar (Exact Video 00:43 & 01:42) */}
-      <div className="border-b border-slate-200 py-3 px-4">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => openWhatsAppEnquiry({})}
-            aria-label="WhatsApp"
-            className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-xs cursor-pointer"
-          >
-            <MessageCircle className="w-5 h-5 fill-white" />
-          </button>
-
-          <a
-            href={`tel:+${storeSettings.whatsappNumber || '918818850488'}`}
-            aria-label="Call Us"
-            className="w-10 h-10 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-xs"
-          >
-            <Phone className="w-5 h-5 fill-white" />
-          </a>
-
-          <a
-            href={storeSettings.instagramUrl || 'https://instagram.com'}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Instagram"
-            className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white flex items-center justify-center shadow-xs"
-          >
-            <Instagram className="w-5 h-5" />
-          </a>
-
-          <a
-            href={storeSettings.facebookUrl || 'https://facebook.com'}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Facebook"
-            className="w-10 h-10 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-xs"
-          >
-            <Facebook className="w-5 h-5 fill-white" />
-          </a>
-
-          <a
-            href="https://x.com"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="X"
-            className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-extrabold text-sm shadow-xs"
-          >
-            X
-          </a>
-
-          <a
-            href={storeSettings.youtubeUrl || 'https://youtube.com'}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="YouTube"
-            className="w-10 h-10 rounded-full bg-[#FF0000] text-white flex items-center justify-center shadow-xs"
-          >
-            <Youtube className="w-5 h-5" />
-          </a>
-        </div>
-      </div>
-
-      {/* 2. White Information Body (Exact Video 00:44 - 00:45 & 01:43) */}
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 text-xs">
-        {/* Contact Information */}
-        <div className="space-y-1.5">
-          <h3 className="text-sm font-extrabold text-[#1E293B]">Contact Information</h3>
-          <p className="font-bold text-[#1E293B]">Head Office</p>
-          <p className="text-slate-600 leading-relaxed">
-            {storeSettings.businessName || 'Charlie Mobiles & Accessories'}, {storeSettings.address}
-          </p>
-          <p className="pt-1 text-slate-700">
-            <strong className="text-[#1E293B]">For Support &amp; Order Inquiries :</strong>{' '}
-            <a
-              href={`mailto:${storeSettings.email || 'charliegedekar@gmail.com'}`}
-              className="text-[#F26522] font-semibold hover:underline"
-            >
-              {storeSettings.email || 'charliegedekar@gmail.com'}
-            </a>{' '}
-            |{' '}
-            <a
-              href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`}
-              className="text-[#1E293B] font-bold hover:text-[#F26522]"
-            >
-              {storeSettings.phone || '+91 8818850488'}
-            </a>
-          </p>
-        </div>
-
-        {/* 2-Column Links Grid: Support + Policies & Know More */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-2 border-t border-slate-100">
-          <div>
-            <h4 className="text-sm font-extrabold text-[#1E293B] mb-2.5">Support</h4>
-            <ul className="space-y-2 text-slate-600">
-              <li><Link to="/store" className="hover:text-[#F26522]">Contact Us</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">Site Map</Link></li>
-              <li><Link to="/offers" className="hover:text-[#F26522]">One Assist</Link></li>
-              <li><a href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`} className="hover:text-[#F26522]">{storeSettings.phone || '+91 8818850488'}</a></li>
+    <footer className="bg-[#B5893D] text-white pt-10 pb-24 md:pb-12 select-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-10">
+        {/* 1. 4-Column Top Links Grid (Exact Video 00:17 - 00:20) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 text-xs">
+          <div className="space-y-3">
+            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+              SHOP BY CATEGORY
+            </h4>
+            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+              <li>
+                <Link to="/products?category=iphone" className="hover:underline">
+                  Flagship iPhones
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=samsung" className="hover:underline">
+                  Samsung Galaxy Series
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=vivo" className="hover:underline">
+                  Vivo &amp; Oppo Editions
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=smartwatches" className="hover:underline">
+                  Luxury Wearables
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=tablets" className="hover:underline">
+                  Laptops &amp; Tablets
+                </Link>
+              </li>
+              <li>
+                <Link to="/offers" className="hover:underline">
+                  Gift Sets
+                </Link>
+              </li>
+              <li>
+                <Link to="/products" className="hover:underline">
+                  New Arrivals
+                </Link>
+              </li>
+              <li>
+                <Link to="/offers" className="hover:underline">
+                  Corporate Gifting
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-sm font-extrabold text-[#1E293B] mb-2.5">Policies</h4>
-            <ul className="space-y-2 text-slate-600">
-              <li><Link to="/store" className="hover:text-[#F26522]">T &amp; C</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">Privacy Policy</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">CSR &amp; Whistle Blower Policy</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">Return, Replacement &amp; Refund</Link></li>
+          <div className="space-y-3">
+            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+              CUSTOMER SERVICE
+            </h4>
+            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => openWhatsAppEnquiry({})}
+                  className="hover:underline cursor-pointer"
+                >
+                  Contact Us
+                </button>
+              </li>
+              <li>
+                <Link to="/account" className="hover:underline">
+                  Order Tracking
+                </Link>
+              </li>
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Shipping &amp; Delivery
+                </Link>
+              </li>
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Return &amp; Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/offers" className="hover:underline">
+                  Care &amp; Warranty Tips
+                </Link>
+              </li>
+              <li>
+                <Link to="/account" className="hover:underline">
+                  Order Return
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div className="col-span-2 sm:col-span-1">
-            <h4 className="text-sm font-extrabold text-[#1E293B] mb-2.5">Know More</h4>
-            <ul className="space-y-2 text-slate-600">
-              <li><Link to="/store" className="hover:text-[#F26522]">About Us</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">Our Stores</Link></li>
-              <li><Link to="/store" className="hover:text-[#F26522]">Service Centres</Link></li>
+          <div className="space-y-3">
+            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+              LEGAL &amp; POLICIES
+            </h4>
+            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin" className="hover:underline font-semibold">
+                  Store Owner Console
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+              OUR JOURNEY
+            </h4>
+            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Our Showroom Legacy
+                </Link>
+              </li>
+              <li>
+                <Link to="/store" className="hover:underline">
+                  Store Locator ({storeSettings.city || 'RAIPUR'})
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* About Us Paragraph */}
-        <div className="space-y-2 pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-3">
-            <img
-              src={storeSettings.logoUrl || '/charlie-logo.png'}
-              alt={storeSettings.businessName || 'Charlie Mobiles & Accessories'}
-              className="h-10 w-auto object-contain rounded bg-white p-0.5 border border-slate-200"
-            />
-            <h4 className="text-sm font-extrabold text-[#1E293B]">About Us :</h4>
+        {/* 2. Middle Row: Contact Us + Center Crest & Newsletter + Right Address (Exact Video 00:18 - 00:20) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-4 border-t border-white/20 text-xs">
+          {/* Left: CONTACT US */}
+          <div className="md:col-span-4 space-y-2">
+            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-xs">
+              CONTACT US
+            </h4>
+            <p className="text-white/90 font-medium">Timings :</p>
+            <p className="text-white/90">
+              {storeSettings.openingHours || 'Monday to Friday / 10am to 6pm'}
+            </p>
+            <p className="text-white/90">
+              Email:{' '}
+              <a
+                href={`mailto:${storeSettings.email || 'charliegedekar@gmail.com'}`}
+                className="underline"
+              >
+                {storeSettings.email || 'charliegedekar@gmail.com'}
+              </a>
+            </p>
+            <p className="text-white/90 font-semibold">
+              Call:{' '}
+              <a
+                href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`}
+                className="underline"
+              >
+                {storeSettings.phone || '+91 8818850488'}
+              </a>
+            </p>
           </div>
-          <p className="text-slate-600 leading-relaxed">
-            {storeSettings.businessName || 'Charlie Mobiles & Accessories'} is a premier omnichannel electronics and smartphone retailer in India. With 100% genuine brand-sealed smartphones, laptops, tablets, smart TVs, home appliances, and original mobile accessories, {storeSettings.storeName || 'Charlie Mobiles'} brings flagship showroom trust directly to your fingertips with instant store pickup, express local delivery, and zero-down-payment EMI options.
-          </p>
-        </div>
 
-        {/* App Download Badges + EMI Partners + Payment Options (Exact Video 00:45 & 01:44) */}
-        <div className="pt-2 border-t border-slate-100 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1.5 rounded bg-black text-white flex items-center gap-2">
-              <span className="text-[10px] font-bold">GET IT ON Google Play</span>
-            </div>
-            <div className="px-3 py-1.5 rounded bg-black text-white flex items-center gap-2">
-              <span className="text-[10px] font-bold">Download on the App Store</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="font-extrabold text-[#1E293B] mb-1.5">Our EMI Partners :</p>
-              <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-700">
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50">
-                  BAJAJ FINSERV
-                </span>
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50">
-                  HDFC BANK
-                </span>
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50">
-                  HOME CREDIT
-                </span>
+          {/* Center: Royal Crest + Social Icons + Newsletter Input */}
+          <div className="md:col-span-5 flex flex-col items-center text-center space-y-4">
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-12 h-12 rounded-full bg-white/15 border border-white/40 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-white" />
               </div>
+              <span className="font-serif-luxury text-sm font-bold tracking-[0.2em] uppercase">
+                {storeSettings.storeName || 'CHARLIE LUXURY'}
+              </span>
             </div>
 
-            <div>
-              <p className="font-extrabold text-[#1E293B] mb-1.5">Payment Option :</p>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-700">
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50 text-blue-800">
-                  VISA
-                </span>
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50 text-orange-600">
-                  MasterCard
-                </span>
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50 text-indigo-700">
-                  RuPay
-                </span>
-                <span className="px-2.5 py-1 rounded border border-slate-200 bg-slate-50 text-emerald-700">
-                  UPI
-                </span>
-              </div>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href={storeSettings.facebookUrl || 'https://facebook.com'}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+              >
+                <Facebook className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={storeSettings.instagramUrl || 'https://instagram.com'}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+              >
+                <Instagram className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href={storeSettings.youtubeUrl || 'https://youtube.com'}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="YouTube"
+                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+              >
+                <Youtube className="w-3.5 h-3.5" />
+              </a>
+              <button
+                type="button"
+                onClick={() => openWhatsAppEnquiry({})}
+                aria-label="WhatsApp"
+                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors cursor-pointer"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+              </button>
             </div>
+
+            <p className="text-[11px] text-white/90 max-w-xs leading-relaxed">
+              Subscribe for special offers, newsletters and become a part of our movement
+            </p>
+
+            <form
+              onSubmit={handleNewsletterSubmit}
+              className="w-full max-w-xs flex items-center border border-white/70 bg-transparent h-10 px-3"
+            >
+              <input
+                type="email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder="Your Email"
+                className="flex-1 bg-transparent text-xs text-white placeholder:text-white/75 focus:outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Subscribe"
+                className="pl-2 text-white hover:translate-x-0.5 transition-transform cursor-pointer"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
           </div>
 
-          <p className="text-[11px] text-slate-500 pt-1">
-            Copyright © {new Date().getFullYear()} Charlie Mobiles &amp; Accessories Pvt. Ltd. All Rights Reserved.
-          </p>
+          {/* Right: Showroom Address */}
+          <div className="md:col-span-3 text-left md:text-right text-[11px] text-white/90 leading-relaxed space-y-1">
+            <p className="font-bold text-white uppercase tracking-wider">
+              {storeSettings.businessName || 'CHARLIE MOBILES & ACCESSORIES'}
+            </p>
+            <p>{storeSettings.address}</p>
+            <p>{storeSettings.city || 'RAIPUR'}, INDIA</p>
+          </div>
         </div>
-      </div>
 
-      {/* 3. Dark Bottom "Know More about Charlie Mobiles" Section (Exact Video 00:46) */}
-      <div className="bg-[#1F242D] text-white">
-        <button
-          type="button"
-          onClick={() => setKnowMoreOpen((v) => !v)}
-          className="w-full px-4 py-3 flex items-center justify-between text-xs font-extrabold border-b border-white/10 cursor-pointer"
-        >
-          <span>Know More about Charlie Mobiles</span>
-          {knowMoreOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
+        {/* 3. Copyright & Most Searched Links (Exact Video 00:19 - 00:20) */}
+        <div className="pt-6 border-t border-white/20 space-y-4 text-[11px]">
+          <div className="text-center text-white/90">
+            © {new Date().getFullYear()} {storeSettings.businessName || 'Charlie Mobiles & Accessories'}. All Rights Reserved.
+          </div>
 
-        {knowMoreOpen && (
-          <div className="p-4 space-y-3 text-xs text-slate-300 leading-relaxed max-w-7xl mx-auto">
-            <div>
-              <h5 className="font-extrabold text-white">No Cost EMI</h5>
-              <p className="mt-0.5">
-                Walking into Charlie Mobiles or shopping online lets you own your dream iPhone, Samsung Galaxy, laptop, or Smart TV with zero-cost EMI across major credit cards and Bajaj Finserv.
-              </p>
-            </div>
-            <div>
-              <h5 className="font-extrabold text-white">EMI On Debit Cards</h5>
-              <p className="mt-0.5">
-                Don&apos;t have a credit card? Avail instant Debit Card EMI and paperless consumer finance at Charlie Mobiles &amp; Accessories (Call/WhatsApp: +91 8818850488).
-              </p>
-            </div>
-            <div>
-              <h5 className="font-extrabold text-white">Mobile Exchange Offers</h5>
-              <p className="mt-0.5">
-                Get the highest instant exchange value for your old smartphone when upgrading to any new 5G device at Charlie Mobiles.
-              </p>
+          <div className="space-y-1.5">
+            <p className="font-bold text-white">Most Searched</p>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-white/90">
+              {mostSearchedLinks.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className="underline hover:text-white transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </footer>
   );

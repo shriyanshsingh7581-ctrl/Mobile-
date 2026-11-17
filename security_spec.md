@@ -11,6 +11,8 @@
 5. **PII Isolation (`users`)**:
    - `/users/{userId}` contains PII (`email`, `phone`, `savedAddress`).
    - Read and write access is strictly isolated to `request.auth.uid == userId` (with `incoming().uid == userId`) or `isAdmin()`.
+6. **Live AI Support Chats (`support_chats/{chatUserId}` & `messages/{messageId}`)**:
+   - Session and message history are strictly isolated to `request.auth.uid == chatUserId || isAdmin()` with `hasAll`/`hasOnly`, bounded strings, `sender in ['user', 'assistant', 'admin']`, and `request.time` timestamp validation. Messages are immutable once created.
 
 ## 2. The "Dirty Dozen" Payloads
 1. **Unauthenticated Product Creation**: `auth = null` attempting `create` on `/products/prod_1`.

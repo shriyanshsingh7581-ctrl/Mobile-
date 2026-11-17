@@ -9,13 +9,28 @@ import {
   doc,
   getDocFromServer,
   getFirestore,
+  initializeFirestore,
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = (() => {
+  try {
+    return initializeFirestore(
+      app,
+      {
+        experimentalForceLongPolling: true,
+        ignoreUndefinedProperties: true,
+      },
+      firebaseConfig.firestoreDatabaseId
+    );
+  } catch {
+    return getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  }
+})();
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export const ADMIN_EMAIL = 'charliegedekar@gmail.com';
 export const ADMIN_EMAILS = [
@@ -82,18 +97,40 @@ export function handleFirestoreError(
 
 // Validate connection to Firestore on startup as mandated
 async function testConnection() {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
   try {
-    await getDocFromServer(doc(db, 'settings', 'connection_test'));
+    await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+      } catch (retryError) {
+        if (
+          retryError instanceof Error &&
+          retryError.message.includes('the client is offline') &&
+          (typeof navigator === 'undefined' || navigator.onLine)
+        ) {
+          console.error('Please check your Firebase configuration.');
+        }
+      }
     }
   }
 }
 testConnection();
 
 export async function signInWithGoogle() {
-  return signInWithPopup(auth, googleProvider);
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'auth/network-request-failed') {
+      // Retry once after brief pause in case the popup/gapi iframe channel timed out transiently
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      return await signInWithPopup(auth, googleProvider);
+    }
+    throw err;
+  }
 }
 
 export async function signOutUser() {

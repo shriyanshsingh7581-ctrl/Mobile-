@@ -1,172 +1,82 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Eye,
-  EyeOff,
-  MapPin,
+  ChevronDown,
+  ChevronRight,
+  Film,
+  Home,
+  LayoutGrid,
   Menu,
-  MessageCircle,
-  Minus,
-  Phone,
-  Plus,
   Search,
-  ShoppingCart,
+  ShoppingBag,
+  Sparkles,
   User,
   WifiOff,
   X,
-  Zap,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useOnlineStatus } from '../hooks/usePWAInstall';
 import { PWAInstallBanner } from './PWAInstallBanner';
+import { SmartImage } from './SmartImage';
+import { LoginModal } from './LoginModal';
 
-const CHARLIE_LOGO_URL = '/charlie-logo.png';
+const DEFAULT_LOGO_URL = '/charlie-logo.png';
 
-interface DrawerCategory {
-  id: string;
-  name: string;
-  iconImg: string;
-  items: {
-    label: string;
-    link: string;
-    hasPlus?: boolean;
-    subItems?: string[];
-  }[];
-}
-
-const POORVIKA_DRAWER_CATEGORIES: DrawerCategory[] = [
+const SHOP_ACCORDION_SECTIONS = [
   {
-    id: 'mobiles',
-    name: 'Mobiles & Accessories',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Mobiles-Accessories-Home-page-Mob.webp',
+    id: 'notes',
+    label: 'Notes / Highlights',
     items: [
-      { label: 'Mobiles', link: '/products?category=smartphones', hasPlus: true },
-      { label: 'Mobile Brands', link: '/products?category=smartphones', hasPlus: true },
-      { label: 'Mobile Accessories', link: '/products?category=mobile-accessories', hasPlus: true },
-      { label: 'Accessories Brands', link: '/products?category=chargers', hasPlus: true },
+      { name: 'Titanium Craft', link: '/products?category=iphone' },
+      { name: 'Cinema Optics', link: '/products?category=vivo' },
+      { name: 'Hyper 5G Core', link: '/products?category=samsung' },
+      { name: 'Pure Acoustics', link: '/products?category=tv-audio' },
     ],
   },
   {
-    id: 'computers',
-    name: 'Computers & Tablets',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Laptops-tablets-Home-page-Mob.webp',
+    id: 'gender',
+    label: 'Gender / Edition',
     items: [
-      { label: 'Laptops', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Laptop Brands', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Desktop PCs', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Refurbished Laptops', link: '/products?category=tablets', hasPlus: false },
-      { label: 'Computer & Laptop Accessories', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Networking', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Tabs & iPad', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Brands', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Tabs & iPad Accessories', link: '/products?category=tablets', hasPlus: true },
-      { label: 'Computer Peripherals', link: '/products?category=tablets', hasPlus: true },
-      {
-        label: 'Software',
-        link: '/products?category=tablets',
-        hasPlus: true,
-        subItems: ['Office Tools', 'Operating Software'],
-      },
+      { name: 'For Him — Executive Series', link: '/products?category=smartphones' },
+      { name: 'For Her — Signature Gold & Rose', link: '/products?category=iphone' },
+      { name: 'Unisex Luxury Collection', link: '/products' },
     ],
   },
   {
-    id: 'tv_audio',
-    name: 'TV & Audio',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/TV-Audio-Home-page-Mob.webp',
+    id: 'price',
+    label: 'Price',
     items: [
-      { label: 'Television', link: '/products?category=tv-audio', hasPlus: false },
-      { label: 'Tv Brands', link: '/products?category=tv-audio', hasPlus: true },
-      { label: 'Tv Screen Size', link: '/products?category=tv-audio', hasPlus: true },
-      { label: 'Tv Accessories', link: '/products?category=tv-audio', hasPlus: true },
-      { label: 'Entertainment', link: '/products?category=entertainment', hasPlus: true },
-      { label: 'Projectors', link: '/products?category=tv-audio', hasPlus: false },
-      { label: 'Audio', link: '/products?category=earbuds', hasPlus: true },
-      { label: 'Audio Brands', link: '/products?category=earbuds', hasPlus: true },
+      { name: 'Under ₹15,000', link: '/products' },
+      { name: '₹15,000 – ₹40,000', link: '/products?category=vivo' },
+      { name: '₹40,000 & Above Flagships', link: '/products?category=iphone' },
     ],
   },
   {
-    id: 'kitchen',
-    name: 'Kitchen Appliances',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Kitchen-appliances-Home-page-Mob.webp',
+    id: 'collections',
+    label: 'Collections',
     items: [
-      { label: 'Air Fryers', link: '/products?category=kitchen-appliances' },
-      { label: 'Coffee Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Soup Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Cookwares', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Dishwashers', link: '/products?category=kitchen-appliances' },
-      { label: 'Electric Kettles', link: '/products?category=kitchen-appliances' },
-      { label: 'Food Processors', link: '/products?category=kitchen-appliances' },
-      { label: 'Choppers', link: '/products?category=kitchen-appliances' },
-      { label: 'Induction Cooktops', link: '/products?category=kitchen-appliances' },
-      { label: 'Juicer & Mixer Grinders', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Kitchen Chimneys', link: '/products?category=kitchen-appliances' },
-      { label: 'Kitchen Hobs & Gas Stoves', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Kitchen Utilities', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Hand Blenders', link: '/products?category=kitchen-appliances' },
-      { label: 'Hand Grinders', link: '/products?category=kitchen-appliances' },
-      { label: 'Microwave Ovens & OTG', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Roti Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Pop-up Toasters', link: '/products?category=kitchen-appliances' },
-      { label: 'Sandwich Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Pizza Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Dosa Makers', link: '/products?category=kitchen-appliances' },
-      { label: 'Steamers & Cookers', link: '/products?category=kitchen-appliances', hasPlus: true },
-      { label: 'Wet Grinders', link: '/products?category=kitchen-appliances' },
-      { label: 'Graters', link: '/products?category=kitchen-appliances' },
-      { label: 'Brands', link: '/products?category=kitchen-appliances', hasPlus: true },
+      { name: 'Royal Reserve Series', link: '/products?category=iphone' },
+      { name: 'Galaxy Ultra Vault', link: '/products?category=samsung' },
+      { name: 'ZEISS Studio Edition', link: '/products?category=vivo' },
+      { name: 'Hasselblad Master Series', link: '/products?category=oppo' },
     ],
   },
   {
-    id: 'home_appliances',
-    name: 'Home Appliances',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Home-Appliances-Mob-web.webp',
+    id: 'occasions',
+    label: 'Occasions',
     items: [
-      { label: 'Air Conditioners', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Refrigerators', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Visi Coolers', link: '/products?category=home-appliances' },
-      { label: 'Deep Freezer', link: '/products?category=home-appliances' },
-      { label: 'Washing Machines', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Air Coolers', link: '/products?category=home-appliances' },
-      { label: 'Wine Coolers', link: '/products?category=home-appliances' },
-      { label: 'Air Purifiers', link: '/products?category=home-appliances' },
-      { label: 'Fans', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Geysers', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Inverters & Accessories', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Irons', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Stabilizers', link: '/products?category=home-appliances' },
-      { label: 'Vacuum Cleaners', link: '/products?category=home-appliances' },
-      { label: 'Water Purifiers & Dispensers', link: '/products?category=home-appliances', hasPlus: true },
-      { label: 'Brands', link: '/products?category=home-appliances', hasPlus: true },
+      { name: 'Executive Office', link: '/products?category=tablets' },
+      { name: 'Evening Gala', link: '/products?category=iphone' },
+      { name: 'Everyday Wear', link: '/products?category=smartwatches' },
+      { name: 'Celebration & Gifting', link: '/offers' },
     ],
   },
   {
-    id: 'smart_tech',
-    name: 'Smart Technology',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Smart-Technology-Home-page-Mob.webp',
+    id: 'dna',
+    label: 'Our Craft & DNA',
     items: [
-      { label: 'Wearables', link: '/products?category=smartwatches', hasPlus: true },
-      { label: 'Wearables Brands', link: '/products?category=smartwatches', hasPlus: true },
-      { label: 'Watch & Band Accessories', link: '/products?category=smartwatches', hasPlus: true },
-      { label: 'Smart Home Devices', link: '/products?category=smartwatches', hasPlus: true },
-      { label: 'Smart Trackers', link: '/products?category=smartwatches' },
-      { label: 'Cameras & Accessories', link: '/products?category=smartwatches', hasPlus: true },
-    ],
-  },
-  {
-    id: 'personal_care',
-    name: 'Personal & Health Care',
-    iconImg:
-      'https://img-prd-pim.poorvika.com/pageimg/Personal-health-care-Home-page-Mob.webp',
-    items: [
-      { label: 'Personal Care', link: '/products?category=personal-care', hasPlus: true },
-      { label: 'Personal Care Brands', link: '/products?category=personal-care', hasPlus: true },
-      { label: 'Health Care', link: '/products?category=personal-care', hasPlus: true },
+      { name: '100% Authentic & Sealed', link: '/store' },
+      { name: 'Showroom Concierge Experience', link: '/store' },
     ],
   },
 ];
@@ -174,34 +84,56 @@ const POORVIKA_DRAWER_CATEGORIES: DrawerCategory[] = [
 export const Navbar: React.FC = () => {
   const {
     user,
+    mobileUser,
     cart,
+    categories,
     storeSettings,
-    selectedCity,
-    setSelectedCity,
     toastMessage,
-    showToast,
-    loginWithGoogle,
+    setLoginModalOpen,
+    setChatbotOpen,
     openWhatsAppEnquiry,
   } = useStore();
   const isOnline = useOnlineStatus();
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showSignInModal, setShowSignInModal] = useState(false);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [expandedCatId, setExpandedCatId] = useState<string | null>(null);
-  const [expandedSubItem, setExpandedSubItem] = useState<string | null>(null);
-
-  // Sign-In Modal fields (exact match to 01:17 in video)
-  const [loginIdentifier, setLoginIdentifier] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [expandedShopSection, setExpandedShopSection] = useState<string | null>(null);
+
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const megaMenuCards =
+    storeSettings.megaMenuCards && storeSettings.megaMenuCards.length > 0
+      ? storeSettings.megaMenuCards
+      : [
+          {
+            id: 'mm_1',
+            title: 'BESTSELLERS',
+            image:
+              'https://img-prd-pim.poorvika.com/product/Apple-iPhone-17-Pro-Max-Cosmic-Orange-2tB-front-back-view.png',
+            link: '/products?category=iphone',
+          },
+          {
+            id: 'mm_2',
+            title: 'GIFT SETS',
+            image:
+              'https://img-prd-pim.poorvika.com/product/Samsung-galaxy-s26-ultra-5g-cobalt-violet-16gb-1Tb-Front-Back-View.webp',
+            link: '/offers',
+          },
+          {
+            id: 'mm_3',
+            title: 'LUXURY SERIES',
+            image:
+              'https://img-prd-pim.poorvika.com/product/Vivo-V80-5G-Horizon-Blue-8GB-512GB-front-back-view.webp',
+            link: '/products?category=vivo',
+          },
+        ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSearchOpen(false);
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
@@ -209,474 +141,462 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const handleManualSignIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginIdentifier.trim()) {
-      showToast('Please enter your Email or Mobile Number');
-      return;
+  const handleReelsNavClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById('celebrity-reels')?.scrollIntoView({ behavior: 'smooth' });
+      }, 250);
+    } else {
+      document.getElementById('celebrity-reels')?.scrollIntoView({ behavior: 'smooth' });
     }
-    setShowSignInModal(false);
-    showToast(`Signed in as ${loginIdentifier.trim()}`);
-    navigate('/account');
   };
 
   return (
     <>
-      {/* EXACT POORVIKA ORANGE STICKY HEADER FROM VIDEO (00:00 - 01:44) */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-2 pb-2.5 space-y-2">
-          {/* Row 1: Hamburger + Uploaded Logo & Brand Name + Location + Cart (Green Badge) + Profile */}
-          <div className="flex items-center justify-between gap-2">
-            {/* Left: Hamburger + Uploaded Logo */}
-            <div className="flex items-center gap-2 min-w-0">
-              <button
-                type="button"
-                onClick={() => setMobileDrawerOpen(true)}
-                aria-label="Open Categories Menu"
-                className="p-1 text-white hover:opacity-90 cursor-pointer shrink-0"
-              >
-                <Menu className="w-6 h-6 stroke-[2.2]" />
-              </button>
+      {/* 1. TOP ANNOUNCEMENT BAR (EXACT VIDEO 00:31 - 00:35) */}
+      <div className="bg-[#FAF7F2] border-b border-[#EAE5DC] text-[#1A1A1A] py-1.5 px-3 text-center">
+        <Link
+          to="/offers"
+          className="text-[11px] sm:text-xs font-medium tracking-wide text-[#1A1A1A] hover:text-[#B5893D] transition-colors inline-flex items-center justify-center gap-1.5"
+        >
+          <span>
+            {storeSettings.announcementText || '❤ Look Good. Feel Royal. Shop Bestsellers ❤'}
+          </span>
+        </Link>
+      </div>
 
-              <Link to="/" className="flex items-center gap-2 min-w-0">
-                <div className="h-9 px-2 rounded-lg bg-white flex items-center justify-center shadow-xs shrink-0">
-                  <img
-                    src={storeSettings.logoUrl || CHARLIE_LOGO_URL}
-                    alt={storeSettings.businessName || 'Charlie Mobiles & Accessories'}
-                    className="h-8 w-auto object-contain"
-                  />
-                </div>
-                <div className="leading-none truncate">
-                  <span className="block text-base sm:text-xl font-black tracking-wide text-white uppercase truncate">
-                    {storeSettings.storeName?.split(' ')[0] || 'CHARLIE'}
-                  </span>
-                  <span className="block text-[9px] font-bold tracking-widest text-orange-100 uppercase truncate">
-                    {storeSettings.businessName?.replace(/^CHARLIE\s*/i, '') || 'MOBILES & ACC.'}
-                  </span>
-                </div>
-              </Link>
-            </div>
+      {/* 2. STICKY LUXURY WHITE HEADER (EXACT VIDEO 00:21 - 00:35) */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAE5DC] text-[#1A1A1A]">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 h-14 sm:h-16 grid grid-cols-3 items-center">
+          {/* Left: Hamburger Menu Button (☰) + Instant Search Icon (🔍) */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              aria-label="Open Navigation Drawer"
+              className="p-1.5 -ml-1.5 text-[#1A1A1A] hover:text-[#B5893D] transition-colors cursor-pointer"
+            >
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.75]" />
+            </button>
 
-            {/* Desktop Search Bar */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label="Search Catalog"
+              className="p-1.5 text-[#1A1A1A] hover:text-[#B5893D] transition-colors cursor-pointer"
+            >
+              <Search className="w-5 h-5 sm:w-5 sm:h-5 stroke-[1.75]" />
+            </button>
+          </div>
+
+          {/* Center: Royal Gold Crest / Brand Logo */}
+          <div className="flex items-center justify-center">
+            <Link to="/" className="flex flex-col items-center justify-center group">
+              <div className="flex items-center gap-2">
+                <img
+                  src={storeSettings.logoUrl || DEFAULT_LOGO_URL}
+                  alt={storeSettings.businessName || 'Charlie Luxury'}
+                  className="h-8 sm:h-10 w-auto object-contain"
+                />
+              </div>
+            </Link>
+          </div>
+
+          {/* Right: User Account Icon + Shopping Bag Icon with Live Count Badge */}
+          <div className="flex items-center justify-end gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (user || mobileUser) {
+                  navigate('/account');
+                } else {
+                  setLoginModalOpen(true);
+                }
+              }}
+              aria-label="Account"
+              className="p-1.5 text-[#1A1A1A] hover:text-[#B5893D] transition-colors cursor-pointer"
+            >
+              <User className="w-5 h-5 stroke-[1.75]" />
+            </button>
+
+            <Link
+              to="/cart"
+              aria-label="Shopping Bag"
+              className="relative p-1.5 -mr-1.5 text-[#1A1A1A] hover:text-[#B5893D] transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
+              {totalCartItems > 0 && (
+                <span className="absolute top-0.5 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-[#B5893D] text-white text-[9px] font-bold flex items-center justify-center tabular-nums">
+                  {totalCartItems}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
+
+        {/* Expandable Instant Search Bar */}
+        {searchOpen && (
+          <div className="border-t border-[#EAE5DC] bg-[#FAF7F2] px-4 py-3 animate-in slide-in-from-top-1 duration-150">
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden md:flex flex-1 max-w-xl relative items-center mx-4"
+              className="max-w-2xl mx-auto relative flex items-center"
             >
               <input
                 type="text"
+                autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for Products, Brands, Offers"
-                className="w-full h-10 pl-4 pr-11 rounded-full bg-white text-sm text-[#171717] placeholder:text-[#737373] focus:outline-none shadow-inner"
+                placeholder="Search signature flagships, luxury gift sets, wearables..."
+                className="w-full h-10 pl-4 pr-20 bg-white border border-[#D4CFC7] focus:border-[#B5893D] text-xs sm:text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none"
               />
               <button
                 type="submit"
-                aria-label="Search"
-                className="absolute right-3 text-[#F26522] hover:text-[#EA580C] flex items-center justify-center cursor-pointer"
+                className="absolute right-1.5 h-7 px-3 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-[10px] font-bold uppercase tracking-wider cursor-pointer"
               >
-                <Search className="w-5 h-5 stroke-[2.4]" />
+                Search
               </button>
             </form>
+          </div>
+        )}
+      </header>
 
-            {/* Right Controls: Location (RAIPUR) + Cart with Green Badge + White Profile Circle */}
-            <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-              {/* Location Pin + City Name Below (Exact match to RAIPUR in video) */}
-              <button
-                type="button"
-                onClick={() => setShowLocationModal(true)}
-                className="flex flex-col items-center justify-center leading-none text-white hover:opacity-90 cursor-pointer"
-              >
-                <MapPin className="w-4 h-4 fill-white text-[#F26522]" />
-                <span className="text-[9px] font-extrabold uppercase tracking-tight mt-0.5 max-w-[64px] truncate">
-                  {selectedCity || 'RAIPUR'}
-                </span>
-              </button>
-
-              {/* Shopping Cart with Green Circular Badge (Exact match to video) */}
-              <Link
-                to="/cart"
-                aria-label="Shopping Cart"
-                className="relative p-1 text-white hover:opacity-90"
-              >
-                <ShoppingCart className="w-6 h-6 stroke-[2]" />
-                <span className="absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#16A34A] border border-white text-white text-[10px] font-extrabold flex items-center justify-center tabular-nums">
-                  {totalCartItems}
-                </span>
-              </Link>
-
-              {/* White Circular Profile Icon (Opens Sign-In Modal or Account) */}
+      {/* 3. SLIDE-OVER MEGA NAVIGATION DRAWER (EXACT VIDEO 00:36 - 00:46) */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px] flex">
+          <div className="w-[88%] max-w-[380px] bg-white h-full flex flex-col overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-200">
+            {/* Top Bar with "Login or Sign Up" & Close X Button (Exact Video 00:26) */}
+            <div className="px-4 py-3.5 flex items-center justify-between border-b border-[#F0ECE1] sticky top-0 bg-white z-10">
               <button
                 type="button"
                 onClick={() => {
-                  if (user) {
+                  setMobileDrawerOpen(false);
+                  if (user || mobileUser) {
                     navigate('/account');
                   } else {
-                    setShowSignInModal(true);
+                    setLoginModalOpen(true);
                   }
                 }}
-                aria-label="Account / Sign In"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white text-[#F26522] flex items-center justify-center shadow-xs cursor-pointer"
+                className="flex items-center gap-2.5 text-left group cursor-pointer"
               >
-                <User className="w-4 h-4 sm:w-5 sm:h-5 fill-[#F26522]" />
+                <span className="w-7 h-7 rounded-full border border-[#1A1A1A] flex items-center justify-center text-[#1A1A1A] group-hover:border-[#B5893D] group-hover:text-[#B5893D]">
+                  <User className="w-4 h-4 stroke-[1.75]" />
+                </span>
+                <span className="text-[13px] font-medium text-[#1A1A1A] group-hover:text-[#B5893D]">
+                  {user?.displayName || (mobileUser ? `+91 ${mobileUser.phone}` : 'Login or Sign Up')}
+                </span>
               </button>
-            </div>
-          </div>
-
-          {/* Row 2: Mobile Rounded-Full White Search Pill (Exact match to video) */}
-          <form onSubmit={handleSearchSubmit} className="md:hidden relative flex items-center">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for Products, Brands, Offers"
-              className="w-full h-9 pl-4 pr-10 rounded-full bg-white text-xs font-medium text-[#171717] placeholder:text-[#737373] focus:outline-none shadow-xs"
-            />
-            <button
-              type="submit"
-              aria-label="Search"
-              className="absolute right-3 text-[#F26522] flex items-center justify-center cursor-pointer"
-            >
-              <Search className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          </form>
-        </div>
-      </header>
-
-      {/* SLIDE-OUT LEFT CATEGORIES DRAWER (EXACT MATCH TO VIDEO 00:57 - 01:12) */}
-      {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex">
-          <div className="w-[82%] max-w-[320px] bg-white h-full flex flex-col overflow-y-auto shadow-2xl">
-            {/* Centered "Categories" Header */}
-            <div className="relative py-3.5 px-4 border-b border-slate-200 flex items-center justify-center bg-white sticky top-0 z-10">
-              <h2 className="text-base font-bold text-[#171717]">Categories</h2>
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                aria-label="Close menu"
-                className="absolute right-3 p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                aria-label="Close Menu"
+                className="p-1 text-[#1A1A1A] hover:text-[#B5893D] cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 stroke-[1.75]" />
               </button>
             </div>
 
-            {/* Install App Prompt inside Categories Drawer */}
-            <PWAInstallBanner variant="drawer-btn" />
+            <div className="p-4 space-y-6 flex-1">
+              {/* A. Top 3 Visual Category Cards (Exact Video 00:37 - 00:46) */}
+              <div className="grid grid-cols-3 gap-2.5">
+                {megaMenuCards.slice(0, 3).map((card) => (
+                  <Link
+                    key={card.id}
+                    to={card.link}
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="group text-center space-y-1.5"
+                  >
+                    <div className="aspect-square bg-[#F5F5F5] p-2.5 flex items-center justify-center overflow-hidden">
+                      <SmartImage
+                        src={card.image}
+                        alt={card.title}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]">
+                      {card.title}
+                    </span>
+                  </Link>
+                ))}
+              </div>
 
-            {/* Accordion Category Rows */}
-            <div className="divide-y divide-slate-200 flex-1">
-              {POORVIKA_DRAWER_CATEGORIES.map((cat) => {
-                const isExpanded = expandedCatId === cat.id;
-                return (
-                  <div key={cat.id} className="bg-white">
+              {/* B. Embedded Promo Banner Card inside Drawer ("Too Cool For ORDINARY" — Exact Video 00:37 - 00:46) */}
+              <Link
+                to={storeSettings.megaMenuBannerLink || '/products'}
+                onClick={() => setMobileDrawerOpen(false)}
+                className="block relative overflow-hidden bg-[#F5F7FA] border border-[#EAE5DC] group"
+              >
+                <div className="aspect-[16/6] w-full relative overflow-hidden">
+                  <img
+                    src={
+                      storeSettings.megaMenuBannerUrl ||
+                      'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp'
+                    }
+                    alt={storeSettings.megaMenuBannerTitle || 'Too Cool For ORDINARY'}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-transparent flex flex-col justify-center px-4">
+                    <span className="text-[10px] font-medium text-[#1A1A1A]">
+                      {storeSettings.megaMenuBannerTitle?.includes('ORDINARY')
+                        ? 'Too Cool For'
+                        : storeSettings.megaMenuBannerSubtitle || 'Signature Series'}
+                    </span>
+                    <span className="font-serif-luxury text-lg font-bold uppercase tracking-wider text-[#1A1A1A] leading-none mt-0.5">
+                      {storeSettings.megaMenuBannerTitle || 'ORDINARY'}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* C. "PRODUCTS" Section (Exact Video 00:37 - 00:46) */}
+              <div className="space-y-2.5">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                  PRODUCTS
+                </h3>
+                <ul className="space-y-2.5 text-[13px] font-medium text-[#1A1A1A]">
+                  <li>
+                    <Link
+                      to="/products?category=smartphones"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 hover:text-[#B5893D]"
+                    >
+                      Flagship Smartphones
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/offers"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 hover:text-[#B5893D]"
+                    >
+                      Exclusive Privilege Bundles
+                    </Link>
+                  </li>
+                  {categories.slice(0, 5).map((cat) => (
+                    <li key={cat.id}>
+                      <Link
+                        to={`/products?category=${cat.slug}`}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className="block py-0.5 hover:text-[#B5893D]"
+                      >
+                        {cat.name}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link
+                      to="/products"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 hover:text-[#B5893D]"
+                    >
+                      New Arrivals
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/products"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 hover:text-[#B5893D]"
+                    >
+                      Bestseller Vault
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* D. "SHOP" Expandable Filter Rows (Exact Video 00:37 - 00:46) */}
+              <div className="space-y-2 pt-2 border-t border-[#F0ECE1]">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                  SHOP
+                </h3>
+                <div className="divide-y divide-[#F5F2EB]">
+                  {SHOP_ACCORDION_SECTIONS.map((sec) => {
+                    const isOpen = expandedShopSection === sec.id;
+                    return (
+                      <div key={sec.id}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedShopSection((prev) => (prev === sec.id ? null : sec.id))
+                          }
+                          className="w-full py-2.5 flex items-center justify-between text-[13px] font-medium text-[#1A1A1A] hover:text-[#B5893D] cursor-pointer"
+                        >
+                          <span>{sec.label}</span>
+                          {isOpen ? (
+                            <ChevronDown className="w-4 h-4 text-[#888888]" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-[#888888]" />
+                          )}
+                        </button>
+                        {isOpen && (
+                          <div className="pl-3 pb-2.5 space-y-2">
+                            {sec.items.map((item) => (
+                              <Link
+                                key={item.name}
+                                to={item.link}
+                                onClick={() => setMobileDrawerOpen(false)}
+                                className="block text-xs text-[#666666] hover:text-[#B5893D]"
+                              >
+                                {item.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* E. "MORE & SUPPORT" Links (Exact Video 00:37 - 00:46) */}
+              <div className="space-y-2.5 pt-2 border-t border-[#F0ECE1]">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                  MORE &amp; SUPPORT
+                </h3>
+                <ul className="space-y-2.5 text-[13px] font-medium text-[#1A1A1A]">
+                  <li>
                     <button
                       type="button"
-                      onClick={() =>
-                        setExpandedCatId((prev) => (prev === cat.id ? null : cat.id))
-                      }
-                      className="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-slate-50"
+                      onClick={() => {
+                        setMobileDrawerOpen(false);
+                        setChatbotOpen(true);
+                      }}
+                      className="block py-0.5 hover:text-[#B5893D] cursor-pointer"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <img
-                          src={cat.iconImg}
-                          alt={cat.name}
-                          className="w-7 h-7 object-contain shrink-0"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span
-                          className={`text-[13px] font-medium truncate ${
-                            isExpanded ? 'text-[#F26522] font-semibold' : 'text-[#171717]'
-                          }`}
-                        >
-                          {cat.name}
-                        </span>
-                      </div>
-                      {isExpanded ? (
-                        <Minus className="w-4 h-4 text-[#171717] shrink-0" />
-                      ) : (
-                        <Plus className="w-4 h-4 text-[#171717] shrink-0" />
-                      )}
+                      AI Shopping Assistant
                     </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileDrawerOpen(false);
+                        openWhatsAppEnquiry({});
+                      }}
+                      className="block py-0.5 hover:text-[#B5893D] cursor-pointer"
+                    >
+                      Contact Us (WhatsApp Concierge)
+                    </button>
+                  </li>
+                  <li>
+                    <Link
+                      to="/store"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 hover:text-[#B5893D]"
+                    >
+                      Our Store
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/admin"
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className="block py-0.5 text-[#B5893D] font-semibold hover:underline"
+                    >
+                      Admin Panel (Store Control)
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-                    {/* Expanded Sub-Items in Orange Text (Exact match to 00:59 - 01:12 in video) */}
-                    {isExpanded && (
-                      <div className="divide-y divide-slate-200 border-t border-slate-200 bg-white">
-                        {cat.items.map((sub) => {
-                          const isSubOpen = expandedSubItem === `${cat.id}_${sub.label}`;
-                          return (
-                            <div key={sub.label}>
-                              <div className="flex items-center justify-between pl-6 pr-3.5 py-2.5">
-                                <Link
-                                  to={sub.link}
-                                  onClick={() => setMobileDrawerOpen(false)}
-                                  className="text-[13px] font-medium text-[#F26522] hover:underline flex-1"
-                                >
-                                  {sub.label}
-                                </Link>
-                                {sub.hasPlus && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (sub.subItems) {
-                                        setExpandedSubItem((prev) =>
-                                          prev === `${cat.id}_${sub.label}`
-                                            ? null
-                                            : `${cat.id}_${sub.label}`
-                                        );
-                                      } else {
-                                        setMobileDrawerOpen(false);
-                                        navigate(sub.link);
-                                      }
-                                    }}
-                                    className="p-1 text-[#171717] cursor-pointer"
-                                  >
-                                    {isSubOpen ? (
-                                      <Minus className="w-4 h-4" />
-                                    ) : (
-                                      <Plus className="w-4 h-4" />
-                                    )}
-                                  </button>
-                                )}
-                              </div>
-
-                              {/* Nested 3rd-level items (e.g. Software -> Office Tools, Operating Software at 01:04) */}
-                              {isSubOpen && sub.subItems && (
-                                <div className="divide-y divide-slate-100 border-t border-slate-100 bg-slate-50/60">
-                                  {sub.subItems.map((nested) => (
-                                    <Link
-                                      key={nested}
-                                      to={sub.link}
-                                      onClick={() => setMobileDrawerOpen(false)}
-                                      className="block pl-10 pr-4 py-2 text-xs text-[#171717] hover:text-[#F26522]"
-                                    >
-                                      {nested}
-                                    </Link>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {/* PWA Install App Prompt inside Drawer */}
+              <div className="pt-2">
+                <PWAInstallBanner variant="drawer-btn" />
+              </div>
             </div>
           </div>
           <div className="flex-1" onClick={() => setMobileDrawerOpen(false)} />
         </div>
       )}
 
-      {/* EXACT POORVIKA SIGN-IN MODAL OVERLAY FROM VIDEO (01:17 - 01:19) */}
-      {showSignInModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-[360px] bg-white rounded-xs shadow-2xl p-6 pt-8 text-[#171717]">
-            {/* Top-Right Orange Square X Button */}
-            <button
-              type="button"
-              onClick={() => setShowSignInModal(false)}
-              aria-label="Close Sign In"
-              className="absolute top-0 right-0 w-7 h-7 bg-[#F26522] hover:bg-[#EA580C] text-white flex items-center justify-center cursor-pointer"
-            >
-              <X className="w-4 h-4 stroke-[2.5]" />
-            </button>
-
-            <div className="text-center space-y-1 mb-5">
-              <h2 className="text-base font-bold text-[#171717]">Sign In</h2>
-              <p className="text-xs text-[#525252]">To Access Your Order Easily</p>
-            </div>
-
-            <form onSubmit={handleManualSignIn} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-[#171717] mb-1.5">
-                  Email / Mobile Number *
-                </label>
-                <input
-                  type="text"
-                  value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
-                  placeholder="Email / Mobile Number"
-                  className="w-full h-10 px-3 border border-slate-300 text-xs text-[#171717] placeholder:text-slate-400 focus:outline-none focus:border-[#F26522]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-[#171717] mb-1.5">
-                  Password *
-                </label>
-                <div className="relative flex items-center">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full h-10 pl-3 pr-9 border border-slate-300 text-xs text-[#171717] placeholder:text-slate-400 focus:outline-none focus:border-[#F26522]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-2.5 text-slate-600 cursor-pointer"
-                  >
-                    {showPassword ? (
-                      <Eye className="w-4 h-4" />
-                    ) : (
-                      <EyeOff className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] pt-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSignInModal(false);
-                    navigate('/account');
-                  }}
-                  className="text-[#F26522] font-semibold hover:underline cursor-pointer"
-                >
-                  Register
-                </button>
-                <button
-                  type="button"
-                  onClick={() => showToast('Password reset link sent to your email/mobile')}
-                  className="text-[#525252] hover:underline cursor-pointer"
-                >
-                  Forgot Password ?
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full h-10 bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-xs font-bold uppercase tracking-wider shadow-xs cursor-pointer"
-              >
-                LOGIN
-              </button>
-
-              <div className="text-center text-xs font-bold text-[#F26522]">or</div>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setShowSignInModal(false);
-                  await loginWithGoogle();
-                }}
-                className="w-full h-10 border border-slate-300 bg-white hover:bg-slate-50 text-[#171717] text-xs font-semibold uppercase tracking-wide cursor-pointer"
-              >
-                LOGIN WITH OTP / GOOGLE
-              </button>
-
-              <p className="text-[10px] text-center text-slate-500 pt-1">
-                Upon Login, I agree to Charlie Mobiles{' '}
-                <Link
-                  to="/store"
-                  onClick={() => setShowSignInModal(false)}
-                  className="text-[#2563EB] underline"
-                >
-                  Privacy Policy
-                </Link>{' '}
-                &amp;{' '}
-                <Link
-                  to="/store"
-                  onClick={() => setShowSignInModal(false)}
-                  className="text-[#2563EB] underline"
-                >
-                  Terms
-                </Link>
-              </p>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Location Picker Modal */}
-      {showLocationModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-xl p-5 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#F26522]" />
-                <h3 className="text-sm font-extrabold text-[#171717]">
-                  Select Delivery Location
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowLocationModal(false)}
-                className="w-7 h-7 rounded bg-slate-100 flex items-center justify-center text-slate-600 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                'RAIPUR',
-                'NAGPUR',
-                'MUMBAI',
-                'PUNE',
-                'DELHI NCR',
-                'BENGALURU',
-                'CHENNAI',
-                'HYDERABAD',
-              ].map((city) => (
-                <button
-                  key={city}
-                  type="button"
-                  onClick={() => {
-                    setSelectedCity(city);
-                    setShowLocationModal(false);
-                  }}
-                  className={`p-2.5 rounded-lg border text-xs font-bold text-left cursor-pointer ${
-                    selectedCity === city
-                      ? 'border-[#F26522] bg-orange-50 text-[#F26522]'
-                      : 'border-slate-200 text-[#171717] hover:bg-slate-50'
-                  }`}
-                >
-                  {city}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 4. CLONED LUXURY LOGIN / SIGN-UP MODAL (EXACT VIDEO 00:27 - 00:32) */}
+      <LoginModal />
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-24 right-4 z-50 max-w-xs bg-[#171717] text-white border-l-4 border-[#F26522] px-3.5 py-2.5 rounded shadow-xl text-xs font-semibold flex items-center gap-2">
-          <Zap className="w-3.5 h-3.5 text-[#F26522] shrink-0" />
+        <div className="fixed top-20 right-4 z-50 max-w-xs bg-[#1A1A1A] text-white border-l-4 border-[#B5893D] px-4 py-2.5 shadow-xl text-xs font-medium flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-[#B5893D] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Offline Mode Indicator */}
       {!isOnline && (
-        <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white shadow-lg">
+        <div className="fixed bottom-16 left-4 z-50 flex items-center gap-2 bg-[#2A1810] border border-[#B5893D] px-3 py-2 text-xs font-semibold text-[#E6C67C] shadow-lg">
           <WifiOff className="w-4 h-4" />
           <span>Offline Mode</span>
         </div>
       )}
 
-      {/* TWO FLOATING CIRCULAR ACTION BUTTONS ON BOTTOM-RIGHT (EXACT MATCH TO VIDEO 00:00 - 01:44) */}
-      <div className="fixed bottom-5 right-3.5 z-40 flex flex-col items-center gap-2.5">
-        {/* Green WhatsApp Circle Button */}
-        <button
-          type="button"
-          onClick={() => openWhatsAppEnquiry({})}
-          aria-label="Chat on WhatsApp"
-          className="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] border-2 border-white flex items-center justify-center transition-transform active:scale-95 cursor-pointer"
-        >
-          <MessageCircle className="w-6 h-6 fill-white text-[#25D366]" />
-        </button>
+      {/* 5. NATIVE MOBILE APP BOTTOM NAVIGATION BAR (APK / MOBILE SHELL) */}
+      <nav
+        aria-label="Mobile App Navigation"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#EAE5DC] pb-safe"
+      >
+        <div className="grid grid-cols-5 h-14 items-center">
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center gap-0.5 ${
+              location.pathname === '/' ? 'text-[#B5893D]' : 'text-[#666666]'
+            }`}
+          >
+            <Home className="w-4 h-4" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
+          </Link>
 
-        {/* Orange Phone Call Circle Button */}
-        <a
-          href={`tel:${(storeSettings.phone || '8818850488').replace(/[^0-9+]/g, '')}`}
-          aria-label="Call Store"
-          className="w-12 h-12 rounded-full bg-[#F26522] hover:bg-[#EA580C] text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] border-2 border-white flex items-center justify-center transition-transform active:scale-95"
-        >
-          <Phone className="w-5 h-5 fill-white text-white" />
-        </a>
-      </div>
+          <Link
+            to="/categories"
+            className={`flex flex-col items-center justify-center gap-0.5 ${
+              location.pathname.startsWith('/categories') ||
+              location.pathname.startsWith('/products')
+                ? 'text-[#B5893D]'
+                : 'text-[#666666]'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Categories</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleReelsNavClick}
+            className="flex flex-col items-center justify-center gap-0.5 text-[#666666] hover:text-[#B5893D] cursor-pointer"
+          >
+            <Film className="w-4 h-4 text-[#B5893D]" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#B5893D]">
+              Reels
+            </span>
+          </button>
+
+          <Link
+            to="/cart"
+            className={`relative flex flex-col items-center justify-center gap-0.5 ${
+              location.pathname === '/cart' ? 'text-[#B5893D]' : 'text-[#666666]'
+            }`}
+          >
+            <div className="relative">
+              <ShoppingBag className="w-4 h-4" />
+              {totalCartItems > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#B5893D] text-white text-[8px] font-bold flex items-center justify-center tabular-nums">
+                  {totalCartItems}
+                </span>
+              )}
+            </div>
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Cart</span>
+          </Link>
+
+          <Link
+            to="/account"
+            className={`flex flex-col items-center justify-center gap-0.5 ${
+              location.pathname === '/account' ? 'text-[#B5893D]' : 'text-[#666666]'
+            }`}
+          >
+            <User className="w-4 h-4" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Account</span>
+          </Link>
+        </div>
+      </nav>
     </>
   );
 };

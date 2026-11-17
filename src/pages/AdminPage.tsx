@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowUpRight,
   BarChart3,
+  Bell,
+  BookOpen,
   Check,
   ChevronDown,
   ChevronUp,
@@ -14,12 +16,14 @@ import {
   Eye,
   EyeOff,
   Film,
+  Gift,
   Image as ImageIcon,
   KeyRound,
   Layers,
   LayoutGrid,
   Lock,
   LogOut,
+  MessageCircle,
   Package,
   Percent,
   Play,
@@ -30,19 +34,26 @@ import {
   Settings,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
+  Star,
   Trash2,
   Upload,
+  Video,
   X,
 } from 'lucide-react';
 import { formatINR, useStore } from '../context/StoreContext';
 import {
+  BlogPostItem,
   CategoryItem,
+  CelebrityReelItem,
   ColorVariant,
   Coupon,
   HeroBanner,
   Order,
   Product,
   ShowroomPhoto,
+  TestimonialItem,
+  VisualCardItem,
 } from '../types/store';
 import {
   DEFAULT_CLOUDINARY_CLOUD_NAME,
@@ -65,8 +76,16 @@ export const AdminPage: React.FC = () => {
     products,
     categories,
     banners,
+    celebrityReels,
+    shopByNotes,
+    shopByOccasions,
+    testimonials,
+    blogPosts,
+    rewardLeads,
+    notifyMeRequests,
     coupons,
     orders,
+    supportChats,
     storeSettings,
     homepageSections,
     toastMessage,
@@ -77,26 +96,43 @@ export const AdminPage: React.FC = () => {
     saveBanner,
     deleteBanner,
     reorderBanners,
+    saveCelebrityReel,
+    deleteCelebrityReel,
+    reorderCelebrityReels,
+    saveShopByNotes,
+    saveShopByOccasions,
+    saveTestimonials,
+    saveBlogPosts,
     saveCoupon,
     deleteCoupon,
     updateOrderStatus,
     updateStoreSettings,
     updateHomepageSections,
     resetCatalogToDefaults,
-    openWhatsAppEnquiry,
+    sendAdminChatReply,
+    deleteSupportChat,
+    refreshSupportChats,
     showToast,
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<
-    | 'dashboard'
     | 'products'
-    | 'categories'
+    | 'reels'
     | 'banners'
+    | 'editorial'
+    | 'categories'
     | 'coupons'
     | 'orders'
+    | 'chats'
     | 'settings'
     | 'homepage'
+    | 'dashboard'
   >('products');
+
+  // Live AI Chats Monitor State
+  const [selectedChatUserId, setSelectedChatUserId] = useState<string>('');
+  const [chatSearchQuery, setChatSearchQuery] = useState('');
+  const [adminReplyInput, setAdminReplyInput] = useState('');
 
   // Product Search & Quick Inline Price Editing State
   const [productSearch, setProductSearch] = useState('');
@@ -118,11 +154,19 @@ export const AdminPage: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [newColorName, setNewColorName] = useState('');
-  const [newColorHex, setNewColorHex] = useState('#2563EB');
+  const [newColorHex, setNewColorHex] = useState('#B5893D');
   const [newSpecKey, setNewSpecKey] = useState('');
   const [newSpecVal, setNewSpecVal] = useState('');
 
-  // Category Form State (Supports both Create & Edit)
+  // Video Reel ("Loved By Celebrities") Form State
+  const [editingReelId, setEditingReelId] = useState<string | null>(null);
+  const [reelTitle, setReelTitle] = useState('');
+  const [reelCelebrity, setReelCelebrity] = useState('');
+  const [reelVideoUrl, setReelVideoUrl] = useState('');
+  const [reelPosterUrl, setReelPosterUrl] = useState('');
+  const [reelProductId, setReelProductId] = useState(products[0]?.id || '');
+
+  // Category Form State
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [catName, setCatName] = useState('');
   const [catSlug, setCatSlug] = useState('');
@@ -130,21 +174,44 @@ export const AdminPage: React.FC = () => {
   const [catBadge, setCatBadge] = useState('');
   const [catImage, setCatImage] = useState('');
 
-  // Banner Form State (Supports both Create & Edit + Photo & Video)
+  // Banner Form State (Photo & Video)
   const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
   const [bannerTitle, setBannerTitle] = useState('');
   const [bannerSub, setBannerSub] = useState('');
-  const [bannerTag, setBannerTag] = useState('CHARLIE MOBILE EXCLUSIVE');
-  const [bannerCtaText, setBannerCtaText] = useState('Shop Now');
+  const [bannerTag, setBannerTag] = useState('ROYAL LUXURY SERIES');
+  const [bannerCtaText, setBannerCtaText] = useState('SHOP NOW');
   const [bannerCtaLink, setBannerCtaLink] = useState('/products');
-  const [bannerSecCtaText, setBannerSecCtaText] = useState('Explore Offers');
+  const [bannerSecCtaText, setBannerSecCtaText] = useState('EXPLORE');
   const [bannerSecCtaLink, setBannerSecCtaLink] = useState('/offers');
-  const [bannerAccent, setBannerAccent] = useState('#2563EB');
+  const [bannerAccent, setBannerAccent] = useState('#B5893D');
   const [bannerImage, setBannerImage] = useState('');
   const [bannerMediaType, setBannerMediaType] = useState<'image' | 'video'>('image');
   const [bannerVideoUrl, setBannerVideoUrl] = useState('');
 
-  // Coupon Form State (Supports both Create & Edit)
+  // Editorial Forms: Notes, Occasions, Testimonials, Blogs
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteSub, setNoteSub] = useState('');
+  const [noteImage, setNoteImage] = useState('');
+  const [noteLink, setNoteLink] = useState('/products');
+
+  const [occTitle, setOccTitle] = useState('');
+  const [occSub, setOccSub] = useState('');
+  const [occImage, setOccImage] = useState('');
+  const [occLink, setOccLink] = useState('/products');
+
+  const [testName, setTestName] = useState('');
+  const [testRole, setTestRole] = useState('Verified Buyer');
+  const [testQuote, setTestQuote] = useState('');
+  const [testProduct, setTestProduct] = useState('');
+  const [testAvatar, setTestAvatar] = useState('');
+
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogExcerpt, setBlogExcerpt] = useState('');
+  const [blogImage, setBlogImage] = useState('');
+  const [blogCta, setBlogCta] = useState('Find Your Style');
+  const [blogLink, setBlogLink] = useState('/products');
+
+  // Coupon Form State
   const [couponCode, setCouponCode] = useState('');
   const [couponTitle, setCouponTitle] = useState('');
   const [couponDesc, setCouponDesc] = useState('');
@@ -170,6 +237,21 @@ export const AdminPage: React.FC = () => {
   useEffect(() => {
     setSettingsForm(storeSettings);
   }, [storeSettings]);
+
+  useEffect(() => {
+    if (activeTab !== 'chats') return;
+    refreshSupportChats();
+    const timer = setInterval(() => {
+      refreshSupportChats();
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!selectedChatUserId && supportChats.length > 0) {
+      setSelectedChatUserId(supportChats[0].userId);
+    }
+  }, [supportChats, selectedChatUserId]);
 
   const cloudinaryInfo = getCloudinaryConfig();
 
@@ -242,30 +324,48 @@ export const AdminPage: React.FC = () => {
     });
   };
 
+  const toggleProductOutOfStock = async (p: Product) => {
+    const nextStock = p.stock > 0 ? 0 : 15;
+    await saveProduct({ ...p, stock: nextStock });
+    setInlineDrafts((prev) => {
+      const next = { ...prev };
+      delete next[p.id];
+      return next;
+    });
+    showToast(
+      nextStock === 0
+        ? `${p.name} set to Out of Stock (🔔 NOTIFY ME enabled)`
+        : `${p.name} restocked (${nextStock} in stock)`
+    );
+  };
+
   const startNewProduct = () => {
     const defaultImg = generateProductStudioSvg({
-      title: 'New 5G Smartphone',
+      title: 'New Luxury Edition',
       brand: 'Apple',
       category: 'smartphones',
-      primaryHex: '#1E293B',
-      secondaryHex: '#00C2FF',
+      primaryHex: '#1A1A1A',
+      secondaryHex: '#B5893D',
     });
     setEditingProduct({
       id: `prod_${Date.now()}`,
       name: '',
       brand: 'Apple',
       category: 'smartphones',
+      goldTagline: '5G FLAGSHIP / CAMERA / TITANIUM',
+      bestsellerTab: 'HIM',
       price: 49999,
       mrp: 54999,
       storagePriceStep: 10000,
       stock: 15,
       description:
-        'Brand-new sealed smartphone with official manufacturer warranty at Charlie Mobile & Accessories.',
+        'Brand-new sealed flagship edition with official manufacturer warranty at Charlie Mobile & Accessories.',
       mainImage: defaultImg,
       gallery: [defaultImg],
+      videoUrl: '',
       colors: [
-        { name: 'Titanium Black', hex: '#1E293B' },
-        { name: 'Electric Blue', hex: '#2563EB' },
+        { name: 'Desert Titanium', hex: '#B5893D' },
+        { name: 'Obsidian Black', hex: '#1A1A1A' },
       ],
       ramOptions: ['8GB', '12GB'],
       storageOptions: ['128GB', '256GB'],
@@ -277,13 +377,13 @@ export const AdminPage: React.FC = () => {
       isFlagship: false,
       isBestCamera: false,
       isMidRange: true,
-      rating: 4.8,
-      reviewCount: 12,
+      rating: 4.9,
+      reviewCount: 42,
       warranty: '1 Year Official Brand Warranty',
       exchangeBonus: 4000,
       emiStartingAt: 2083,
       specs: {
-        Display: '6.7-inch 120Hz AMOLED Display',
+        Display: '6.7-inch 120Hz Super Retina / AMOLED Display',
         Processor: 'Flagship Octa-Core 5G Processor',
         Camera: '50MP OIS Triple Rear Camera System',
         Battery: '5000mAh Battery with Fast Charging',
@@ -305,6 +405,25 @@ export const AdminPage: React.FC = () => {
     } catch (err) {
       console.error(err);
       showToast('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSingleMediaUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onResult: (url: string, mediaType: 'image' | 'video') => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await uploadMediaToCloudinary(file);
+      onResult(res.url, res.mediaType);
+      showToast(`Uploaded ${res.mediaType} to Cloudinary (${cloudinaryInfo.cloudName})`);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to upload media');
     } finally {
       setUploadingImage(false);
     }
@@ -344,7 +463,7 @@ export const AdminPage: React.FC = () => {
     if (!editingProduct || !newColorName.trim()) return;
     const updatedColors: ColorVariant[] = [
       ...editingProduct.colors,
-      { name: newColorName.trim(), hex: newColorHex || '#1E293B' },
+      { name: newColorName.trim(), hex: newColorHex || '#1A1A1A' },
     ];
     setEditingProduct({ ...editingProduct, colors: updatedColors });
     setNewColorName('');
@@ -378,7 +497,53 @@ export const AdminPage: React.FC = () => {
     setEditingProduct({ ...editingProduct, specs: nextSpecs });
   };
 
-  // Category Submit (Create or Update)
+  // Celebrity Reel Submit
+  const handleSaveReelForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reelVideoUrl.trim()) {
+      showToast('Please upload or paste a vertical MP4 video URL');
+      return;
+    }
+    const newReel: CelebrityReelItem = {
+      id: editingReelId || `reel_${Date.now()}`,
+      title: reelTitle.trim() || 'Luxury Spotlight Reel',
+      celebrityName: reelCelebrity.trim() || 'Celebrity Pick',
+      videoUrl: reelVideoUrl.trim(),
+      posterUrl: reelPosterUrl.trim() || undefined,
+      linkedProductId: reelProductId || products[0]?.id || '',
+      enabled: true,
+      order: editingReelId
+        ? celebrityReels.find((r) => r.id === editingReelId)?.order || celebrityReels.length + 1
+        : celebrityReels.length + 1,
+    };
+    saveCelebrityReel(newReel);
+    setEditingReelId(null);
+    setReelTitle('');
+    setReelCelebrity('');
+    setReelVideoUrl('');
+    setReelPosterUrl('');
+  };
+
+  const startEditReel = (reel: CelebrityReelItem) => {
+    setEditingReelId(reel.id);
+    setReelTitle(reel.title);
+    setReelCelebrity(reel.celebrityName || '');
+    setReelVideoUrl(reel.videoUrl);
+    setReelPosterUrl(reel.posterUrl || '');
+    setReelProductId(reel.linkedProductId);
+  };
+
+  const handleMoveReelOrder = async (index: number, direction: 'up' | 'down') => {
+    const sorted = [...celebrityReels].sort((a, b) => a.order - b.order);
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= sorted.length) return;
+    const [moved] = sorted.splice(index, 1);
+    sorted.splice(targetIdx, 0, moved);
+    const reindexed = sorted.map((r, idx) => ({ ...r, order: idx + 1 }));
+    await reorderCelebrityReels(reindexed);
+  };
+
+  // Category Submit
   const handleSaveCategoryForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!catName.trim()) return;
@@ -450,7 +615,6 @@ export const AdminPage: React.FC = () => {
     await reorderBanners(nextBanners);
   };
 
-  // Banner Submit (Create or Update with Photo or Video)
   const handleSaveBannerForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bannerTitle.trim()) return;
@@ -465,15 +629,15 @@ export const AdminPage: React.FC = () => {
       id: editingBannerId || `banner_${Date.now()}`,
       title: bannerTitle.trim(),
       subtitle: bannerSub.trim(),
-      tag: bannerTag.trim() || 'CHARLIE MOBILE EXCLUSIVE',
-      ctaText: bannerCtaText.trim() || 'Shop Now',
+      tag: bannerTag.trim() || 'ROYAL LUXURY SERIES',
+      ctaText: bannerCtaText.trim() || 'SHOP NOW',
       ctaLink: bannerCtaLink.trim() || '/products',
-      secondaryCtaText: bannerSecCtaText.trim() || 'Explore Offers',
+      secondaryCtaText: bannerSecCtaText.trim() || 'EXPLORE',
       secondaryCtaLink: bannerSecCtaLink.trim() || '/offers',
       mediaType: resolvedIsVideo ? 'video' : 'image',
       videoUrl: resolvedIsVideo ? (bannerVideoUrl.trim() || bannerImage.trim()) : undefined,
       image: bannerImage.trim() || fallbackSvg,
-      accentColor: bannerAccent || '#2563EB',
+      accentColor: bannerAccent || '#B5893D',
       enabled: true,
     };
     await saveBanner(newBanner);
@@ -489,16 +653,108 @@ export const AdminPage: React.FC = () => {
     setEditingBannerId(b.id);
     setBannerTitle(b.title);
     setBannerSub(b.subtitle);
-    setBannerTag(b.tag || 'CHARLIE MOBILE EXCLUSIVE');
+    setBannerTag(b.tag || 'ROYAL LUXURY SERIES');
     setBannerCtaText(b.ctaText);
     setBannerCtaLink(b.ctaLink);
-    setBannerSecCtaText(b.secondaryCtaText || 'Explore Offers');
+    setBannerSecCtaText(b.secondaryCtaText || 'EXPLORE');
     setBannerSecCtaLink(b.secondaryCtaLink || '/offers');
-    setBannerAccent(b.accentColor || '#2563EB');
+    setBannerAccent(b.accentColor || '#B5893D');
     setBannerImage(b.image);
     const isVid = b.mediaType === 'video' || isVideoUrl(b.videoUrl) || isVideoUrl(b.image);
     setBannerMediaType(isVid ? 'video' : 'image');
     setBannerVideoUrl(b.videoUrl || (isVid ? b.image : ''));
+  };
+
+  // Editorial: Notes, Occasions, Testimonials, Blogs handlers
+  const handleAddNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!noteTitle.trim()) return;
+    const item: VisualCardItem = {
+      id: `note_${Date.now()}`,
+      title: noteTitle.trim(),
+      subtitle: noteSub.trim() || 'Signature Note',
+      image:
+        noteImage.trim() ||
+        'https://images.unsplash.com/photo-1616348436168-de43ad0db179?auto=format&fit=crop&w=600&q=85',
+      link: noteLink.trim() || '/products',
+    };
+    saveShopByNotes([...shopByNotes, item]);
+    setNoteTitle('');
+    setNoteSub('');
+    setNoteImage('');
+  };
+
+  const handleDeleteNote = (id: string) => {
+    saveShopByNotes(shopByNotes.filter((n) => n.id !== id));
+  };
+
+  const handleAddOccasion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!occTitle.trim()) return;
+    const item: VisualCardItem = {
+      id: `occ_${Date.now()}`,
+      title: occTitle.trim().toUpperCase(),
+      subtitle: occSub.trim() || 'Curated Collection',
+      image:
+        occImage.trim() ||
+        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=85',
+      link: occLink.trim() || '/products',
+    };
+    saveShopByOccasions([...shopByOccasions, item]);
+    setOccTitle('');
+    setOccSub('');
+    setOccImage('');
+  };
+
+  const handleDeleteOccasion = (id: string) => {
+    saveShopByOccasions(shopByOccasions.filter((o) => o.id !== id));
+  };
+
+  const handleAddTestimonial = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testName.trim() || !testQuote.trim()) return;
+    const item: TestimonialItem = {
+      id: `test_${Date.now()}`,
+      authorName: testName.trim(),
+      authorRole: testRole.trim() || 'Verified Buyer',
+      rating: 5,
+      quote: testQuote.trim(),
+      avatarUrl:
+        testAvatar.trim() ||
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    };
+    saveTestimonials([...testimonials, item]);
+    setTestName('');
+    setTestQuote('');
+    setTestProduct('');
+    setTestAvatar('');
+  };
+
+  const handleDeleteTestimonial = (id: string) => {
+    saveTestimonials(testimonials.filter((t) => t.id !== id));
+  };
+
+  const handleAddBlog = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blogTitle.trim()) return;
+    const item: BlogPostItem = {
+      id: `blog_${Date.now()}`,
+      title: blogTitle.trim(),
+      excerpt: blogExcerpt.trim() || 'Discover our latest luxury guide and editorial.',
+      image:
+        blogImage.trim() ||
+        'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=800&q=85',
+      ctaText: blogCta.trim() || 'Find Your Style',
+      link: blogLink.trim() || '/products',
+    };
+    saveBlogPosts([...blogPosts, item]);
+    setBlogTitle('');
+    setBlogExcerpt('');
+    setBlogImage('');
+  };
+
+  const handleDeleteBlog = (id: string) => {
+    saveBlogPosts(blogPosts.filter((b) => b.id !== id));
   };
 
   // Coupon Submit
@@ -623,7 +879,7 @@ export const AdminPage: React.FC = () => {
       } catch {
         // ignore storage error
       }
-      showToast('Admin Console Unlocked');
+      showToast('Royal Luxury Admin Console Unlocked');
     } else {
       setPasswordError('Incorrect Admin Password. Please try again.');
     }
@@ -661,31 +917,31 @@ export const AdminPage: React.FC = () => {
 
   if (!isPasswordUnlocked) {
     return (
-      <div className="min-h-screen bg-[#101114] text-white flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-[#181B22] rounded-3xl border border-white/10 p-6 sm:p-8 shadow-2xl space-y-6">
+      <div className="min-h-screen bg-[#1A1A1A] text-white flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-[#2A1810] border border-[#B5893D]/40 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="text-center space-y-3">
-            <div className="w-28 h-16 mx-auto rounded-2xl bg-white p-2 flex items-center justify-center shadow-md">
+            <div className="w-28 h-16 mx-auto bg-white p-2 flex items-center justify-center border border-[#B5893D]">
               <img
                 src={storeSettings.logoUrl || '/charlie-logo.png'}
                 alt="Charlie Mobiles & Accessories"
                 className="h-full w-auto object-contain"
               />
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 text-[#F26522] text-xs font-extrabold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#B5893D]/20 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.2em]">
               <Lock className="w-3.5 h-3.5" />
-              <span>PROTECTED STORE OWNER CONSOLE</span>
+              <span>ROYAL LUXURY ADMIN CONSOLE</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white">
-              Charlie Mobiles Admin Login
+            <h1 className="font-serif-luxury text-xl sm:text-2xl font-bold uppercase tracking-[0.08em] text-white">
+              Store Owner Login
             </h1>
-            <p className="text-xs text-slate-400">
-              Enter your Admin Password to manage products, prices, banners, orders, and Cloudinary uploads.
+            <p className="text-xs text-[#E5E0D8]/80">
+              Enter your Admin Password to manage products, video reels, luxury banners, and orders.
             </p>
           </div>
 
           <form onSubmit={handleUnlockSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-300">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
                 Admin Password *
               </label>
               <div className="relative">
@@ -699,13 +955,13 @@ export const AdminPage: React.FC = () => {
                     if (passwordError) setPasswordError(null);
                   }}
                   placeholder="Enter admin password"
-                  className="w-full h-11 pl-4 pr-11 rounded-xl bg-[#101114] border border-white/15 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#F26522]"
+                  className="w-full h-11 pl-4 pr-11 bg-[#1A1A1A] border border-[#B5893D]/50 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37] select-text"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswordText((v) => !v)}
                   aria-label="Toggle password visibility"
-                  className="absolute right-3 top-3 text-slate-400 hover:text-white cursor-pointer"
+                  className="absolute right-3 top-3 text-white/60 hover:text-white cursor-pointer"
                 >
                   {showPasswordText ? (
                     <Eye className="w-5 h-5" />
@@ -721,16 +977,16 @@ export const AdminPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D9460F] text-white text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+              className="w-full h-11 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-[0.18em] flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <Lock className="w-4 h-4" />
               <span>Unlock Admin Panel</span>
             </button>
           </form>
 
-          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
             <span>Owner: charliegedekar@gmail.com</span>
-            <Link to="/" className="text-[#F26522] font-bold hover:underline">
+            <Link to="/" className="text-[#D4AF37] font-bold hover:underline">
               ← Back to Store
             </Link>
           </div>
@@ -739,13 +995,15 @@ export const AdminPage: React.FC = () => {
     );
   }
 
+  const sortedReels = [...celebrityReels].sort((a, b) => a.order - b.order);
+
   return (
-    <div className="min-h-screen bg-[#F5F6F8] text-[#171717]">
-      {/* Standalone Top Admin Bar (Separate from Customer Website) */}
-      <header className="sticky top-0 z-40 bg-[#101114] text-white border-b border-white/10 shadow-md">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1A1A1A] select-text">
+      {/* Standalone Top Luxury Admin Header */}
+      <header className="sticky top-0 z-40 bg-[#2A1810] text-white border-b border-[#B5893D]/40 shadow-md">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 px-2 rounded-xl bg-white flex items-center justify-center shrink-0">
+            <div className="h-10 px-2 bg-white border border-[#B5893D] flex items-center justify-center shrink-0">
               <img
                 src={storeSettings.logoUrl || '/charlie-logo.png'}
                 alt="Charlie Mobiles"
@@ -754,16 +1012,16 @@ export const AdminPage: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:text-base font-extrabold tracking-tight text-white">
-                  CHARLIE MOBILES — ADMIN CONSOLE
+                <span className="font-serif-luxury text-sm sm:text-lg font-bold tracking-[0.08em] text-[#D4AF37]">
+                  CHARLIE LUXURY — ADMIN CONSOLE
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-[#B5893D]/25 text-[#F3E5AB] text-[10px] font-bold">
                   <CloudUpload className="w-3 h-3" />
-                  Cloudinary: {cloudinaryInfo.cloudName} / {cloudinaryInfo.uploadPreset}
+                  Cloudinary: {cloudinaryInfo.cloudName}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Standalone Store Owner Control Center · Password Protected
+              <p className="text-[11px] text-white/70">
+                Full Storefront, Video Reels, Banners, Stock &amp; WhatsApp Control
               </p>
             </div>
           </div>
@@ -773,13 +1031,13 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={loginWithGoogle}
-                className="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                className="h-9 px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#00C2FF]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span className="hidden lg:inline">Cloud Sync Sign-In</span>
               </button>
             ) : (
-              <span className="hidden lg:inline-block text-xs text-[#00C2FF] font-semibold px-2.5 py-1 rounded-lg bg-white/5">
+              <span className="hidden lg:inline-block text-xs text-[#D4AF37] font-semibold px-2.5 py-1 bg-white/5">
                 {isAdmin ? `Synced: ${user.email}` : user.email}
               </span>
             )}
@@ -788,9 +1046,9 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={() => setShowChangePassModal(true)}
               title="Change Admin Password"
-              className="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
-              <KeyRound className="w-3.5 h-3.5 text-[#F26522]" />
+              <KeyRound className="w-3.5 h-3.5 text-[#D4AF37]" />
               <span className="hidden sm:inline">Password</span>
             </button>
 
@@ -798,7 +1056,7 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={handleLockAdmin}
               title="Lock Admin Console"
-              className="h-9 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Lock</span>
@@ -806,7 +1064,7 @@ export const AdminPage: React.FC = () => {
 
             <Link
               to="/"
-              className="h-9 px-3.5 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-extrabold flex items-center gap-1.5 whitespace-nowrap"
+              className="h-9 px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap"
             >
               <span>Live Store</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -818,18 +1076,18 @@ export const AdminPage: React.FC = () => {
       {/* Change Admin Password Modal */}
       {showChangePassModal && (
         <div className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="w-full max-w-sm bg-white border border-[#B5893D] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
               <div className="flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#F26522]" />
-                <h3 className="text-sm font-extrabold text-[#1E293B]">
+                <KeyRound className="w-5 h-5 text-[#B5893D]" />
+                <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A]">
                   Change Admin Password
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowChangePassModal(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 cursor-pointer"
+                className="w-7 h-7 bg-[#FAF7F2] flex items-center justify-center text-[#1A1A1A] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -837,7 +1095,7 @@ export const AdminPage: React.FC = () => {
 
             <form onSubmit={handleSaveNewPassword} className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-[#1A1A1A] mb-1">
                   New Admin Password *
                 </label>
                 <input
@@ -846,11 +1104,11 @@ export const AdminPage: React.FC = () => {
                   value={newPassInput}
                   onChange={(e) => setNewPassInput(e.target.value)}
                   placeholder="Enter new password"
-                  className="w-full h-10 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F26522]"
+                  className="w-full h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
                 />
               </div>
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-bold text-[#1A1A1A] mb-1">
                   Confirm New Password *
                 </label>
                 <input
@@ -859,12 +1117,12 @@ export const AdminPage: React.FC = () => {
                   value={confirmPassInput}
                   onChange={(e) => setConfirmPassInput(e.target.value)}
                   placeholder="Confirm new password"
-                  className="w-full h-10 px-3 rounded-xl border border-slate-300 focus:outline-none focus:border-[#F26522]"
+                  className="w-full h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full h-10 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white font-extrabold cursor-pointer"
+                className="w-full h-10 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
               >
                 Update Password
               </button>
@@ -873,26 +1131,41 @@ export const AdminPage: React.FC = () => {
         </div>
       )}
 
-      {/* Toast Notification inside Standalone Admin */}
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm bg-[#101114] text-white border border-[#00C2FF] px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2">
-          <Check className="w-4 h-4 text-[#00C2FF] shrink-0" />
+        <div className="fixed top-20 right-4 z-50 max-w-sm bg-[#2A1810] text-white border border-[#B5893D] px-4 py-2.5 shadow-xl text-xs font-bold flex items-center gap-2">
+          <Check className="w-4 h-4 text-[#D4AF37] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-7 space-y-6">
-        {/* Admin Navigation Bar */}
+        {/* Luxury Admin Navigation Bar */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {[
-            { id: 'products', label: `Products & Prices (${products.length})`, icon: Package },
+            { id: 'products', label: `Products & Stock (${products.length})`, icon: Package },
+            {
+              id: 'reels',
+              label: `Celebrity Video Reels (${celebrityReels.length})`,
+              icon: Video,
+            },
+            { id: 'banners', label: `Hero & Luxury Banners (${banners.length})`, icon: ImageIcon },
+            { id: 'editorial', label: 'Notes, Occasions, Reviews & Blogs', icon: Sparkles },
             { id: 'categories', label: `Categories (${categories.length})`, icon: LayoutGrid },
-            { id: 'banners', label: `Hero Banners (${banners.length})`, icon: ImageIcon },
-            { id: 'coupons', label: `Coupons & Offers (${coupons.length})`, icon: Percent },
-            { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag },
-            { id: 'settings', label: 'Store & Website Settings', icon: Settings },
+            {
+              id: 'orders',
+              label: `Orders & Leads (${orders.length + rewardLeads.length + notifyMeRequests.length})`,
+              icon: ShoppingBag,
+            },
+            {
+              id: 'chats',
+              label: `Live AI Chats (${supportChats.length})`,
+              icon: MessageCircle,
+            },
+            { id: 'coupons', label: `Coupons (${coupons.length})`, icon: Percent },
+            { id: 'settings', label: 'Store & Brand Video Settings', icon: Settings },
             { id: 'homepage', label: 'Homepage Sections', icon: Layers },
-            { id: 'dashboard', label: 'Analytics Overview', icon: BarChart3 },
+            { id: 'dashboard', label: 'Analytics', icon: BarChart3 },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -901,10 +1174,10 @@ export const AdminPage: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`min-h-[42px] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+                className={`min-h-[42px] px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer transition-colors border ${
                   active
-                    ? 'bg-[#2563EB] text-white shadow-xs'
-                    : 'bg-white border border-[#E5E7EB] text-[#171717] hover:border-[#2563EB]'
+                    ? 'bg-[#B5893D] text-white border-[#B5893D]'
+                    : 'bg-white border-[#E5E0D8] text-[#1A1A1A] hover:border-[#B5893D]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -915,37 +1188,37 @@ export const AdminPage: React.FC = () => {
         </div>
 
         {/* =====================================================================
-            TAB 1: PRODUCTS, PRICES, STOCK & CLOUDINARY GALLERY CONTROL
+            TAB 1: PRODUCTS, GOLD TAGLINES, BESTSELLER TABS & STOCK / NOTIFY ME
         ===================================================================== */}
         {activeTab === 'products' && (
           <div className="space-y-6">
             {/* Top Toolbar */}
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h2 className="text-base sm:text-lg font-extrabold text-[#171717]">
-                  Complete Product, Price, Variant &amp; Cloudinary Image Manager
+                <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                  Luxury Catalog, Gold Taglines, Videos &amp; Stock Manager
                 </h2>
-                <p className="text-xs text-[#737373]">
-                  Edit Selling Price, MRP, Exchange Bonus, EMI or Stock directly in the table below, or click &ldquo;Full Edit&rdquo; to change specs, variants &amp; Cloudinary images.
+                <p className="text-xs text-[#666666]">
+                  Edit Selling Price, MRP, Gold Tagline, or toggle any product to &ldquo;🔔 NOTIFY ME&rdquo; (Out of Stock) in 1 click.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2.5">
                 <div className="relative flex-1 sm:w-64">
-                  <Search className="w-4 h-4 text-[#737373] absolute left-3 top-3" />
+                  <Search className="w-4 h-4 text-[#666666] absolute left-3 top-3" />
                   <input
                     type="text"
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
-                    placeholder="Search phone, brand, category..."
-                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-[#E5E7EB] text-xs"
+                    placeholder="Search product, brand..."
+                    className="w-full h-10 pl-9 pr-3 border border-[#D4CFC7] text-xs"
                   />
                 </div>
 
                 <select
                   value={productCategoryFilter}
                   onChange={(e) => setProductCategoryFilter(e.target.value)}
-                  className="h-10 px-3 rounded-xl border border-[#E5E7EB] bg-white text-xs font-bold"
+                  className="h-10 px-3 border border-[#D4CFC7] bg-white text-xs font-bold"
                 >
                   <option value="all">All Categories ({products.length})</option>
                   {categories.map((c) => (
@@ -958,7 +1231,7 @@ export const AdminPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={startNewProduct}
-                  className="h-10 px-4 rounded-xl bg-[#2563EB] hover:bg-blue-600 text-white text-xs font-extrabold flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 px-4 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Product</span>
@@ -970,33 +1243,33 @@ export const AdminPage: React.FC = () => {
             {editingProduct && (
               <form
                 onSubmit={handleSaveProductSubmit}
-                className="bg-white rounded-3xl border-2 border-[#2563EB] p-5 sm:p-6 space-y-5 text-xs shadow-lg"
+                className="bg-white border-2 border-[#B5893D] p-5 sm:p-6 space-y-5 text-xs shadow-lg"
               >
-                <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
+                <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#2563EB]">
-                      FULL PRODUCT &amp; CLOUDINARY EDITOR
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#B5893D]">
+                      FULL LUXURY PRODUCT &amp; MEDIA EDITOR
                     </span>
-                    <h3 className="text-base sm:text-lg font-extrabold text-[#171717]">
+                    <h3 className="font-serif-luxury text-lg sm:text-xl font-bold text-[#1A1A1A]">
                       {products.some((p) => p.id === editingProduct.id)
                         ? `Editing: ${editingProduct.name}`
-                        : 'Create New Store Product'}
+                        : 'Create New Luxury Product'}
                     </h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setEditingProduct(null)}
-                    className="h-9 px-3 rounded-xl bg-slate-100 hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
+                    className="h-9 px-3 bg-[#FAF7F2] hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                     <span>Close</span>
                   </button>
                 </div>
 
-                {/* Basic Identity & Pricing Grid */}
+                {/* Basic Identity, Gold Tagline, Bestseller Tab & Pricing Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                   <div className="sm:col-span-2">
-                    <label className="block font-bold mb-1">Product Name *</label>
+                    <label className="block font-bold mb-1">Product Title *</label>
                     <input
                       type="text"
                       required
@@ -1004,9 +1277,43 @@ export const AdminPage: React.FC = () => {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, name: e.target.value })
                       }
-                      placeholder="e.g. Apple iPhone 16 Pro Max 5G"
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-semibold"
+                      placeholder="e.g. Apple iPhone 16 Pro Max — Royal Edition"
+                      className="w-full h-10 px-3 border border-[#D4CFC7] font-semibold"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-[#B5893D]">
+                      Gold Note / Tagline (Above Title)
+                    </label>
+                    <input
+                      type="text"
+                      value={editingProduct.goldTagline || ''}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, goldTagline: e.target.value })
+                      }
+                      placeholder="e.g. 5G FLAGSHIP / CAMERA / TITANIUM"
+                      className="w-full h-10 px-3 border border-[#B5893D] font-semibold uppercase"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1 text-[#B5893D]">
+                      Bestseller Filter Tab
+                    </label>
+                    <select
+                      value={editingProduct.bestsellerTab || 'ALL'}
+                      onChange={(e) =>
+                        setEditingProduct({ ...editingProduct, bestsellerTab: e.target.value })
+                      }
+                      className="w-full h-10 px-3 border border-[#B5893D] bg-white font-bold"
+                    >
+                      <option value="ALL">ALL</option>
+                      <option value="HIM">HIM</option>
+                      <option value="HER">HER</option>
+                      <option value="ATTAR / PRO">ATTAR / PRO</option>
+                      <option value="GIFTING">GIFTING</option>
+                    </select>
                   </div>
 
                   <div>
@@ -1019,7 +1326,7 @@ export const AdminPage: React.FC = () => {
                         setEditingProduct({ ...editingProduct, brand: e.target.value })
                       }
                       placeholder="Apple, Samsung, Vivo..."
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                      className="w-full h-10 px-3 border border-[#D4CFC7]"
                     />
                   </div>
 
@@ -1030,7 +1337,7 @@ export const AdminPage: React.FC = () => {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, category: e.target.value })
                       }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-white font-semibold"
+                      className="w-full h-10 px-3 border border-[#D4CFC7] bg-white font-semibold"
                     >
                       {categories.map((c) => (
                         <option key={c.id} value={c.slug}>
@@ -1041,7 +1348,7 @@ export const AdminPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block font-bold mb-1 text-[#2563EB]">
+                    <label className="block font-bold mb-1 text-[#B5893D]">
                       Selling Price (₹ INR) *
                     </label>
                     <input
@@ -1051,7 +1358,7 @@ export const AdminPage: React.FC = () => {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, price: Number(e.target.value) })
                       }
-                      className="w-full h-10 px-3 rounded-xl border-2 border-[#2563EB] font-extrabold text-sm tabular-nums"
+                      className="w-full h-10 px-3 border-2 border-[#B5893D] font-extrabold text-sm tabular-nums"
                     />
                   </div>
 
@@ -1064,122 +1371,70 @@ export const AdminPage: React.FC = () => {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, mrp: Number(e.target.value) })
                       }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-bold tabular-nums"
+                      className="w-full h-10 px-3 border border-[#D4CFC7] font-bold tabular-nums"
                     />
                   </div>
 
                   <div>
                     <label className="block font-bold mb-1">
-                      Storage Upgrade Price Step (₹)
+                      Stock Quantity (0 = 🔔 NOTIFY ME) *
                     </label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="number"
+                        required
+                        value={editingProduct.stock}
+                        onChange={(e) =>
+                          setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })
+                        }
+                        className="w-full h-10 px-3 border border-[#D4CFC7] font-bold tabular-nums"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            stock: editingProduct.stock > 0 ? 0 : 15,
+                          })
+                        }
+                        className={`px-3 h-10 font-bold whitespace-nowrap cursor-pointer ${
+                          editingProduct.stock <= 0
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-amber-100 text-amber-900 border border-amber-300'
+                        }`}
+                      >
+                        {editingProduct.stock <= 0 ? 'Set In Stock' : 'Set 🔔 Notify Me'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold mb-1">Customer Rating (1.0 - 5.0)</label>
                     <input
                       type="number"
-                      value={
-                        editingProduct.storagePriceStep !== undefined
-                          ? editingProduct.storagePriceStep
-                          : 10000
-                      }
+                      step="0.1"
+                      min="1"
+                      max="5"
+                      value={editingProduct.rating}
                       onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          storagePriceStep: Number(e.target.value),
-                        })
+                        setEditingProduct({ ...editingProduct, rating: Number(e.target.value) })
                       }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
+                      className="w-full h-10 px-3 border border-[#D4CFC7] tabular-nums"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold mb-1">Stock Quantity *</label>
+                    <label className="block font-bold mb-1">Review Count</label>
                     <input
                       type="number"
-                      required
-                      value={editingProduct.stock}
-                      onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-bold tabular-nums"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Exchange Bonus Up To (₹)</label>
-                    <input
-                      type="number"
-                      value={editingProduct.exchangeBonus}
+                      value={editingProduct.reviewCount}
                       onChange={(e) =>
                         setEditingProduct({
                           ...editingProduct,
-                          exchangeBonus: Number(e.target.value),
+                          reviewCount: Number(e.target.value),
                         })
                       }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Monthly EMI Starting At (₹/mo)</label>
-                    <input
-                      type="number"
-                      value={editingProduct.emiStartingAt}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          emiStartingAt: Number(e.target.value),
-                        })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Operating System</label>
-                    <select
-                      value={editingProduct.os}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          os: e.target.value as Product['os'],
-                        })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-white"
-                    >
-                      <option value="Android">Android</option>
-                      <option value="iOS">iOS</option>
-                      <option value="iPadOS">iPadOS</option>
-                      <option value="WearOS">WearOS</option>
-                      <option value="Accessory">Accessory</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Warranty Details</label>
-                    <input
-                      type="text"
-                      value={editingProduct.warranty}
-                      onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, warranty: e.target.value })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">RAM Options (comma separated)</label>
-                    <input
-                      type="text"
-                      value={editingProduct.ramOptions.join(', ')}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          ramOptions: e.target.value
-                            .split(',')
-                            .map((s) => s.trim())
-                            .filter(Boolean),
-                        })
-                      }
-                      placeholder="8GB, 12GB, 16GB"
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                      className="w-full h-10 px-3 border border-[#D4CFC7] tabular-nums"
                     />
                   </div>
 
@@ -1200,37 +1455,7 @@ export const AdminPage: React.FC = () => {
                         })
                       }
                       placeholder="128GB, 256GB, 512GB"
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Customer Rating (1.0 - 5.0)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="1"
-                      max="5"
-                      value={editingProduct.rating}
-                      onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, rating: Number(e.target.value) })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Review Count</label>
-                    <input
-                      type="number"
-                      value={editingProduct.reviewCount}
-                      onChange={(e) =>
-                        setEditingProduct({
-                          ...editingProduct,
-                          reviewCount: Number(e.target.value),
-                        })
-                      }
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
+                      className="w-full h-10 px-3 border border-[#D4CFC7]"
                     />
                   </div>
                 </div>
@@ -1244,172 +1469,88 @@ export const AdminPage: React.FC = () => {
                     onChange={(e) =>
                       setEditingProduct({ ...editingProduct, description: e.target.value })
                     }
-                    className="w-full p-3 rounded-xl border border-[#E5E7EB]"
+                    className="w-full p-3 border border-[#D4CFC7]"
                   />
                 </div>
 
-                {/* Color Variants Manager */}
-                <div className="p-4 rounded-2xl bg-[#F5F6F8] space-y-3">
-                  <label className="block font-extrabold text-[#171717]">
-                    Color Variants ({editingProduct.colors.length})
+                {/* Cloudinary Main Image, Gallery & Product Video Manager */}
+                <div className="p-4 bg-[#FAF7F2] border border-[#B5893D]/40 space-y-3">
+                  <label className="font-bold text-[#1A1A1A] flex items-center gap-1.5">
+                    <CloudUpload className="w-4 h-4 text-[#B5893D]" />
+                    <span>
+                      Cloudinary Product Photo, Gallery &amp; Product Video Upload (Cloud:{' '}
+                      {cloudinaryInfo.cloudName})
+                    </span>
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {editingProduct.colors.map((c, idx) => (
-                      <div
-                        key={`${c.name}-${idx}`}
-                        className="px-3 py-1.5 rounded-xl bg-white border border-[#E5E7EB] flex items-center gap-2"
-                      >
-                        <span
-                          className="w-4 h-4 rounded-full border border-slate-300"
-                          style={{ backgroundColor: c.hex }}
-                        />
-                        <span className="font-bold">{c.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveColorVariant(idx)}
-                          className="text-rose-500 hover:text-rose-700 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="text"
-                      value={newColorName}
-                      onChange={(e) => setNewColorName(e.target.value)}
-                      placeholder="Color Name (e.g. Desert Titanium)"
-                      className="h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                    <input
-                      type="color"
-                      value={newColorHex}
-                      onChange={(e) => setNewColorHex(e.target.value)}
-                      className="h-9 w-12 rounded-lg bg-white border border-[#E5E7EB] p-1 cursor-pointer"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddColorVariant}
-                      className="h-9 px-3.5 rounded-xl bg-[#101114] text-white font-bold cursor-pointer"
-                    >
-                      + Add Color
-                    </button>
-                  </div>
-                </div>
 
-                {/* Technical Specifications Editor */}
-                <div className="p-4 rounded-2xl bg-[#F5F6F8] space-y-3">
-                  <label className="block font-extrabold text-[#171717]">
-                    Technical Specifications
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {Object.entries(editingProduct.specs || {}).map(([key, val]) => (
-                      <div
-                        key={key}
-                        className="p-2.5 rounded-xl bg-white border border-[#E5E7EB] flex items-center gap-2"
-                      >
-                        <span className="font-bold text-[#737373] min-w-[90px]">{key}:</span>
-                        <input
-                          type="text"
-                          value={val}
-                          onChange={(e) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              specs: {
-                                ...editingProduct.specs,
-                                [key]: e.target.value,
-                              },
-                            })
-                          }
-                          className="flex-1 h-8 px-2 rounded-lg border border-[#E5E7EB] font-semibold"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSpecField(key)}
-                          className="text-rose-500 p-1 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <input
-                      type="text"
-                      value={newSpecKey}
-                      onChange={(e) => setNewSpecKey(e.target.value)}
-                      placeholder="Spec Name (e.g. Charging)"
-                      className="h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                    <input
-                      type="text"
-                      value={newSpecVal}
-                      onChange={(e) => setNewSpecVal(e.target.value)}
-                      placeholder="Spec Value (e.g. 100W SuperVOOC)"
-                      className="flex-1 h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddSpecField}
-                      className="h-9 px-3.5 rounded-xl bg-[#101114] text-white font-bold cursor-pointer"
-                    >
-                      + Add Spec
-                    </button>
-                  </div>
-                </div>
-
-                {/* Cloudinary Main Image & Gallery Manager */}
-                <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="font-extrabold text-[#171717] flex items-center gap-1.5">
-                      <CloudUpload className="w-4 h-4 text-[#2563EB]" />
-                      <span>
-                        Cloudinary Product Image &amp; Gallery Upload (Cloud: {cloudinaryInfo.cloudName} · Preset:{' '}
-                        {cloudinaryInfo.uploadPreset})
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <input
-                      type="text"
-                      value={editingProduct.mainImage}
-                      onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, mainImage: e.target.value })
-                      }
-                      placeholder="Main Image URL or upload directly via Cloudinary"
-                      className="flex-1 h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                    <label className="h-10 px-4 rounded-xl bg-[#2563EB] hover:bg-blue-600 text-white font-bold flex items-center gap-1.5 cursor-pointer">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload Main Image'}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <input
-                        type="file"
-                        accept="image/*"
+                        type="text"
+                        value={editingProduct.mainImage}
                         onChange={(e) =>
-                          handleSingleImageUpload(e, (url) =>
-                            setEditingProduct({
-                              ...editingProduct,
-                              mainImage: url,
-                              gallery: [url, ...(editingProduct.gallery || [])],
-                            })
-                          )
+                          setEditingProduct({ ...editingProduct, mainImage: e.target.value })
                         }
-                        className="hidden"
+                        placeholder="Main Image URL or upload via Cloudinary"
+                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
                       />
-                    </label>
-                    <label className="h-10 px-4 rounded-xl bg-[#101114] text-white font-bold flex items-center gap-1.5 cursor-pointer">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload Gallery Photos'}</span>
+                      <label className="h-10 px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold flex items-center gap-1.5 cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{uploadingImage ? 'Uploading...' : 'Main Photo'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setEditingProduct({
+                                ...editingProduct,
+                                mainImage: url,
+                                gallery: [url, ...(editingProduct.gallery || [])],
+                              })
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                      <label className="h-10 px-3.5 bg-[#1A1A1A] text-white font-bold flex items-center gap-1.5 cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Gallery</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleGalleryUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Product Video Upload */}
+                    <div className="flex items-center gap-2">
                       <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleGalleryUpload}
-                        className="hidden"
+                        type="text"
+                        value={editingProduct.videoUrl || ''}
+                        onChange={(e) =>
+                          setEditingProduct({ ...editingProduct, videoUrl: e.target.value })
+                        }
+                        placeholder="Optional Product Video (.mp4 URL)"
+                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
                       />
-                    </label>
+                      <label className="h-10 px-3.5 bg-[#2A1810] text-[#D4AF37] font-bold flex items-center gap-1.5 cursor-pointer shrink-0">
+                        <Film className="w-3.5 h-3.5" />
+                        <span>{uploadingImage ? 'Uploading...' : 'Upload Video'}</span>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) =>
+                            handleSingleMediaUpload(e, (url) =>
+                              setEditingProduct({ ...editingProduct, videoUrl: url })
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   {/* Gallery Thumbnails Preview */}
@@ -1418,9 +1559,13 @@ export const AdminPage: React.FC = () => {
                       {editingProduct.gallery.map((imgUrl, gIdx) => (
                         <div
                           key={`${imgUrl}-${gIdx}`}
-                          className="relative w-16 h-16 rounded-xl bg-white border border-[#E5E7EB] p-1 shrink-0"
+                          className="relative w-16 h-16 bg-white border border-[#D4CFC7] p-1 shrink-0"
                         >
-                          <SmartImage src={imgUrl} alt="Gallery" className="w-full h-full object-contain" />
+                          <SmartImage
+                            src={imgUrl}
+                            alt="Gallery"
+                            className="w-full h-full object-contain"
+                          />
                           <button
                             type="button"
                             onClick={() =>
@@ -1439,48 +1584,164 @@ export const AdminPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Homepage Placement & Visibility Badges */}
-                <div className="flex flex-wrap gap-4 pt-1">
-                  {[
-                    { key: 'is5G', label: '5G Ready' },
-                    { key: 'isBestSeller', label: 'Best Seller Rail' },
-                    { key: 'isFeatured', label: 'Featured Product' },
-                    { key: 'isNewRelease', label: 'New Release Spotlight' },
-                    { key: 'isFlagship', label: 'Flagship Zone' },
-                    { key: 'isBestCamera', label: 'Best Camera Tab' },
-                    { key: 'isMidRange', label: 'Mid-Range Tab' },
-                  ].map((flag) => (
-                    <label
-                      key={flag.key}
-                      className="px-3 py-2 rounded-xl bg-[#F5F6F8] border border-[#E5E7EB] flex items-center gap-2 font-bold cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={Boolean(editingProduct[flag.key as keyof Product])}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            [flag.key]: e.target.checked,
-                          })
-                        }
-                      />
-                      <span>{flag.label}</span>
+                {/* Color Variants & Specs */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] space-y-3">
+                    <label className="block font-bold text-[#1A1A1A]">
+                      Color Variants ({editingProduct.colors.length})
                     </label>
-                  ))}
+                    <div className="flex flex-wrap gap-2">
+                      {editingProduct.colors.map((c, idx) => (
+                        <div
+                          key={`${c.name}-${idx}`}
+                          className="px-3 py-1.5 bg-white border border-[#D4CFC7] flex items-center gap-2"
+                        >
+                          <span
+                            className="w-4 h-4 rounded-full border border-slate-300"
+                            style={{ backgroundColor: c.hex }}
+                          />
+                          <span className="font-bold">{c.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveColorVariant(idx)}
+                            className="text-rose-500 hover:text-rose-700 cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <input
+                        type="text"
+                        value={newColorName}
+                        onChange={(e) => setNewColorName(e.target.value)}
+                        placeholder="Color Name (e.g. Desert Titanium)"
+                        className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                      <input
+                        type="color"
+                        value={newColorHex}
+                        onChange={(e) => setNewColorHex(e.target.value)}
+                        className="h-9 w-12 bg-white border border-[#D4CFC7] p-1 cursor-pointer"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddColorVariant}
+                        className="h-9 px-3.5 bg-[#1A1A1A] text-white font-bold cursor-pointer"
+                      >
+                        + Add Color
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Homepage Placement Flags */}
+                  <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] space-y-3">
+                    <label className="block font-bold text-[#1A1A1A]">
+                      Homepage Section Placement
+                    </label>
+                    <div className="flex flex-wrap gap-2.5">
+                      {[
+                        { key: 'isBestSeller', label: 'Our Bestsellers' },
+                        { key: 'isFeatured', label: "Ranveer's Favourite" },
+                        { key: 'isNewRelease', label: 'New Arrivals' },
+                        { key: 'isFlagship', label: 'Luxury Series / Pro' },
+                        { key: 'is5G', label: '5G Ready' },
+                      ].map((flag) => (
+                        <label
+                          key={flag.key}
+                          className="px-3 py-2 bg-white border border-[#D4CFC7] flex items-center gap-2 font-bold cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(editingProduct[flag.key as keyof Product])}
+                            onChange={(e) =>
+                              setEditingProduct({
+                                ...editingProduct,
+                                [flag.key]: e.target.checked,
+                              })
+                            }
+                          />
+                          <span>{flag.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Specifications Editor */}
+                <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] space-y-3">
+                  <label className="block font-bold text-[#1A1A1A]">
+                    Specifications / Key Notes
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {Object.entries(editingProduct.specs || {}).map(([key, val]) => (
+                      <div
+                        key={key}
+                        className="p-2 bg-white border border-[#D4CFC7] flex items-center gap-2"
+                      >
+                        <span className="font-bold text-[#666666] min-w-[90px]">{key}:</span>
+                        <input
+                          type="text"
+                          value={val}
+                          onChange={(e) =>
+                            setEditingProduct({
+                              ...editingProduct,
+                              specs: {
+                                ...editingProduct.specs,
+                                [key]: e.target.value,
+                              },
+                            })
+                          }
+                          className="flex-1 h-8 px-2 border border-[#E5E0D8] font-semibold"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSpecField(key)}
+                          className="text-rose-500 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <input
+                      type="text"
+                      value={newSpecKey}
+                      onChange={(e) => setNewSpecKey(e.target.value)}
+                      placeholder="Spec Name"
+                      className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                    <input
+                      type="text"
+                      value={newSpecVal}
+                      onChange={(e) => setNewSpecVal(e.target.value)}
+                      placeholder="Spec Value"
+                      className="flex-1 h-9 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSpecField}
+                      className="h-9 px-3.5 bg-[#1A1A1A] text-white font-bold cursor-pointer"
+                    >
+                      + Add Spec
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     type="submit"
-                    className="h-11 px-6 rounded-xl bg-[#2563EB] hover:bg-blue-600 text-white font-extrabold flex items-center gap-2 cursor-pointer"
+                    className="h-11 px-6 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Save All Product Changes</span>
+                    <span>Save Product Changes</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingProduct(null)}
-                    className="h-11 px-5 rounded-xl bg-slate-100 text-[#171717] font-bold cursor-pointer"
+                    className="h-11 px-5 bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A] font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1488,44 +1749,44 @@ export const AdminPage: React.FC = () => {
               </form>
             )}
 
-            {/* Quick Inline Price, MRP, Bonus, EMI & Stock Editor Table */}
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] overflow-hidden shadow-xs">
+            {/* Quick Inline Price, MRP, Stock & 1-Click 🔔 NOTIFY ME Table */}
+            <div className="bg-white border border-[#E5E0D8] overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-[#F5F6F8] border-b border-[#E5E7EB] text-[#737373]">
-                      <th className="p-3.5 font-bold">Product &amp; Image</th>
+                    <tr className="bg-[#FAF7F2] border-b border-[#E5E0D8] text-[#666666] uppercase tracking-wider text-[11px]">
+                      <th className="p-3.5 font-bold">Product &amp; Gold Tagline</th>
                       <th className="p-3.5 font-bold">Selling Price (₹)</th>
                       <th className="p-3.5 font-bold">Original MRP (₹)</th>
-                      <th className="p-3.5 font-bold">Exchange Bonus (₹)</th>
-                      <th className="p-3.5 font-bold">EMI / Mo (₹)</th>
                       <th className="p-3.5 font-bold">Stock</th>
-                      <th className="p-3.5 font-bold text-right">Quick Save / Full Edit</th>
+                      <th className="p-3.5 font-bold">Availability / 🔔 Notify Me</th>
+                      <th className="p-3.5 font-bold text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E5E7EB]">
+                  <tbody className="divide-y divide-[#E5E0D8]">
                     {filteredProducts.map((p) => {
                       const draft = getDraftForProduct(p);
                       const isDirty = Boolean(inlineDrafts[p.id]);
+                      const isOut = p.stock <= 0;
                       return (
-                        <tr key={p.id} className="hover:bg-slate-50/80">
+                        <tr key={p.id} className="hover:bg-[#FAF7F2]/60">
                           <td className="p-3.5">
-                            <div className="flex items-center gap-3 min-w-[210px]">
-                              <div className="w-11 h-11 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] p-1 shrink-0">
+                            <div className="flex items-center gap-3 min-w-[230px]">
+                              <div className="w-12 h-12 bg-[#F5F5F5] border border-[#E5E0D8] p-1 shrink-0">
                                 <SmartImage src={p.mainImage} alt={p.name} brand={p.brand} />
                               </div>
                               <div>
-                                <p className="font-extrabold text-[#171717] line-clamp-1">
-                                  {p.name}
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-[#B5893D]">
+                                  {p.goldTagline || p.brand}
                                 </p>
-                                <p className="text-[11px] text-[#737373]">
-                                  {p.brand} · {p.category}
+                                <p className="font-bold text-[#1A1A1A] line-clamp-1">{p.name}</p>
+                                <p className="text-[11px] text-[#666666]">
+                                  Tab: {p.bestsellerTab || 'ALL'} · {p.category}
                                 </p>
                               </div>
                             </div>
                           </td>
 
-                          {/* Inline Selling Price Input */}
                           <td className="p-2.5">
                             <input
                               type="number"
@@ -1533,11 +1794,10 @@ export const AdminPage: React.FC = () => {
                               onChange={(e) =>
                                 updateInlineDraft(p, 'price', Number(e.target.value))
                               }
-                              className="w-28 h-9 px-2.5 rounded-xl border border-[#E5E7EB] focus:border-[#2563EB] font-extrabold text-[#171717] tabular-nums"
+                              className="w-28 h-9 px-2.5 border border-[#D4CFC7] focus:border-[#B5893D] font-bold text-[#1A1A1A] tabular-nums"
                             />
                           </td>
 
-                          {/* Inline MRP Input */}
                           <td className="p-2.5">
                             <input
                               type="number"
@@ -1545,35 +1805,10 @@ export const AdminPage: React.FC = () => {
                               onChange={(e) =>
                                 updateInlineDraft(p, 'mrp', Number(e.target.value))
                               }
-                              className="w-28 h-9 px-2.5 rounded-xl border border-[#E5E7EB] text-[#737373] font-bold tabular-nums"
+                              className="w-28 h-9 px-2.5 border border-[#D4CFC7] text-[#666666] font-bold tabular-nums"
                             />
                           </td>
 
-                          {/* Inline Exchange Bonus Input */}
-                          <td className="p-2.5">
-                            <input
-                              type="number"
-                              value={draft.exchangeBonus}
-                              onChange={(e) =>
-                                updateInlineDraft(p, 'exchangeBonus', Number(e.target.value))
-                              }
-                              className="w-24 h-9 px-2.5 rounded-xl border border-[#E5E7EB] text-emerald-700 font-bold tabular-nums"
-                            />
-                          </td>
-
-                          {/* Inline EMI Input */}
-                          <td className="p-2.5">
-                            <input
-                              type="number"
-                              value={draft.emiStartingAt}
-                              onChange={(e) =>
-                                updateInlineDraft(p, 'emiStartingAt', Number(e.target.value))
-                              }
-                              className="w-24 h-9 px-2.5 rounded-xl border border-[#E5E7EB] text-[#2563EB] font-bold tabular-nums"
-                            />
-                          </td>
-
-                          {/* Inline Stock Input */}
                           <td className="p-2.5">
                             <input
                               type="number"
@@ -1581,22 +1816,37 @@ export const AdminPage: React.FC = () => {
                               onChange={(e) =>
                                 updateInlineDraft(p, 'stock', Number(e.target.value))
                               }
-                              className="w-20 h-9 px-2.5 rounded-xl border border-[#E5E7EB] font-bold tabular-nums"
+                              className="w-20 h-9 px-2.5 border border-[#D4CFC7] font-bold tabular-nums"
                             />
+                          </td>
+
+                          <td className="p-2.5">
+                            <button
+                              type="button"
+                              onClick={() => toggleProductOutOfStock(p)}
+                              className={`h-9 px-3 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer border ${
+                                isOut
+                                  ? 'bg-amber-50 border-[#B5893D] text-[#1A1A1A]'
+                                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                              }`}
+                            >
+                              <Bell className="w-3.5 h-3.5 text-[#B5893D]" />
+                              <span>{isOut ? '🔔 NOTIFY ME (Sold Out)' : 'In Stock (Active)'}</span>
+                            </button>
                           </td>
 
                           <td className="p-3.5 text-right whitespace-nowrap space-x-1.5">
                             <button
                               type="button"
                               onClick={() => saveInlineProductRow(p)}
-                              className={`h-9 px-3 rounded-xl font-bold inline-flex items-center gap-1 cursor-pointer transition-colors ${
+                              className={`h-9 px-3 font-bold inline-flex items-center gap-1 cursor-pointer transition-colors ${
                                 isDirty
-                                  ? 'bg-emerald-600 text-white shadow-xs'
-                                  : 'bg-slate-100 text-[#737373] hover:bg-slate-200'
+                                  ? 'bg-[#B5893D] text-white'
+                                  : 'bg-[#FAF7F2] border border-[#D4CFC7] text-[#666666]'
                               }`}
                             >
                               <Save className="w-3.5 h-3.5" />
-                              <span>Save Price</span>
+                              <span>Save</span>
                             </button>
                             <button
                               type="button"
@@ -1604,7 +1854,7 @@ export const AdminPage: React.FC = () => {
                                 setEditingProduct(p);
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                               }}
-                              className="h-9 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-bold inline-flex items-center gap-1 cursor-pointer"
+                              className="h-9 px-3 bg-[#2A1810] text-[#D4AF37] font-bold inline-flex items-center gap-1 cursor-pointer"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                               <span>Full Edit</span>
@@ -1612,7 +1862,7 @@ export const AdminPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => deleteProduct(p.id)}
-                              className="h-9 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 inline-flex items-center cursor-pointer"
+                              className="h-9 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 inline-flex items-center cursor-pointer"
                               aria-label="Delete product"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1629,16 +1879,912 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 2: CATEGORY MANAGEMENT (CREATE + EDIT + CLOUDINARY UPLOAD)
+            TAB 2: SHOPPABLE VIDEO REELS MANAGER ("LOVED BY CELEBRITIES" 00:00-00:11)
+        ===================================================================== */}
+        {activeTab === 'reels' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <form
+              onSubmit={handleSaveReelForm}
+              className="lg:col-span-5 bg-white border border-[#E5E0D8] p-5 space-y-4 text-xs"
+            >
+              <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#B5893D]">
+                    9:16 VERTICAL SHOPPABLE REELS
+                  </span>
+                  <h2 className="font-serif-luxury text-lg font-bold text-[#1A1A1A]">
+                    {editingReelId ? 'Edit Celebrity Video Reel' : 'Add New Celebrity Video Reel'}
+                  </h2>
+                </div>
+                {editingReelId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingReelId(null);
+                      setReelTitle('');
+                      setReelCelebrity('');
+                      setReelVideoUrl('');
+                      setReelPosterUrl('');
+                    }}
+                    className="text-rose-600 font-bold cursor-pointer"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Celebrity Name / Creator Handle *</label>
+                <input
+                  type="text"
+                  required
+                  value={reelCelebrity}
+                  onChange={(e) => setReelCelebrity(e.target.value)}
+                  placeholder="e.g. Ranveer's Pick / Royal Tech Unboxed"
+                  className="w-full h-10 px-3 border border-[#D4CFC7]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Reel Title / Caption *</label>
+                <input
+                  type="text"
+                  required
+                  value={reelTitle}
+                  onChange={(e) => setReelTitle(e.target.value)}
+                  placeholder="e.g. iPhone 16 Pro Max Desert Titanium Spotlight"
+                  className="w-full h-10 px-3 border border-[#D4CFC7]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1 text-[#B5893D]">
+                  Link Product to Reel (Displays Mini Product Bar Below Video) *
+                </label>
+                <select
+                  value={reelProductId}
+                  onChange={(e) => setReelProductId(e.target.value)}
+                  className="w-full h-10 px-3 border-2 border-[#B5893D] bg-white font-bold"
+                >
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — {formatINR(p.price)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="p-3.5 bg-[#FAF7F2] border border-[#E5E0D8] space-y-2.5">
+                <label className="block font-bold">
+                  Vertical Video (.mp4 / .webm) — Upload or Paste URL *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={reelVideoUrl}
+                  onChange={(e) => setReelVideoUrl(e.target.value)}
+                  placeholder="Paste .mp4 video URL or upload below"
+                  className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  value={reelPosterUrl}
+                  onChange={(e) => setReelPosterUrl(e.target.value)}
+                  placeholder="Optional Cover Thumbnail Image URL"
+                  className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <label className="w-full h-10 bg-[#2A1810] hover:bg-[#1A1A1A] text-[#D4AF37] font-bold flex items-center justify-center gap-2 cursor-pointer">
+                  <Upload className="w-4 h-4" />
+                  <span>
+                    {uploadingImage
+                      ? 'Uploading Video to Cloudinary...'
+                      : 'Upload Vertical Video (.MP4) from Device'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) =>
+                      handleSingleMediaUpload(e, (url) => {
+                        setReelVideoUrl(url);
+                      })
+                    }
+                    className="hidden"
+                  />
+                </label>
+
+                {reelVideoUrl && (
+                  <div className="pt-2">
+                    <p className="text-[10px] font-bold text-[#666666] mb-1">Live 9:16 Preview:</p>
+                    <div className="w-36 aspect-[9/16] bg-[#1A1A1A] overflow-hidden border border-[#B5893D]">
+                      <video
+                        src={reelVideoUrl}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full h-11 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
+              >
+                {editingReelId ? 'Save Reel Changes' : 'Publish Shoppable Video Reel'}
+              </button>
+            </form>
+
+            <div className="lg:col-span-7 space-y-3">
+              <div className="bg-white border border-[#E5E0D8] p-4">
+                <h3 className="font-serif-luxury text-base font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                  Active &ldquo;LOVED BY CELEBRITIES&rdquo; Video Reels ({sortedReels.length})
+                </h3>
+                <p className="text-xs text-[#666666]">
+                  All active reels auto-play inline in a 9:16 carousel with a linked 1-click Add-to-Cart product bar underneath.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {sortedReels.map((reel, idx) => {
+                  const linkedProduct =
+                    products.find((p) => p.id === reel.linkedProductId) || products[0];
+                  return (
+                    <div
+                      key={reel.id}
+                      className="bg-white border border-[#E5E0D8] p-3.5 flex gap-3.5 text-xs"
+                    >
+                      <div className="w-24 aspect-[9/16] bg-[#1A1A1A] shrink-0 overflow-hidden relative border border-[#D4CFC7]">
+                        <video
+                          src={reel.videoUrl}
+                          poster={reel.posterUrl}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                      </div>
+
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#B5893D]">
+                            #{idx + 1} · {reel.celebrityName}
+                          </span>
+                          <p className="font-bold text-sm text-[#1A1A1A] line-clamp-1">
+                            {reel.title}
+                          </p>
+                          {linkedProduct && (
+                            <div className="mt-2 p-2 bg-[#FAF7F2] border border-[#E5E0D8] flex items-center gap-2">
+                              <div className="w-8 h-8 bg-white p-0.5 shrink-0">
+                                <SmartImage
+                                  src={linkedProduct.mainImage}
+                                  alt={linkedProduct.name}
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-bold text-[#1A1A1A] truncate">
+                                  {linkedProduct.name}
+                                </p>
+                                <p className="text-[10px] font-bold text-[#B5893D]">
+                                  {formatINR(linkedProduct.price)}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5 pt-3">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveReelOrder(idx, 'up')}
+                            className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === sortedReels.length - 1}
+                            onClick={() => handleMoveReelOrder(idx, 'down')}
+                            className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEditReel(reel)}
+                            className="px-2.5 py-1 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveCelebrityReel({ ...reel, enabled: !reel.enabled })}
+                            className={`px-2.5 py-1 font-bold cursor-pointer ${
+                              reel.enabled
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {reel.enabled ? 'Active' : 'Hidden'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteCelebrityReel(reel.id)}
+                            className="p-1.5 bg-rose-50 text-rose-600 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================================
+            TAB 3: HERO BANNERS, MEGA-MENU & LUXURY GIFTING BANNERS
+        ===================================================================== */}
+        {activeTab === 'banners' && (
+          <div className="space-y-6">
+            {/* Banner Auto-Slide Timer Bar (Default: 5 Seconds) */}
+            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-[#FAF7F2] border border-[#B5893D] text-[#B5893D] flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A]">
+                    Hero Banner Auto-Slide Speed (Currently: {storeSettings.bannerIntervalSeconds || 5} Seconds)
+                  </h3>
+                  <p className="text-[#666666] mt-0.5">
+                    Homepage Hero Banners (Photos &amp; Videos) automatically transition every{' '}
+                    <span className="font-bold text-[#1A1A1A]">
+                      {storeSettings.bannerIntervalSeconds || 5} seconds
+                    </span>
+                    .
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {[3, 5, 7, 10].map((sec) => {
+                  const isCurrent = (storeSettings.bannerIntervalSeconds || 5) === sec;
+                  return (
+                    <button
+                      key={sec}
+                      type="button"
+                      onClick={() =>
+                        updateStoreSettings({
+                          ...storeSettings,
+                          bannerIntervalSeconds: sec,
+                        })
+                      }
+                      className={`h-9 px-3.5 font-bold cursor-pointer transition-colors ${
+                        isCurrent
+                          ? 'bg-[#B5893D] text-white'
+                          : 'bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A]'
+                      }`}
+                    >
+                      {sec}s {sec === 5 ? '(Default)' : ''}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <form
+                onSubmit={handleSaveBannerForm}
+                className="lg:col-span-5 bg-white border border-[#E5E0D8] p-5 space-y-3.5 text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="font-serif-luxury text-lg font-bold uppercase text-[#1A1A1A]">
+                    {editingBannerId ? 'Edit Hero Banner' : 'Add Photo / Video Hero Banner'}
+                  </h2>
+                  {editingBannerId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingBannerId(null);
+                        setBannerTitle('');
+                        setBannerSub('');
+                        setBannerImage('');
+                        setBannerVideoUrl('');
+                        setBannerMediaType('image');
+                      }}
+                      className="text-rose-600 font-bold cursor-pointer"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1.5">Select Banner Media Type *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBannerMediaType('image')}
+                      className={`h-10 font-bold flex items-center justify-center gap-2 border cursor-pointer ${
+                        bannerMediaType === 'image'
+                          ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                          : 'bg-[#FAF7F2] text-[#1A1A1A] border-[#D4CFC7]'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Photo Banner</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBannerMediaType('video')}
+                      className={`h-10 font-bold flex items-center justify-center gap-2 border cursor-pointer ${
+                        bannerMediaType === 'video'
+                          ? 'bg-[#B5893D] text-white border-[#B5893D]'
+                          : 'bg-[#FAF7F2] text-[#1A1A1A] border-[#D4CFC7]'
+                      }`}
+                    >
+                      <Film className="w-4 h-4" />
+                      <span>Video Banner</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">Gold Tagline Above Headline</label>
+                  <input
+                    type="text"
+                    value={bannerTag}
+                    onChange={(e) => setBannerTag(e.target.value)}
+                    placeholder="ROYAL LUXURY SERIES"
+                    className="w-full h-9 px-3 border border-[#D4CFC7]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">Main Banner Headline *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerTitle}
+                    onChange={(e) => setBannerTitle(e.target.value)}
+                    placeholder="e.g. THE TITANIUM FLAGSHIP COLLECTION"
+                    className="w-full h-10 px-3 border border-[#D4CFC7] font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">Subheadline</label>
+                  <textarea
+                    rows={2}
+                    value={bannerSub}
+                    onChange={(e) => setBannerSub(e.target.value)}
+                    className="w-full p-3 border border-[#D4CFC7]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-bold mb-1">CTA Button Text</label>
+                    <input
+                      type="text"
+                      value={bannerCtaText}
+                      onChange={(e) => setBannerCtaText(e.target.value)}
+                      className="w-full h-9 px-3 border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">CTA Link</label>
+                    <input
+                      type="text"
+                      value={bannerCtaLink}
+                      onChange={(e) => setBannerCtaLink(e.target.value)}
+                      className="w-full h-9 px-3 border border-[#D4CFC7]"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-[#FAF7F2] border border-[#E5E0D8] space-y-2.5">
+                  <label className="block font-bold">
+                    {bannerMediaType === 'video'
+                      ? 'Upload Video or Paste Video URL (.mp4)'
+                      : 'Upload Photo or Paste Image URL'}
+                  </label>
+
+                  {bannerMediaType === 'video' ? (
+                    <>
+                      <input
+                        type="text"
+                        value={bannerVideoUrl}
+                        onChange={(e) => setBannerVideoUrl(e.target.value)}
+                        placeholder="Paste MP4 Video URL or Upload below"
+                        className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                      <input
+                        type="text"
+                        value={bannerImage}
+                        onChange={(e) => setBannerImage(e.target.value)}
+                        placeholder="Optional Poster Image URL"
+                        className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      value={bannerImage}
+                      onChange={(e) => setBannerImage(e.target.value)}
+                      placeholder="Paste Image URL or Upload below"
+                      className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  )}
+
+                  <label className="w-full h-10 bg-[#2A1810] text-[#D4AF37] font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>
+                      {uploadingImage
+                        ? 'Uploading to Cloudinary...'
+                        : 'Upload Photo or Video from Device'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleBannerMediaUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full h-10 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
+                >
+                  {editingBannerId ? 'Save Banner Changes' : 'Publish Hero Banner'}
+                </button>
+              </form>
+
+              <div className="lg:col-span-7 space-y-3">
+                {banners.map((b, idx) => {
+                  const isVid =
+                    b.mediaType === 'video' || isVideoUrl(b.videoUrl) || isVideoUrl(b.image);
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white border border-[#E5E0D8] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-28 h-20 bg-[#1A1A1A] shrink-0 relative overflow-hidden flex items-center justify-center border border-[#D4CFC7]">
+                          {isVid ? (
+                            <>
+                              <video
+                                src={b.videoUrl || b.image}
+                                className="w-full h-full object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                              />
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-[#B5893D] text-white text-[9px] font-bold flex items-center gap-0.5">
+                                <Play className="w-2.5 h-2.5 fill-white" /> VIDEO
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <SmartImage
+                                src={b.image}
+                                alt={b.title}
+                                className="w-full h-full object-cover"
+                              />
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-black/70 text-white text-[9px] font-bold">
+                                PHOTO
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold text-[#B5893D] uppercase tracking-wider">
+                            #{idx + 1} · {b.tag}
+                          </span>
+                          <p className="font-serif-luxury font-bold text-base text-[#1A1A1A]">
+                            {b.title}
+                          </p>
+                          <p className="text-[#666666] line-clamp-1 mt-0.5">{b.subtitle}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveBannerOrder(idx, 'up')}
+                          className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === banners.length - 1}
+                          onClick={() => handleMoveBannerOrder(idx, 'down')}
+                          className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startEditBanner(b)}
+                          className="px-3 py-1.5 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => saveBanner({ ...b, enabled: !b.enabled })}
+                          className={`px-3 py-1.5 font-bold cursor-pointer ${
+                            b.enabled
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {b.enabled ? 'Active' : 'Hidden'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteBanner(b.id)}
+                          className="p-2 bg-rose-50 text-rose-600 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================================
+            TAB 4: EDITORIAL MANAGER (NOTES, OCCASIONS, TESTIMONIALS & BLOGS)
+        ===================================================================== */}
+        {activeTab === 'editorial' && (
+          <div className="space-y-8 text-xs">
+            {/* 1. SHOP BY NOTES */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
+              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                1. &ldquo;SHOP BY NOTES / SIGNATURE STYLES&rdquo; Cards ({shopByNotes.length})
+              </h2>
+              <form
+                onSubmit={handleAddNote}
+                className="grid grid-cols-1 sm:grid-cols-5 gap-3 bg-[#FAF7F2] p-3.5 border border-[#E5E0D8]"
+              >
+                <input
+                  type="text"
+                  required
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  placeholder="Card Title (e.g. Titanium Series)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  value={noteSub}
+                  onChange={(e) => setNoteSub(e.target.value)}
+                  placeholder="Subtitle (e.g. Aerospace Finish)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={noteImage}
+                    onChange={(e) => setNoteImage(e.target.value)}
+                    placeholder="Image URL"
+                    className="flex-1 h-9 px-3 bg-white border border-[#D4CFC7]"
+                  />
+                  <label className="h-9 px-2.5 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleSingleImageUpload(e, setNoteImage)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={noteLink}
+                  onChange={(e) => setNoteLink(e.target.value)}
+                  placeholder="Link (/products)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <button
+                  type="submit"
+                  className="h-9 bg-[#B5893D] text-white font-bold uppercase cursor-pointer"
+                >
+                  + Add Note Card
+                </button>
+              </form>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {shopByNotes.map((item) => (
+                  <div key={item.id} className="border border-[#E5E0D8] p-2.5 space-y-2">
+                    <div className="aspect-[4/3] bg-[#F5F5F5] overflow-hidden">
+                      <SmartImage
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="font-bold text-[#1A1A1A]">{item.title}</p>
+                    <p className="text-[11px] text-[#666666]">{item.subtitle}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteNote(item.id)}
+                      className="text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. SHOP BY OCCASIONS */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
+              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                2. &ldquo;SHOP BY OCCASIONS&rdquo; Cards ({shopByOccasions.length})
+              </h2>
+              <form
+                onSubmit={handleAddOccasion}
+                className="grid grid-cols-1 sm:grid-cols-5 gap-3 bg-[#FAF7F2] p-3.5 border border-[#E5E0D8]"
+              >
+                <input
+                  type="text"
+                  required
+                  value={occTitle}
+                  onChange={(e) => setOccTitle(e.target.value)}
+                  placeholder="Occasion Title (e.g. EXECUTIVE SUITE)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  value={occSub}
+                  onChange={(e) => setOccSub(e.target.value)}
+                  placeholder="Subtitle"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={occImage}
+                    onChange={(e) => setOccImage(e.target.value)}
+                    placeholder="Image URL"
+                    className="flex-1 h-9 px-3 bg-white border border-[#D4CFC7]"
+                  />
+                  <label className="h-9 px-2.5 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleSingleImageUpload(e, setOccImage)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={occLink}
+                  onChange={(e) => setOccLink(e.target.value)}
+                  placeholder="Link (/products)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <button
+                  type="submit"
+                  className="h-9 bg-[#B5893D] text-white font-bold uppercase cursor-pointer"
+                >
+                  + Add Occasion
+                </button>
+              </form>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {shopByOccasions.map((item) => (
+                  <div key={item.id} className="border border-[#E5E0D8] p-2.5 space-y-2">
+                    <div className="aspect-[4/3] bg-[#F5F5F5] overflow-hidden">
+                      <SmartImage
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="font-bold text-[#1A1A1A]">{item.title}</p>
+                    <p className="text-[11px] text-[#666666]">{item.subtitle}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteOccasion(item.id)}
+                      className="text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. CUSTOMER TESTIMONIALS ("FROM OUR LOVED ONES") */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
+              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                3. &ldquo;FROM OUR LOVED ONES&rdquo; Gold-Bordered Reviews ({testimonials.length})
+              </h2>
+              <form
+                onSubmit={handleAddTestimonial}
+                className="grid grid-cols-1 sm:grid-cols-5 gap-3 bg-[#FAF7F2] p-3.5 border border-[#E5E0D8]"
+              >
+                <input
+                  type="text"
+                  required
+                  value={testName}
+                  onChange={(e) => setTestName(e.target.value)}
+                  placeholder="Customer Name *"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  value={testRole}
+                  onChange={(e) => setTestRole(e.target.value)}
+                  placeholder="City / Role (e.g. Mumbai)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  required
+                  value={testQuote}
+                  onChange={(e) => setTestQuote(e.target.value)}
+                  placeholder="Review Quote *"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={testAvatar}
+                    onChange={(e) => setTestAvatar(e.target.value)}
+                    placeholder="Customer Photo URL"
+                    className="flex-1 h-9 px-3 bg-white border border-[#D4CFC7]"
+                  />
+                  <label className="h-9 px-2.5 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleSingleImageUpload(e, setTestAvatar)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  className="h-9 bg-[#B5893D] text-white font-bold uppercase cursor-pointer"
+                >
+                  + Add Review
+                </button>
+              </form>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {testimonials.map((t) => (
+                  <div key={t.id} className="border-2 border-[#B5893D] p-3.5 space-y-2 bg-[#FAF7F2]">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#1A1A1A]">{t.authorName}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTestimonial(t.id)}
+                        className="text-rose-600 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-[#666666] italic">&ldquo;{t.quote}&rdquo;</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. BLOGS */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
+              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                4. &ldquo;BLOGS&rdquo; Editorial Cards ({blogPosts.length})
+              </h2>
+              <form
+                onSubmit={handleAddBlog}
+                className="grid grid-cols-1 sm:grid-cols-5 gap-3 bg-[#FAF7F2] p-3.5 border border-[#E5E0D8]"
+              >
+                <input
+                  type="text"
+                  required
+                  value={blogTitle}
+                  onChange={(e) => setBlogTitle(e.target.value)}
+                  placeholder="Blog Title *"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <input
+                  type="text"
+                  value={blogExcerpt}
+                  onChange={(e) => setBlogExcerpt(e.target.value)}
+                  placeholder="Short Excerpt"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={blogImage}
+                    onChange={(e) => setBlogImage(e.target.value)}
+                    placeholder="Blog Cover Image URL"
+                    className="flex-1 h-9 px-3 bg-white border border-[#D4CFC7]"
+                  />
+                  <label className="h-9 px-2.5 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleSingleImageUpload(e, setBlogImage)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={blogCta}
+                  onChange={(e) => setBlogCta(e.target.value)}
+                  placeholder="Button Text (Find Your Style)"
+                  className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                />
+                <button
+                  type="submit"
+                  className="h-9 bg-[#B5893D] text-white font-bold uppercase cursor-pointer"
+                >
+                  + Add Blog Card
+                </button>
+              </form>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {blogPosts.map((b) => (
+                  <div key={b.id} className="border border-[#E5E0D8] p-3 space-y-2">
+                    <div className="aspect-[16/10] bg-[#F5F5F5] overflow-hidden">
+                      <SmartImage
+                        src={b.image}
+                        alt={b.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="font-bold text-[#1A1A1A]">{b.title}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBlog(b.id)}
+                      className="text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove Blog
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================================
+            TAB 5: CATEGORY MANAGEMENT
         ===================================================================== */}
         {activeTab === 'categories' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <form
               onSubmit={handleSaveCategoryForm}
-              className="lg:col-span-4 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3.5 text-xs"
+              className="lg:col-span-4 bg-white border border-[#E5E0D8] p-5 space-y-3.5 text-xs"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-extrabold text-[#171717]">
+                <h2 className="font-serif-luxury text-lg font-bold text-[#1A1A1A]">
                   {editingCategoryId ? 'Edit Category' : 'Add New Category'}
                 </h2>
                 {editingCategoryId && (
@@ -1666,7 +2812,7 @@ export const AdminPage: React.FC = () => {
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   placeholder="e.g. 5G Smartphones"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                  className="w-full h-10 px-3 border border-[#D4CFC7]"
                 />
               </div>
 
@@ -1678,7 +2824,7 @@ export const AdminPage: React.FC = () => {
                     value={catSlug}
                     onChange={(e) => setCatSlug(e.target.value)}
                     placeholder="smartphones"
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
                   />
                 </div>
                 <div>
@@ -1687,34 +2833,21 @@ export const AdminPage: React.FC = () => {
                     type="number"
                     value={catOrder}
                     onChange={(e) => setCatOrder(Number(e.target.value))}
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold mb-1">Highlight Tag / Badge (Optional)</label>
-                <input
-                  type="text"
-                  value={catBadge}
-                  onChange={(e) => setCatBadge(e.target.value)}
-                  placeholder="e.g. Hot, New, Up to 40% Off"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                />
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-[#F5F6F8] space-y-2">
-                <label className="block font-bold">
-                  Category Icon / Image (Cloudinary Upload)
-                </label>
+              <div className="p-3.5 bg-[#FAF7F2] border border-[#E5E0D8] space-y-2">
+                <label className="block font-bold">Category Image (Cloudinary Upload)</label>
                 <input
                   type="text"
                   value={catImage}
                   onChange={(e) => setCatImage(e.target.value)}
                   placeholder="Paste URL or Upload below"
-                  className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                  className="w-full h-9 px-3 bg-white border border-[#D4CFC7]"
                 />
-                <label className="w-full h-9 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                <label className="w-full h-9 bg-[#1A1A1A] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingImage ? 'Uploading...' : 'Upload via Cloudinary'}</span>
                   <input
@@ -1728,30 +2861,30 @@ export const AdminPage: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full h-10 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
+                className="w-full h-10 bg-[#B5893D] text-white font-bold uppercase tracking-wider cursor-pointer"
               >
                 {editingCategoryId ? 'Update Category' : 'Create Category'}
               </button>
             </form>
 
-            <div className="lg:col-span-8 bg-white rounded-3xl border border-[#E5E7EB] p-5">
-              <h2 className="text-base font-extrabold text-[#171717] mb-3">
+            <div className="lg:col-span-8 bg-white border border-[#E5E0D8] p-5">
+              <h2 className="font-serif-luxury text-lg font-bold text-[#1A1A1A] mb-3">
                 All Store Categories ({categories.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {categories.map((cat) => (
                   <div
                     key={cat.id}
-                    className="p-3 rounded-2xl border border-[#E5E7EB] flex items-center justify-between gap-2 text-xs"
+                    className="p-3 border border-[#E5E0D8] flex items-center justify-between gap-2 text-xs"
                   >
                     <div className="flex items-center gap-2.5 truncate">
-                      <div className="w-10 h-10 rounded-xl bg-[#F8FAFC] p-1 shrink-0 border border-[#E5E7EB]">
+                      <div className="w-10 h-10 bg-[#F5F5F5] p-1 shrink-0 border border-[#E5E0D8]">
                         <SmartImage src={cat.image} alt={cat.name} />
                       </div>
                       <div className="truncate">
-                        <p className="font-extrabold text-[#171717] truncate">{cat.name}</p>
-                        <p className="text-[10px] text-[#737373]">
-                          /{cat.slug} · Order #{cat.order}
+                        <p className="font-bold text-[#1A1A1A] truncate">{cat.name}</p>
+                        <p className="text-[10px] text-[#666666]">
+                          /{cat.slug} · #{cat.order}
                         </p>
                       </div>
                     </div>
@@ -1759,14 +2892,14 @@ export const AdminPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => startEditCategory(cat)}
-                        className="p-1.5 rounded-lg bg-blue-50 text-[#2563EB] cursor-pointer"
+                        className="p-1.5 bg-[#FAF7F2] text-[#B5893D] cursor-pointer"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
                         onClick={() => deleteCategory(cat.id)}
-                        className="p-1.5 rounded-lg bg-rose-50 text-rose-600 cursor-pointer"
+                        className="p-1.5 bg-rose-50 text-rose-600 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1779,400 +2912,161 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 3: HERO BANNERS MANAGEMENT (PHOTO + VIDEO + 5-SEC AUTO-SLIDE)
+            TAB 6: ORDERS, REWARDS POPUP LEADS & "🔔 NOTIFY ME" WAITLIST
         ===================================================================== */}
-        {activeTab === 'banners' && (
-          <div className="space-y-5">
-            {/* Banner Auto-Slide Timer Bar (Default: 5 Seconds) */}
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#F26522] flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-extrabold text-[#171717]">
-                    Hero Banner Auto-Change Timer (Currently: {storeSettings.bannerIntervalSeconds || 5} Seconds)
-                  </h3>
-                  <p className="text-[#737373] mt-0.5">
-                    Homepage banners (Photos &amp; Videos) automatically slide every{' '}
-                    <span className="font-bold text-[#171717]">
-                      {storeSettings.bannerIntervalSeconds || 5} seconds
-                    </span>
-                    . Change the timer speed anytime below.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {[3, 5, 7, 10].map((sec) => {
-                  const isCurrent = (storeSettings.bannerIntervalSeconds || 5) === sec;
-                  return (
-                    <button
-                      key={sec}
-                      type="button"
-                      onClick={() =>
-                        updateStoreSettings({
-                          ...storeSettings,
-                          bannerIntervalSeconds: sec,
-                        })
-                      }
-                      className={`h-9 px-3.5 rounded-xl font-extrabold cursor-pointer transition-colors ${
-                        isCurrent
-                          ? 'bg-[#F26522] text-white shadow-xs'
-                          : 'bg-[#F5F6F8] border border-[#E5E7EB] text-[#171717] hover:border-[#F26522]'
-                      }`}
-                    >
-                      {sec}s {sec === 5 ? '(Default)' : ''}
-                    </button>
-                  );
-                })}
-                <div className="flex items-center gap-1.5 bg-[#F5F6F8] border border-[#E5E7EB] rounded-xl px-2.5 h-9">
-                  <span className="text-[11px] font-bold text-[#737373]">Custom (sec):</span>
-                  <input
-                    type="number"
-                    min={2}
-                    max={60}
-                    value={storeSettings.bannerIntervalSeconds || 5}
-                    onChange={(e) =>
-                      updateStoreSettings({
-                        ...storeSettings,
-                        bannerIntervalSeconds: Math.max(2, Number(e.target.value) || 5),
-                      })
-                    }
-                    className="w-12 text-center font-extrabold text-[#171717] bg-transparent focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <form
-                onSubmit={handleSaveBannerForm}
-                className="lg:col-span-5 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3.5 text-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-extrabold text-[#171717]">
-                    {editingBannerId ? 'Edit Hero Banner' : 'Add Photo / Video Hero Banner'}
-                  </h2>
-                  {editingBannerId && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingBannerId(null);
-                        setBannerTitle('');
-                        setBannerSub('');
-                        setBannerImage('');
-                        setBannerVideoUrl('');
-                        setBannerMediaType('image');
-                      }}
-                      className="text-rose-600 font-bold cursor-pointer"
-                    >
-                      Cancel Edit
-                    </button>
-                  )}
-                </div>
-
-                {/* Media Type Toggle: Photo vs Video Banner */}
-                <div>
-                  <label className="block font-bold mb-1.5">Select Banner Media Type *</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBannerMediaType('image')}
-                      className={`h-10 rounded-xl font-extrabold flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
-                        bannerMediaType === 'image'
-                          ? 'bg-[#2563EB] text-white border-[#2563EB]'
-                          : 'bg-[#F5F6F8] text-[#171717] border-[#E5E7EB]'
-                      }`}
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                      <span>Photo Banner</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBannerMediaType('video')}
-                      className={`h-10 rounded-xl font-extrabold flex items-center justify-center gap-2 border cursor-pointer transition-colors ${
-                        bannerMediaType === 'video'
-                          ? 'bg-[#F26522] text-white border-[#F26522]'
-                          : 'bg-[#F5F6F8] text-[#171717] border-[#E5E7EB]'
-                      }`}
-                    >
-                      <Film className="w-4 h-4" />
-                      <span>Video Banner</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-bold mb-1">Campaign Kicker Tag</label>
-                  <input
-                    type="text"
-                    value={bannerTag}
-                    onChange={(e) => setBannerTag(e.target.value)}
-                    placeholder="CHARLIE MOBILE EXCLUSIVE"
-                    className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold mb-1">Main Banner Headline *</label>
-                  <input
-                    type="text"
-                    required
-                    value={bannerTitle}
-                    onChange={(e) => setBannerTitle(e.target.value)}
-                    placeholder="e.g. Your Next Smartphone Awaits"
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold mb-1">Subheadline</label>
-                  <textarea
-                    rows={2}
-                    value={bannerSub}
-                    onChange={(e) => setBannerSub(e.target.value)}
-                    placeholder="Up to ₹9,000 instant exchange bonus..."
-                    className="w-full p-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block font-bold mb-1">Primary CTA Button</label>
-                    <input
-                      type="text"
-                      value={bannerCtaText}
-                      onChange={(e) => setBannerCtaText(e.target.value)}
-                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">Primary CTA Link</label>
-                    <input
-                      type="text"
-                      value={bannerCtaLink}
-                      onChange={(e) => setBannerCtaLink(e.target.value)}
-                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block font-bold mb-1">Secondary CTA Text</label>
-                    <input
-                      type="text"
-                      value={bannerSecCtaText}
-                      onChange={(e) => setBannerSecCtaText(e.target.value)}
-                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">Secondary CTA Link</label>
-                    <input
-                      type="text"
-                      value={bannerSecCtaLink}
-                      onChange={(e) => setBannerSecCtaLink(e.target.value)}
-                      className="w-full h-9 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[#F5F6F8] space-y-2.5">
-                  <label className="block font-bold">
-                    {bannerMediaType === 'video'
-                      ? `Upload Video or Paste Video URL (MP4 / WebM — Cloudinary: ${cloudinaryInfo.cloudName})`
-                      : `Upload Photo or Paste Image URL (Cloudinary: ${cloudinaryInfo.cloudName})`}
-                  </label>
-
-                  {bannerMediaType === 'video' ? (
-                    <>
-                      <input
-                        type="text"
-                        value={bannerVideoUrl}
-                        onChange={(e) => setBannerVideoUrl(e.target.value)}
-                        placeholder="Paste MP4 / Video URL or Upload Video below"
-                        className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                      />
-                      <input
-                        type="text"
-                        value={bannerImage}
-                        onChange={(e) => setBannerImage(e.target.value)}
-                        placeholder="Optional Fallback Poster Image URL"
-                        className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                      />
-                    </>
-                  ) : (
-                    <input
-                      type="text"
-                      value={bannerImage}
-                      onChange={(e) => setBannerImage(e.target.value)}
-                      placeholder="Paste Image URL or Upload Photo/Video below"
-                      className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  )}
-
-                  <label className="w-full h-10 rounded-xl bg-[#101114] hover:bg-slate-800 text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
-                    <Upload className="w-3.5 h-3.5 text-[#F26522]" />
-                    <span>
-                      {uploadingImage
-                        ? 'Uploading to Cloudinary...'
-                        : 'Upload Photo or Video from Device'}
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={handleBannerMediaUpload}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {/* Live Preview inside Form */}
-                  {(bannerVideoUrl || bannerImage) && (
-                    <div className="pt-1">
-                      <p className="text-[10px] font-bold text-[#737373] mb-1">Live Banner Preview:</p>
-                      <div className="w-full h-32 rounded-xl bg-[#101114] overflow-hidden flex items-center justify-center border border-[#E5E7EB]">
-                        {bannerMediaType === 'video' || isVideoUrl(bannerVideoUrl || bannerImage) ? (
-                          <video
-                            src={bannerVideoUrl || bannerImage}
-                            className="w-full h-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                            controls
-                          />
-                        ) : (
-                          <SmartImage
-                            src={bannerImage}
-                            alt="Preview"
-                            className="w-full h-full object-contain"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full h-10 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
-                >
-                  {editingBannerId ? 'Save Banner Changes' : 'Publish Hero Banner'}
-                </button>
-              </form>
-
-              <div className="lg:col-span-7 space-y-3">
-                {banners.map((b, idx) => {
-                  const isVid =
-                    b.mediaType === 'video' || isVideoUrl(b.videoUrl) || isVideoUrl(b.image);
-                  return (
+        {activeTab === 'orders' && (
+          <div className="space-y-6 text-xs">
+            {/* 1. Customer Orders */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
+              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                1. Customer Orders &amp; Payment Status ({orders.length})
+              </h2>
+              {orders.length === 0 ? (
+                <p className="text-[#666666] py-4">
+                  No customer orders placed yet. Orders placed via Checkout appear here in real time.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {orders.map((ord) => (
                     <div
-                      key={b.id}
-                      className="bg-white rounded-2xl border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
+                      key={ord.id}
+                      className="p-4 border border-[#E5E0D8] bg-[#FAF7F2] flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                     >
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-24 h-20 rounded-xl bg-[#101114] p-1 shrink-0 relative overflow-hidden flex items-center justify-center">
-                          {isVid ? (
-                            <>
-                              <video
-                                src={b.videoUrl || b.image}
-                                className="w-full h-full object-cover rounded-lg"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                              />
-                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-[#F26522] text-white text-[9px] font-extrabold flex items-center gap-0.5">
-                                <Play className="w-2.5 h-2.5 fill-white" /> VIDEO
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <SmartImage src={b.image} alt={b.title} />
-                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-extrabold">
-                                PHOTO
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-extrabold text-[#2563EB] uppercase">
-                              #{idx + 1} · {b.tag}
-                            </span>
-                          </div>
-                          <p className="font-extrabold text-sm text-[#171717]">{b.title}</p>
-                          <p className="text-[#737373] line-clamp-2 mt-0.5">{b.subtitle}</p>
-                          <span className="inline-block mt-1 text-[11px] font-bold text-[#171717]">
-                            CTA: {b.ctaText} ({b.ctaLink})
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[#1A1A1A]">
+                            Order #{ord.id}
+                          </span>
+                          <span className="text-[#666666]">
+                            · {new Date(ord.createdAt).toLocaleString()}
                           </span>
                         </div>
+                        <p className="font-bold text-[#1A1A1A]">
+                          Customer: {ord.customerName} · Phone: {ord.customerPhone} · Email:{' '}
+                          {ord.customerEmail}
+                        </p>
+                        <p className="text-[#666666]">Address / Pickup: {ord.shippingAddress}</p>
+                        <p className="font-semibold text-[#B5893D]">Items: {ord.itemsSummary}</p>
+                        <p className="font-extrabold text-sm text-[#1A1A1A] tabular-nums">
+                          Total: {formatINR(ord.totalAmount)} ({ord.paymentMethod.toUpperCase()} —{' '}
+                          {ord.paymentStatus})
+                        </p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          disabled={idx === 0}
-                          onClick={() => handleMoveBannerOrder(idx, 'up')}
-                          title="Move Banner Up"
-                          className="p-1.5 rounded-lg bg-slate-100 text-slate-700 disabled:opacity-35 cursor-pointer"
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={idx === banners.length - 1}
-                          onClick={() => handleMoveBannerOrder(idx, 'down')}
-                          title="Move Banner Down"
-                          className="p-1.5 rounded-lg bg-slate-100 text-slate-700 disabled:opacity-35 cursor-pointer"
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startEditBanner(b)}
-                          className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#2563EB] font-bold cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => saveBanner({ ...b, enabled: !b.enabled })}
-                          className={`px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
-                            b.enabled
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          {b.enabled ? 'Active' : 'Hidden'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteBanner(b.id)}
-                          className="p-2 rounded-lg bg-rose-50 text-rose-600 cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {(
+                            [
+                              'pending',
+                              'confirmed',
+                              'processing',
+                              'shipped',
+                              'delivered',
+                              'cancelled',
+                            ] as Order['status'][]
+                          ).map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              onClick={() =>
+                                updateOrderStatus(
+                                  ord.id,
+                                  st,
+                                  st === 'delivered' ? 'paid' : ord.paymentStatus
+                                )
+                              }
+                              className={`px-3 py-1.5 font-bold capitalize cursor-pointer ${
+                                ord.status === st
+                                  ? 'bg-[#B5893D] text-white'
+                                  : 'bg-white border border-[#D4CFC7] text-[#1A1A1A]'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 2. "🔔 NOTIFY ME" Out-of-Stock Waitlist Requests */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#B5893D]" />
+                <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                  2. &ldquo;🔔 NOTIFY ME&rdquo; Out-of-Stock Waitlist Requests ({notifyMeRequests.length})
+                </h2>
               </div>
+              {notifyMeRequests.length === 0 ? (
+                <p className="text-[#666666]">
+                  When customers click &ldquo;🔔 NOTIFY ME&rdquo; on an out-of-stock product, their contact details appear here.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {notifyMeRequests.map((req) => (
+                    <div
+                      key={req.id}
+                      className="p-3.5 bg-[#FAF7F2] border border-[#E5E0D8] space-y-1.5"
+                    >
+                      <p className="font-bold text-[#1A1A1A]">{req.productName}</p>
+                      <p className="text-[#B5893D] font-semibold">
+                        Contact: {req.customerContact}
+                      </p>
+                      <p className="text-[10px] text-[#666666]">
+                        Requested: {new Date(req.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Luxury Rewards Popup Leads */}
+            <div className="bg-white border border-[#E5E0D8] p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Gift className="w-4 h-4 text-[#B5893D]" />
+                <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                  3. Luxury Rewards Popup Signups ({rewardLeads.length})
+                </h2>
+              </div>
+              {rewardLeads.length === 0 ? (
+                <p className="text-[#666666]">
+                  Customer mobile numbers, emails, and birthdays submitted in the Rewards Popup appear here.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {rewardLeads.map((lead) => (
+                    <div
+                      key={lead.id}
+                      className="p-3.5 bg-[#FAF7F2] border border-[#E5E0D8] space-y-1"
+                    >
+                      <p className="font-bold text-[#1A1A1A]">Phone: {lead.phone}</p>
+                      {lead.email && <p className="text-[#666666]">Email: {lead.email}</p>}
+                      {lead.birthday && <p className="text-[#666666]">DOB: {lead.birthday}</p>}
+                      <p className="text-[10px] text-[#B5893D] font-bold">
+                        Joined: {new Date(lead.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* =====================================================================
-            TAB 4: COUPONS & OFFERS MANAGER
+            TAB 7: COUPONS & OFFERS MANAGER
         ===================================================================== */}
         {activeTab === 'coupons' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <form
               onSubmit={handleSaveCouponForm}
-              className="lg:col-span-4 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3.5 text-xs"
+              className="lg:col-span-4 bg-white border border-[#E5E0D8] p-5 space-y-3.5 text-xs"
             >
-              <h2 className="text-base font-extrabold text-[#171717]">
+              <h2 className="font-serif-luxury text-lg font-bold text-[#1A1A1A]">
                 Create or Update Coupon Code
               </h2>
               <div>
@@ -2182,8 +3076,8 @@ export const AdminPage: React.FC = () => {
                   required
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. DIWALI2000"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] font-mono font-bold uppercase"
+                  placeholder="e.g. ROYAL10"
+                  className="w-full h-10 px-3 border border-[#D4CFC7] font-mono font-bold uppercase"
                 />
               </div>
               <div>
@@ -2193,8 +3087,8 @@ export const AdminPage: React.FC = () => {
                   required
                   value={couponTitle}
                   onChange={(e) => setCouponTitle(e.target.value)}
-                  placeholder="e.g. Flat ₹2,000 Instant Discount"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                  placeholder="e.g. Flat ₹2,000 Instant Privilege Discount"
+                  className="w-full h-10 px-3 border border-[#D4CFC7]"
                 />
               </div>
               <div>
@@ -2203,8 +3097,7 @@ export const AdminPage: React.FC = () => {
                   type="text"
                   value={couponDesc}
                   onChange={(e) => setCouponDesc(e.target.value)}
-                  placeholder="Valid on 5G Smartphones above ₹20,000"
-                  className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                  className="w-full h-10 px-3 border border-[#D4CFC7]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2.5">
@@ -2212,10 +3105,8 @@ export const AdminPage: React.FC = () => {
                   <label className="block font-bold mb-1">Discount Type</label>
                   <select
                     value={couponType}
-                    onChange={(e) =>
-                      setCouponType(e.target.value as 'flat' | 'percentage')
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-white"
+                    onChange={(e) => setCouponType(e.target.value as 'flat' | 'percentage')}
+                    className="w-full h-10 px-3 border border-[#D4CFC7] bg-white"
                   >
                     <option value="flat">Flat Amount (₹)</option>
                     <option value="percentage">Percentage (%)</option>
@@ -2230,35 +3121,13 @@ export const AdminPage: React.FC = () => {
                     required
                     value={couponValue}
                     onChange={(e) => setCouponValue(Number(e.target.value))}
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-bold mb-1">Min Order (₹)</label>
-                  <input
-                    type="number"
-                    value={couponMinOrder}
-                    onChange={(e) => setCouponMinOrder(Number(e.target.value))}
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                {couponType === 'percentage' && (
-                  <div>
-                    <label className="block font-bold mb-1">Max Cap (₹)</label>
-                    <input
-                      type="number"
-                      value={couponMaxDisc}
-                      onChange={(e) => setCouponMaxDisc(Number(e.target.value))}
-                      className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                    />
-                  </div>
-                )}
               </div>
               <button
                 type="submit"
-                className="w-full h-10 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
+                className="w-full h-10 bg-[#B5893D] text-white font-bold uppercase tracking-wider cursor-pointer"
               >
                 Save Coupon Offer
               </button>
@@ -2268,45 +3137,23 @@ export const AdminPage: React.FC = () => {
               {coupons.map((c) => (
                 <div
                   key={c.code}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="bg-white border border-[#E5E0D8] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-[#101114] text-[#00C2FF] font-mono font-extrabold">
+                      <span className="px-2.5 py-1 bg-[#2A1810] text-[#D4AF37] font-mono font-bold">
                         {c.code}
                       </span>
-                      <span className="font-extrabold text-sm text-[#171717]">{c.title}</span>
+                      <span className="font-bold text-sm text-[#1A1A1A]">{c.title}</span>
                     </div>
-                    <p className="text-[#737373] mt-1">{c.description}</p>
-                    <p className="text-[11px] font-bold text-[#2563EB] mt-1 tabular-nums">
-                      Min Order: {formatINR(c.minOrderAmount)} · Value:{' '}
-                      {c.discountType === 'flat'
-                        ? formatINR(c.discountValue)
-                        : `${c.discountValue}%`}
-                    </p>
+                    <p className="text-[#666666] mt-1">{c.description}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={() => {
-                        setCouponCode(c.code);
-                        setCouponTitle(c.title);
-                        setCouponDesc(c.description);
-                        setCouponType(c.discountType);
-                        setCouponValue(c.discountValue);
-                        setCouponMinOrder(c.minOrderAmount);
-                      }}
-                      className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#2563EB] font-bold cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => saveCoupon({ ...c, active: !c.active })}
-                      className={`px-3 py-1.5 rounded-lg font-bold cursor-pointer ${
-                        c.active
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-600'
+                      className={`px-3 py-1.5 font-bold cursor-pointer ${
+                        c.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
                       }`}
                     >
                       {c.active ? 'Active' : 'Disabled'}
@@ -2314,7 +3161,7 @@ export const AdminPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => deleteCoupon(c.code)}
-                      className="p-2 rounded-lg bg-rose-50 text-rose-600 cursor-pointer"
+                      className="p-2 bg-rose-50 text-rose-600 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -2326,414 +3173,276 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 5: ORDERS MANAGEMENT
-        ===================================================================== */}
-        {activeTab === 'orders' && (
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-4">
-            <h2 className="text-base font-extrabold text-[#171717]">
-              Customer Orders &amp; Payment Status Management ({orders.length})
-            </h2>
-            {orders.length === 0 ? (
-              <p className="text-xs text-[#737373] py-6">
-                No customer orders placed yet. Orders placed via Checkout will appear here in real time.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {orders.map((ord) => (
-                  <div
-                    key={ord.id}
-                    className="p-4 rounded-2xl border border-[#E5E7EB] bg-[#F5F6F8] flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-sm text-[#171717]">
-                          Order #{ord.id}
-                        </span>
-                        <span className="text-[#737373]">
-                          · {new Date(ord.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="font-bold text-[#171717]">
-                        Customer: {ord.customerName} · Phone: {ord.customerPhone} · Email:{' '}
-                        {ord.customerEmail}
-                      </p>
-                      <p className="text-[#737373]">Address / Pickup: {ord.shippingAddress}</p>
-                      <p className="font-semibold text-[#2563EB]">Items: {ord.itemsSummary}</p>
-                      <p className="font-extrabold text-sm text-[#171717] tabular-nums">
-                        Total: {formatINR(ord.totalAmount)} ({ord.paymentMethod.toUpperCase()} —{' '}
-                        {ord.paymentStatus})
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {(
-                          [
-                            'pending',
-                            'confirmed',
-                            'processing',
-                            'shipped',
-                            'delivered',
-                            'cancelled',
-                          ] as Order['status'][]
-                        ).map((st) => (
-                          <button
-                            key={st}
-                            type="button"
-                            onClick={() =>
-                              updateOrderStatus(
-                                ord.id,
-                                st,
-                                st === 'delivered' ? 'paid' : ord.paymentStatus
-                              )
-                            }
-                            className={`px-3 py-1.5 rounded-xl font-bold capitalize cursor-pointer ${
-                              ord.status === st
-                                ? 'bg-[#2563EB] text-white'
-                                : 'bg-white border border-[#E5E7EB] text-[#171717]'
-                            }`}
-                          >
-                            {st}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[11px] font-bold text-[#737373]">Payment:</span>
-                        {(
-                          ['cod_due', 'pending_verification', 'paid', 'failed'] as Order['paymentStatus'][]
-                        ).map((pst) => (
-                          <button
-                            key={pst}
-                            type="button"
-                            onClick={() => updateOrderStatus(ord.id, ord.status, pst)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase cursor-pointer ${
-                              ord.paymentStatus === pst
-                                ? 'bg-[#101114] text-[#00C2FF]'
-                                : 'bg-white border border-[#E5E7EB] text-[#737373]'
-                            }`}
-                          >
-                            {pst.replace('_', ' ')}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* =====================================================================
-            TAB 6: STORE & WEBSITE CONTENT SETTINGS + CLOUDINARY + SHOWROOM PHOTOS
+            TAB 8: STORE SETTINGS, BRAND STORY VIDEO, MEGA-MENU & REWARDS POPUP
         ===================================================================== */}
         {activeTab === 'settings' && (
           <div className="space-y-6">
             <form
               onSubmit={handleSaveSettingsSubmit}
-              className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6 space-y-5 text-xs"
+              className="bg-white border border-[#E5E0D8] p-5 sm:p-6 space-y-6 text-xs"
             >
-              <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3">
+              <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
                 <div>
-                  <h2 className="text-base sm:text-lg font-extrabold text-[#171717]">
-                    Store Details, Website Copy, Offers &amp; Cloudinary Settings
+                  <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase text-[#1A1A1A]">
+                    Store Details, Brand Story Video, Mega-Menu &amp; Rewards Popup Settings
                   </h2>
-                  <p className="text-[#737373]">
-                    Every detail below dynamically updates the Header, Homepage, Offers, Checkout, Store Locator, and Footer.
+                  <p className="text-[#666666]">
+                    Control every luxury banner, video, logo, WhatsApp number, and popup across the website.
                   </p>
                 </div>
                 <button
                   type="submit"
-                  className="h-10 px-5 rounded-xl bg-[#2563EB] text-white font-extrabold flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 px-5 bg-[#B5893D] text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save All Settings</span>
                 </button>
               </div>
 
-              {/* Cloudinary Configuration Box */}
-              <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-extrabold text-[#171717] mb-1">
-                    Cloudinary Cloud Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={cloudNameInput}
-                    onChange={(e) => setCloudNameInput(e.target.value)}
-                    placeholder="dxeuzdwkz"
-                    className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB] font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-[#171717] mb-1">
-                    Cloudinary Upload Preset (Unsigned) *
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadPresetInput}
-                    onChange={(e) => setUploadPresetInput(e.target.value)}
-                    placeholder="charliemobile"
-                    className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB] font-mono font-bold"
-                  />
+              {/* 1. "LET US WALK YOU THROUGH" Full-Width Brand Story Video */}
+              <div className="p-4 bg-[#FAF7F2] border border-[#B5893D]/50 space-y-3">
+                <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A] flex items-center gap-2">
+                  <Film className="w-4 h-4 text-[#B5893D]" />
+                  <span>
+                    1. &ldquo;LET US WALK YOU THROUGH&rdquo; Full-Width Brand Story Video (Above Footer)
+                  </span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold mb-1">Section Heading</label>
+                    <input
+                      type="text"
+                      value={settingsForm.brandStoryTitle || 'LET US WALK YOU THROUGH'}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, brandStoryTitle: e.target.value })
+                      }
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Brand Story Video URL (.mp4)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.brandStoryVideoUrl || ''}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, brandStoryVideoUrl: e.target.value })
+                      }
+                      placeholder="Paste .mp4 video URL or upload"
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Upload Brand Video (Cloudinary)</label>
+                    <label className="w-full h-10 bg-[#2A1810] text-[#D4AF37] font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{uploadingImage ? 'Uploading...' : 'Upload Brand Video (.MP4)'}</span>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) =>
+                          handleSingleMediaUpload(e, (url) =>
+                            setSettingsForm((prev) => ({ ...prev, brandStoryVideoUrl: url }))
+                          )
+                        }
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              {/* Store Identity & Contact */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label className="block font-bold mb-1">Official Brand Name</label>
-                  <input
-                    type="text"
-                    value={settingsForm.storeName}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, storeName: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
+              {/* 2. "DISCOVER LUXURY GIFTING" Banner & Mega-Menu Promo Banner */}
+              <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] space-y-3">
+                <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A]">
+                  2. &ldquo;DISCOVER Luxury Gifting&rdquo; Banner &amp; Hamburger Drawer Promo Card
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block font-bold mb-1">Luxury Gifting Banner Title</label>
+                    <input
+                      type="text"
+                      value={settingsForm.luxuryGiftingBannerTitle || 'DISCOVER Luxury Gifting'}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          luxuryGiftingBannerTitle: e.target.value,
+                        })
+                      }
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Luxury Gifting Image</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={settingsForm.luxuryGiftingBannerImage || ''}
+                        onChange={(e) =>
+                          setSettingsForm({
+                            ...settingsForm,
+                            luxuryGiftingBannerImage: e.target.value,
+                          })
+                        }
+                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                      <label className="h-10 px-3 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setSettingsForm((prev) => ({
+                                ...prev,
+                                luxuryGiftingBannerImage: url,
+                              }))
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Mega-Menu Promo Title</label>
+                    <input
+                      type="text"
+                      value={settingsForm.megaMenuBannerTitle || 'Too Cool For ORDINARY'}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, megaMenuBannerTitle: e.target.value })
+                      }
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Mega-Menu Promo Image</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={settingsForm.megaMenuBannerUrl || ''}
+                        onChange={(e) =>
+                          setSettingsForm({ ...settingsForm, megaMenuBannerUrl: e.target.value })
+                        }
+                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                      <label className="h-10 px-3 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setSettingsForm((prev) => ({ ...prev, megaMenuBannerUrl: url }))
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-bold mb-1">Full Business Name</label>
-                  <input
-                    type="text"
-                    value={settingsForm.businessName}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, businessName: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Store Tagline</label>
-                  <input
-                    type="text"
-                    value={settingsForm.tagline}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, tagline: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block font-bold mb-1">Physical Store Address</label>
-                  <input
-                    type="text"
-                    value={settingsForm.address}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, address: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">City / Primary Hub</label>
-                  <input
-                    type="text"
-                    value={settingsForm.city}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, city: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Store Phone Number</label>
-                  <input
-                    type="text"
-                    value={settingsForm.phone}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, phone: e.target.value })
-                    }
-                    placeholder="e.g. +91 98XXXXXXXX"
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">
-                    WhatsApp Business Number (with country code, e.g. 9198XXXXXXXX)
+              </div>
+
+              {/* 3. Split Luxury Rewards Popup Settings */}
+              <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A]">
+                    3. Split Luxury Rewards Popup Modal (00:02 in Video)
+                  </h3>
+                  <label className="flex items-center gap-2 font-bold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.rewardPopupEnabled !== false}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          rewardPopupEnabled: e.target.checked,
+                        })
+                      }
+                    />
+                    <span>Enable Rewards Popup</span>
                   </label>
-                  <input
-                    type="text"
-                    value={settingsForm.whatsappNumber}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, whatsappNumber: e.target.value })
-                    }
-                    placeholder="e.g. 9198XXXXXXXX"
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
                 </div>
-                <div>
-                  <label className="block font-bold mb-1">Official Email</label>
-                  <input
-                    type="email"
-                    value={settingsForm.email}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, email: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block font-bold mb-1">Popup Headline</label>
+                    <input
+                      type="text"
+                      value={settingsForm.rewardPopupTitle || ''}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, rewardPopupTitle: e.target.value })
+                      }
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Reward Coupon Code</label>
+                    <input
+                      type="text"
+                      value={settingsForm.rewardCouponCode || 'ROYAL10'}
+                      onChange={(e) =>
+                        setSettingsForm({ ...settingsForm, rewardCouponCode: e.target.value })
+                      }
+                      className="w-full h-10 px-3 bg-white border border-[#D4CFC7] font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">Popup Left Image</label>
+                    <div className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={settingsForm.rewardPopupImage || ''}
+                        onChange={(e) =>
+                          setSettingsForm({ ...settingsForm, rewardPopupImage: e.target.value })
+                        }
+                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
+                      />
+                      <label className="h-10 px-3 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                        <Upload className="w-3.5 h-3.5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleSingleImageUpload(e, (url) =>
+                              setSettingsForm((prev) => ({ ...prev, rewardPopupImage: url }))
+                            )
+                          }
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-bold mb-1">Opening Hours</label>
-                  <input
-                    type="text"
-                    value={settingsForm.openingHours}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, openingHours: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Google Maps Direction Link</label>
-                  <input
-                    type="text"
-                    value={settingsForm.mapLink}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, mapLink: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Merchant UPI ID (For Checkout)</label>
-                  <input
-                    type="text"
-                    value={settingsForm.upiId}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, upiId: e.target.value })
-                    }
-                    placeholder="e.g. charliemobile@upi"
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Bank Cashback Strip Headline</label>
-                  <input
-                    type="text"
-                    value={settingsForm.bankOfferTitle || ''}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, bankOfferTitle: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Bank Cashback Partner Subtitle</label>
-                  <input
-                    type="text"
-                    value={settingsForm.bankOfferSubtitle || ''}
-                    onChange={(e) =>
-                      setSettingsForm({ ...settingsForm, bankOfferSubtitle: e.target.value })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Max Exchange Bonus Banner (₹)</label>
-                  <input
-                    type="number"
-                    value={settingsForm.exchangeMaxBonus || 9000}
-                    onChange={(e) =>
-                      setSettingsForm({
-                        ...settingsForm,
-                        exchangeMaxBonus: Number(e.target.value),
-                      })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Starting Monthly EMI Banner (₹)</label>
-                  <input
-                    type="number"
-                    value={settingsForm.emiStartingPrice || 699}
-                    onChange={(e) =>
-                      setSettingsForm({
-                        ...settingsForm,
-                        emiStartingPrice: Number(e.target.value),
-                      })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums"
-                  />
-                </div>
+              </div>
+
+              {/* 4. Store Identity, Logo, Announcement Bar & Contact */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block font-bold mb-1">Top Promotional Announcement Text</label>
+                  <label className="block font-bold mb-1 text-[#B5893D]">
+                    Top Announcement Bar Text (00:31 in Video)
+                  </label>
                   <input
                     type="text"
                     value={settingsForm.announcementText}
                     onChange={(e) =>
                       setSettingsForm({ ...settingsForm, announcementText: e.target.value })
                     }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB]"
+                    className="w-full h-10 px-3 border border-[#B5893D] font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold mb-1">
-                    Hero Banner Auto-Slide Speed (Seconds)
-                  </label>
-                  <input
-                    type="number"
-                    min={2}
-                    max={60}
-                    value={settingsForm.bannerIntervalSeconds || 5}
-                    onChange={(e) =>
-                      setSettingsForm({
-                        ...settingsForm,
-                        bannerIntervalSeconds: Math.max(2, Number(e.target.value) || 5),
-                      })
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] tabular-nums font-bold"
-                  />
-                </div>
-              </div>
-
-              {/* Website Logo, Festive Strip Banner & Seasonal Deals Banners Control */}
-              <div className="p-4 rounded-2xl bg-[#F5F6F8] border border-[#E5E7EB] space-y-4">
-                <h3 className="text-sm font-extrabold text-[#171717]">
-                  Website Logo, Festive Strip &amp; Promotional Banners Control
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                  <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-[#E5E7EB]">
-                    <img
-                      src={settingsForm.logoUrl || '/charlie-logo.png'}
-                      alt="Current Store Logo"
-                      className="h-12 w-auto object-contain shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <p className="font-extrabold text-[#171717] text-xs">Active Store Logo</p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSettingsForm({ ...settingsForm, logoUrl: '/charlie-logo.png' })
-                        }
-                        className="text-[11px] font-bold text-[#F26522] hover:underline cursor-pointer mt-0.5"
-                      >
-                        Reset to Default CM Logo
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Website Logo URL</label>
+                  <label className="block font-bold mb-1">Website Brand Logo</label>
+                  <div className="flex gap-1.5">
                     <input
                       type="text"
                       value={settingsForm.logoUrl || '/charlie-logo.png'}
                       onChange={(e) =>
                         setSettingsForm({ ...settingsForm, logoUrl: e.target.value })
                       }
-                      placeholder="/charlie-logo.png"
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
+                      className="flex-1 h-10 px-3 border border-[#D4CFC7]"
                     />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Upload Custom Logo (Cloudinary)</label>
-                    <label className="w-full h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                      <Upload className="w-3.5 h-3.5 text-[#F26522]" />
-                      <span>{uploadingImage ? 'Uploading...' : 'Upload New Logo'}</span>
+                    <label className="h-10 px-3 bg-[#1A1A1A] text-white flex items-center cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" />
                       <input
                         type="file"
                         accept="image/*"
@@ -2747,300 +3456,120 @@ export const AdminPage: React.FC = () => {
                     </label>
                   </div>
                 </div>
-
-                {/* Top Festive Deals Strip Banner & Seasonal Deals Banner */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 border-t border-[#E5E7EB]">
-                  <div>
-                    <label className="block font-bold mb-1">Top Festive Strip Banner URL</label>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        value={settingsForm.festiveStripBannerUrl || ''}
-                        onChange={(e) =>
-                          setSettingsForm({
-                            ...settingsForm,
-                            festiveStripBannerUrl: e.target.value,
-                          })
-                        }
-                        placeholder="Image URL for top strip banner"
-                        className="flex-1 h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                      />
-                      <label className="h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center cursor-pointer shrink-0">
-                        <Upload className="w-3.5 h-3.5" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleSingleImageUpload(e, (url) =>
-                              setSettingsForm((prev) => ({
-                                ...prev,
-                                festiveStripBannerUrl: url,
-                              }))
-                            )
-                          }
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Top Festive Strip Click Link</label>
-                    <input
-                      type="text"
-                      value={settingsForm.festiveStripBannerLink || '/offers'}
-                      onChange={(e) =>
-                        setSettingsForm({
-                          ...settingsForm,
-                          festiveStripBannerLink: e.target.value,
-                        })
-                      }
-                      placeholder="/offers"
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Seasonal Deals Main Banner</label>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        value={settingsForm.seasonalMainBannerUrl || ''}
-                        onChange={(e) =>
-                          setSettingsForm({
-                            ...settingsForm,
-                            seasonalMainBannerUrl: e.target.value,
-                          })
-                        }
-                        placeholder="Image URL for seasonal deals banner"
-                        className="flex-1 h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                      />
-                      <label className="h-10 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center cursor-pointer shrink-0">
-                        <Upload className="w-3.5 h-3.5" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleSingleImageUpload(e, (url) =>
-                              setSettingsForm((prev) => ({
-                                ...prev,
-                                seasonalMainBannerUrl: url,
-                              }))
-                            )
-                          }
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Seasonal Deals Section Heading</label>
-                    <input
-                      type="text"
-                      value={settingsForm.seasonalDealsTitle || 'Monsoon Appliance Deals'}
-                      onChange={(e) =>
-                        setSettingsForm({
-                          ...settingsForm,
-                          seasonalDealsTitle: e.target.value,
-                        })
-                      }
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block font-bold mb-1">Seasonal Deals Subtitle</label>
-                    <input
-                      type="text"
-                      value={settingsForm.seasonalDealsSubtitle || ''}
-                      onChange={(e) =>
-                        setSettingsForm({
-                          ...settingsForm,
-                          seasonalDealsSubtitle: e.target.value,
-                        })
-                      }
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-bold mb-1">Official Brand Name</label>
+                  <input
+                    type="text"
+                    value={settingsForm.storeName}
+                    onChange={(e) =>
+                      setSettingsForm({ ...settingsForm, storeName: e.target.value })
+                    }
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
+                  />
                 </div>
-
-                {/* Social Media Links */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[#E5E7EB]">
-                  <div>
-                    <label className="block font-bold mb-1">Instagram Profile Link</label>
-                    <input
-                      type="text"
-                      value={settingsForm.instagramUrl || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, instagramUrl: e.target.value })
-                      }
-                      placeholder="https://instagram.com/..."
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">Facebook Page Link</label>
-                    <input
-                      type="text"
-                      value={settingsForm.facebookUrl || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, facebookUrl: e.target.value })
-                      }
-                      placeholder="https://facebook.com/..."
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">YouTube Channel Link</label>
-                    <input
-                      type="text"
-                      value={settingsForm.youtubeUrl || ''}
-                      onChange={(e) =>
-                        setSettingsForm({ ...settingsForm, youtubeUrl: e.target.value })
-                      }
-                      placeholder="https://youtube.com/..."
-                      className="w-full h-10 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-bold mb-1">WhatsApp Ordering Number</label>
+                  <input
+                    type="text"
+                    value={settingsForm.whatsappNumber}
+                    onChange={(e) =>
+                      setSettingsForm({ ...settingsForm, whatsappNumber: e.target.value })
+                    }
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">Store Phone Number</label>
+                  <input
+                    type="text"
+                    value={settingsForm.phone}
+                    onChange={(e) =>
+                      setSettingsForm({ ...settingsForm, phone: e.target.value })
+                    }
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block font-bold mb-1">Physical Store Address</label>
+                  <input
+                    type="text"
+                    value={settingsForm.address}
+                    onChange={(e) =>
+                      setSettingsForm({ ...settingsForm, address: e.target.value })
+                    }
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">Merchant UPI ID</label>
+                  <input
+                    type="text"
+                    value={settingsForm.upiId}
+                    onChange={(e) =>
+                      setSettingsForm({ ...settingsForm, upiId: e.target.value })
+                    }
+                    className="w-full h-10 px-3 border border-[#D4CFC7]"
+                  />
                 </div>
               </div>
 
-              {/* Checkout & Fulfillment Toggles */}
-              <div className="pt-2 flex flex-wrap gap-4">
-                {[
-                  { key: 'codEnabled', label: 'Cash on Delivery / Pay at Store' },
-                  { key: 'onlinePaymentEnabled', label: 'UPI / Online Payment' },
-                  { key: 'storePickupEnabled', label: 'Express Store Pickup' },
-                  { key: 'localDeliveryEnabled', label: '2-Hour Local Delivery' },
-                  { key: 'shippingEnabled', label: 'All-India Courier Shipping' },
-                ].map((item) => (
-                  <label
-                    key={item.key}
-                    className="px-3.5 py-2 rounded-xl bg-[#F5F6F8] border border-[#E5E7EB] flex items-center gap-2 font-bold cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={Boolean(settingsForm[item.key as keyof typeof settingsForm])}
-                      onChange={(e) =>
-                        setSettingsForm({
-                          ...settingsForm,
-                          [item.key]: e.target.checked,
-                        })
-                      }
-                    />
-                    <span>{item.label}</span>
+              {/* Cloudinary Configuration Box */}
+              <div className="p-4 bg-[#FAF7F2] border border-[#E5E0D8] grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-[#1A1A1A] mb-1">
+                    Cloudinary Cloud Name *
                   </label>
-                ))}
+                  <input
+                    type="text"
+                    value={cloudNameInput}
+                    onChange={(e) => setCloudNameInput(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-[#D4CFC7] font-mono font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-[#1A1A1A] mb-1">
+                    Cloudinary Upload Preset (Unsigned) *
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadPresetInput}
+                    onChange={(e) => setUploadPresetInput(e.target.value)}
+                    className="w-full h-10 px-3 bg-white border border-[#D4CFC7] font-mono font-bold"
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="h-11 px-6 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
+                className="h-11 px-6 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
               >
-                Save Store &amp; Website Settings
+                Save All Store &amp; Luxury Theme Settings
               </button>
             </form>
-
-            {/* Physical Showroom Photographs Manager (Cloudinary Upload) */}
-            <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6 space-y-4 text-xs">
-              <h3 className="text-base font-extrabold text-[#171717]">
-                Physical Showroom Photos (Displayed on Homepage &amp; Store Locator)
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {currentShowroomPhotos.map((photo, idx) => (
-                  <div
-                    key={`${photo.title}-${idx}`}
-                    className="p-3 rounded-2xl border border-[#E5E7EB] space-y-2"
-                  >
-                    <div className="aspect-video rounded-xl bg-[#101114] overflow-hidden">
-                      <img
-                        src={photo.src}
-                        alt={photo.title}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <p className="font-extrabold text-[#171717] line-clamp-1">{photo.title}</p>
-                    <p className="text-[#737373] line-clamp-1">{photo.caption}</p>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveShowroomPhoto(idx)}
-                      className="text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove Photo</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#F5F6F8] grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                <div>
-                  <label className="block font-bold mb-1">Photo Title</label>
-                  <input
-                    type="text"
-                    value={newShowroomTitle}
-                    onChange={(e) => setNewShowroomTitle(e.target.value)}
-                    placeholder="Storefront / Counter"
-                    className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Caption</label>
-                  <input
-                    type="text"
-                    value={newShowroomCaption}
-                    onChange={(e) => setNewShowroomCaption(e.target.value)}
-                    placeholder="Charlie Mobile Showroom"
-                    className="w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold mb-1">Upload via Cloudinary</label>
-                  <label className="w-full h-9 px-3 rounded-xl bg-[#101114] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>{uploadingImage ? 'Uploading...' : 'Choose Store Photo'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleSingleImageUpload(e, setNewShowroomSrc)}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddShowroomPhoto}
-                  className="h-9 px-4 rounded-xl bg-[#2563EB] text-white font-extrabold cursor-pointer"
-                >
-                  + Add Showroom Photo
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
         {/* =====================================================================
-            TAB 7: HOMEPAGE SECTIONS & CATALOG RESET
+            TAB 9: HOMEPAGE SECTIONS & CATALOG RESET
         ===================================================================== */}
         {activeTab === 'homepage' && (
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E7EB] pb-4">
+          <div className="bg-white border border-[#E5E0D8] p-5 sm:p-6 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E0D8] pb-4">
               <div>
-                <h2 className="text-base font-extrabold text-[#171717]">
+                <h2 className="font-serif-luxury text-lg font-bold uppercase text-[#1A1A1A]">
                   Customize Homepage Section Titles &amp; Visibility
                 </h2>
-                <p className="text-xs text-[#737373]">
-                  Rename any homepage section heading or toggle sections on/off.
+                <p className="text-xs text-[#666666]">
+                  Rename any luxury homepage section heading or toggle sections on/off.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={resetCatalogToDefaults}
-                className="h-9 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 self-start cursor-pointer"
+                className="h-9 px-3.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 self-start cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restore Default Catalog &amp; Settings</span>
+                <span>Restore Default Luxury Catalog &amp; Reels</span>
               </button>
             </div>
 
@@ -3048,7 +3577,7 @@ export const AdminPage: React.FC = () => {
               {homepageSections.map((sec, idx) => (
                 <div
                   key={sec.id}
-                  className="p-3.5 rounded-2xl border border-[#E5E7EB] flex items-center justify-between gap-3"
+                  className="p-3.5 border border-[#E5E0D8] flex items-center justify-between gap-3"
                 >
                   <input
                     type="text"
@@ -3058,7 +3587,7 @@ export const AdminPage: React.FC = () => {
                       updated[idx] = { ...sec, title: e.target.value };
                       updateHomepageSections(updated);
                     }}
-                    className="flex-1 h-9 px-3 rounded-xl bg-[#F5F6F8] font-bold text-[#171717]"
+                    className="flex-1 h-9 px-3 bg-[#FAF7F2] font-bold text-[#1A1A1A]"
                   />
                   <label className="flex items-center gap-1.5 font-semibold cursor-pointer shrink-0">
                     <input
@@ -3079,124 +3608,257 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 8: ANALYTICS & INVENTORY OVERVIEW
+            TAB 10: ANALYTICS & INVENTORY OVERVIEW
         ===================================================================== */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4">
-                <span className="text-xs text-[#737373] font-medium">Total Products</span>
-                <p className="text-2xl font-extrabold text-[#171717] mt-1 tabular-nums">
+              <div className="bg-white border border-[#E5E0D8] p-4">
+                <span className="text-xs text-[#666666] font-medium">Total Products</span>
+                <p className="text-2xl font-extrabold text-[#1A1A1A] mt-1 tabular-nums">
                   {products.length}
                 </p>
               </div>
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4">
-                <span className="text-xs text-[#737373] font-medium">Total Orders</span>
-                <p className="text-2xl font-extrabold text-[#171717] mt-1 tabular-nums">
+              <div className="bg-white border border-[#E5E0D8] p-4">
+                <span className="text-xs text-[#666666] font-medium">Celebrity Reels</span>
+                <p className="text-2xl font-extrabold text-[#B5893D] mt-1 tabular-nums">
+                  {celebrityReels.length}
+                </p>
+              </div>
+              <div className="bg-white border border-[#E5E0D8] p-4">
+                <span className="text-xs text-[#666666] font-medium">Total Orders</span>
+                <p className="text-2xl font-extrabold text-[#1A1A1A] mt-1 tabular-nums">
                   {orders.length}
                 </p>
               </div>
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4">
-                <span className="text-xs text-[#737373] font-medium">Pending Orders</span>
-                <p className="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">
-                  {pendingOrders.length}
+              <div className="bg-white border border-[#E5E0D8] p-4">
+                <span className="text-xs text-[#666666] font-medium">Notify Me Waitlist</span>
+                <p className="text-2xl font-extrabold text-[#1A1A1A] mt-1 tabular-nums">
+                  {notifyMeRequests.length}
                 </p>
               </div>
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4">
-                <span className="text-xs text-[#737373] font-medium">Total Customers</span>
-                <p className="text-2xl font-extrabold text-[#171717] mt-1 tabular-nums">
-                  {uniqueCustomers}
-                </p>
-              </div>
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 col-span-2 lg:col-span-1">
-                <span className="text-xs text-[#737373] font-medium">Total Revenue</span>
-                <p className="text-2xl font-extrabold text-[#2563EB] mt-1 tabular-nums">
+              <div className="bg-white border border-[#E5E0D8] p-4 col-span-2 lg:col-span-1">
+                <span className="text-xs text-[#666666] font-medium">Total Revenue</span>
+                <p className="text-2xl font-extrabold text-[#B5893D] mt-1 tabular-nums">
                   {formatINR(totalRevenue)}
                 </p>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-extrabold text-[#171717]">Recent Orders</h2>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('orders')}
-                    className="text-xs font-bold text-[#2563EB] flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Manage All</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                {orders.length === 0 ? (
-                  <p className="text-xs text-[#737373] py-4">
-                    No customer orders placed yet.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {orders.slice(0, 5).map((ord) => (
-                      <div
-                        key={ord.id}
-                        className="p-3 rounded-xl bg-[#F5F6F8] flex items-center justify-between text-xs"
-                      >
-                        <div>
-                          <p className="font-bold text-[#171717]">
-                            #{ord.id} · {ord.customerName}
-                          </p>
-                          <p className="text-[#737373] truncate max-w-xs">{ord.itemsSummary}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-extrabold text-[#171717] tabular-nums">
-                            {formatINR(ord.totalAmount)}
-                          </p>
-                          <span className="uppercase text-[10px] font-bold text-[#2563EB]">
-                            {ord.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+          </div>
+        )}
+        {/* =====================================================================
+            TAB 11: LIVE AI CHATS MONITOR (GROQ + FIREBASE REAL-TIME SYNC)
+        ===================================================================== */}
+        {activeTab === 'chats' && (
+          <div className="space-y-4">
+            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+                  Live AI Chats Monitor (Firebase &amp; Groq Sync)
+                </h2>
+                <p className="text-xs text-[#666666]">
+                  Watch every customer query &amp; Groq AI reply live under{' '}
+                  <code className="bg-[#FAF7F2] px-1.5 py-0.5 text-[#B5893D] font-mono">
+                    /support_chats/{'{userId}'}
+                  </code>{' '}
+                  and send manual concierge replies anytime.
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => refreshSupportChats()}
+                className="h-9 px-4 bg-[#FAF7F2] hover:bg-[#B5893D] hover:text-white border border-[#D4CFC7] text-xs font-bold uppercase tracking-wider cursor-pointer self-start"
+              >
+                Refresh Feed
+              </button>
+            </div>
 
-              <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  <h2 className="text-base font-extrabold text-[#171717]">
-                    Low Stock Inventory ({lowStockProducts.length})
-                  </h2>
+            {supportChats.length === 0 ? (
+              <div className="bg-white border border-[#E5E0D8] p-12 text-center space-y-2">
+                <MessageCircle className="w-8 h-8 text-[#B5893D] mx-auto" />
+                <p className="text-sm font-bold text-[#1A1A1A]">No Active Customer AI Chats Yet</p>
+                <p className="text-xs text-[#666666] max-w-md mx-auto">
+                  When customers message the AI Chatbot on any Product Page or Storefront, their full conversation and Groq AI replies appear here in real time.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                {/* Left Pane: Active Customer Sessions */}
+                <div className="lg:col-span-4 bg-white border border-[#E5E0D8] flex flex-col max-h-[600px]">
+                  <div className="p-3 border-b border-[#E5E0D8]">
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 text-[#666666] absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        value={chatSearchQuery}
+                        onChange={(e) => setChatSearchQuery(e.target.value)}
+                        placeholder="Search user, phone or message..."
+                        className="w-full h-9 pl-8 pr-3 bg-[#FAF7F2] border border-[#E5E0D8] text-xs focus:outline-none focus:border-[#B5893D]"
+                      />
+                    </div>
+                  </div>
+                  <div className="divide-y divide-[#F0ECE1] overflow-y-auto flex-1">
+                    {supportChats
+                      .filter((s) => {
+                        const q = chatSearchQuery.trim().toLowerCase();
+                        if (!q) return true;
+                        return (
+                          s.customerName.toLowerCase().includes(q) ||
+                          (s.customerPhone || '').toLowerCase().includes(q) ||
+                          s.lastMessage.toLowerCase().includes(q) ||
+                          (s.productName || '').toLowerCase().includes(q)
+                        );
+                      })
+                      .map((session) => {
+                        const isSelected = session.userId === selectedChatUserId;
+                        return (
+                          <button
+                            key={session.userId}
+                            type="button"
+                            onClick={() => setSelectedChatUserId(session.userId)}
+                            className={`w-full text-left p-3.5 transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#FAF7F2] border-l-4 border-[#B5893D]'
+                                : 'hover:bg-[#FAF7F2]/60'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-[#1A1A1A] truncate">
+                                {session.customerName}
+                              </span>
+                              <span className="text-[10px] text-[#8C8C8C] shrink-0 tabular-nums">
+                                {new Date(session.updatedAt).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                            {(session.customerPhone || session.productName) && (
+                              <p className="text-[10px] font-semibold text-[#B5893D] truncate mt-0.5">
+                                {session.customerPhone || session.productName}
+                              </p>
+                            )}
+                            <p className="text-[11px] text-[#666666] line-clamp-1 mt-1">
+                              {session.lastSender === 'assistant'
+                                ? 'AI: '
+                                : session.lastSender === 'admin'
+                                ? 'You: '
+                                : 'Customer: '}
+                              {session.lastMessage}
+                            </p>
+                          </button>
+                        );
+                      })}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {lowStockProducts.map((p) => (
-                    <div
-                      key={p.id}
-                      className="p-3 rounded-xl bg-[#F5F6F8] flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <p className="font-bold text-[#171717]">{p.name}</p>
-                        <p className="text-[#737373]">{p.brand}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-extrabold text-amber-700 tabular-nums">
-                          {p.stock} left
-                        </span>
+
+                {/* Right Pane: Live Conversation Thread */}
+                {(() => {
+                  const activeSession =
+                    supportChats.find((s) => s.userId === selectedChatUserId) || supportChats[0];
+                  if (!activeSession) return null;
+                  return (
+                    <div className="lg:col-span-8 bg-white border border-[#E5E0D8] flex flex-col h-[600px]">
+                      <div className="px-4 py-3 border-b border-[#E5E0D8] bg-[#FAF7F2] flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <h3 className="text-sm font-bold text-[#1A1A1A] truncate">
+                              {activeSession.customerName}
+                            </h3>
+                            <span className="text-[10px] px-2 py-0.5 bg-white border border-[#E5E0D8] font-mono text-[#666666]">
+                              {activeSession.messages.length} msgs
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#666666] truncate">
+                            ID: {activeSession.userId}
+                            {activeSession.customerPhone ? ` · ${activeSession.customerPhone}` : ''}
+                            {activeSession.productName
+                              ? ` · Viewing: ${activeSession.productName}`
+                              : ''}
+                          </p>
+                        </div>
+
                         <button
                           type="button"
-                          onClick={() => {
-                            setEditingProduct(p);
-                            setActiveTab('products');
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-[#101114] text-white font-bold cursor-pointer"
+                          onClick={() => deleteSupportChat(activeSession.userId)}
+                          className="h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
                         >
-                          Edit Stock / Price
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Clear</span>
                         </button>
                       </div>
+
+                      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
+                        {activeSession.messages.map((m) => {
+                          const isCustomer = m.sender === 'user';
+                          const isAdminReply = m.sender === 'admin';
+                          return (
+                            <div
+                              key={m.id}
+                              className={`flex flex-col ${
+                                isCustomer ? 'items-start' : 'items-end'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-1 text-[10px] text-[#8C8C8C]">
+                                <span className="font-bold uppercase tracking-wider text-[#1A1A1A]">
+                                  {isCustomer
+                                    ? activeSession.customerName
+                                    : isAdminReply
+                                    ? 'Admin Concierge'
+                                    : 'Groq AI Assistant'}
+                                </span>
+                                <span>
+                                  {new Date(m.timestamp).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                              <div
+                                className={`max-w-[80%] px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
+                                  isCustomer
+                                    ? 'bg-[#F5F5F5] text-[#1A1A1A] border border-[#E5E0D8]'
+                                    : isAdminReply
+                                    ? 'bg-[#B5893D] text-white'
+                                    : 'bg-[#2A1810] text-[#F4D993]'
+                                }`}
+                              >
+                                {m.text}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <form
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          if (!adminReplyInput.trim()) return;
+                          await sendAdminChatReply(activeSession.userId, adminReplyInput);
+                          setAdminReplyInput('');
+                        }}
+                        className="p-3 border-t border-[#E5E0D8] bg-[#FAF7F2] flex items-center gap-2"
+                      >
+                        <input
+                          type="text"
+                          value={adminReplyInput}
+                          onChange={(e) => setAdminReplyInput(e.target.value)}
+                          placeholder="Send a live Store Concierge message to this customer..."
+                          className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7] text-xs focus:outline-none focus:border-[#B5893D]"
+                        />
+                        <button
+                          type="submit"
+                          className="h-10 px-4 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                        >
+                          Send Reply
+                        </button>
+                      </form>
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
