@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
+  ArrowLeft,
   ArrowUpRight,
   BarChart3,
   Bell,
@@ -24,6 +25,7 @@ import {
   Lock,
   LogOut,
   MessageCircle,
+  MoreHorizontal,
   Package,
   Percent,
   Play,
@@ -129,7 +131,9 @@ export const AdminPage: React.FC = () => {
     | 'dashboard'
   >('products');
 
-  // Live AI Chats Monitor State
+  // Mobile Navigation & Live AI Chats Monitor State
+  const [showMobileMoreSheet, setShowMobileMoreSheet] = useState(false);
+  const [mobileChatView, setMobileChatView] = useState<'list' | 'thread'>('list');
   const [selectedChatUserId, setSelectedChatUserId] = useState<string>('');
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [adminReplyInput, setAdminReplyInput] = useState('');
@@ -997,43 +1001,134 @@ export const AdminPage: React.FC = () => {
 
   const sortedReels = [...celebrityReels].sort((a, b) => a.order - b.order);
 
+  const adminTabs: {
+    id: typeof activeTab;
+    label: string;
+    shortLabel: string;
+    badge?: number;
+    icon: React.ComponentType<{ className?: string }>;
+  }[] = [
+    {
+      id: 'products',
+      label: `Products & Stock (${products.length})`,
+      shortLabel: 'Products',
+      badge: products.length,
+      icon: Package,
+    },
+    {
+      id: 'orders',
+      label: `Orders & Leads (${orders.length + rewardLeads.length + notifyMeRequests.length})`,
+      shortLabel: 'Orders',
+      badge: orders.length + rewardLeads.length + notifyMeRequests.length,
+      icon: ShoppingBag,
+    },
+    {
+      id: 'chats',
+      label: `Live AI Chats (${supportChats.length})`,
+      shortLabel: 'AI Chats',
+      badge: supportChats.length,
+      icon: MessageCircle,
+    },
+    {
+      id: 'reels',
+      label: `Celebrity Video Reels (${celebrityReels.length})`,
+      shortLabel: 'Reels',
+      badge: celebrityReels.length,
+      icon: Video,
+    },
+    {
+      id: 'banners',
+      label: `Hero & Luxury Banners (${banners.length})`,
+      shortLabel: 'Banners',
+      badge: banners.length,
+      icon: ImageIcon,
+    },
+    {
+      id: 'editorial',
+      label: 'Notes, Occasions, Reviews & Blogs',
+      shortLabel: 'Editorial',
+      icon: Sparkles,
+    },
+    {
+      id: 'categories',
+      label: `Categories (${categories.length})`,
+      shortLabel: 'Categories',
+      badge: categories.length,
+      icon: LayoutGrid,
+    },
+    {
+      id: 'coupons',
+      label: `Coupons (${coupons.length})`,
+      shortLabel: 'Coupons',
+      badge: coupons.length,
+      icon: Percent,
+    },
+    {
+      id: 'settings',
+      label: 'Store & Brand Video Settings',
+      shortLabel: 'Settings',
+      icon: Settings,
+    },
+    {
+      id: 'homepage',
+      label: 'Homepage Sections',
+      shortLabel: 'Homepage',
+      icon: Layers,
+    },
+    {
+      id: 'dashboard',
+      label: 'Analytics',
+      shortLabel: 'Analytics',
+      icon: BarChart3,
+    },
+  ];
+
+  const activeTabMeta = adminTabs.find((t) => t.id === activeTab) || adminTabs[0];
+  const primaryMobileTabIds: (typeof activeTab)[] = ['products', 'orders', 'chats', 'reels'];
+  const isMoreTabActive = !primaryMobileTabIds.includes(activeTab);
+
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1A1A1A] select-text">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1A1A1A] select-text overflow-x-hidden pb-24 md:pb-10">
       {/* Standalone Top Luxury Admin Header */}
       <header className="sticky top-0 z-40 bg-[#2A1810] text-white border-b border-[#B5893D]/40 shadow-md">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="h-10 px-2 bg-white border border-[#B5893D] flex items-center justify-center shrink-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="h-9 sm:h-10 px-1.5 sm:px-2 bg-white border border-[#B5893D] flex items-center justify-center shrink-0">
               <img
                 src={storeSettings.logoUrl || '/charlie-logo.png'}
                 alt="Charlie Mobiles"
-                className="h-8 w-auto object-contain"
+                className="h-6 sm:h-8 w-auto object-contain"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-serif-luxury text-sm sm:text-lg font-bold tracking-[0.08em] text-[#D4AF37]">
-                  CHARLIE LUXURY — ADMIN CONSOLE
+                <span className="font-serif-luxury text-xs sm:text-lg font-bold tracking-[0.06em] sm:tracking-[0.08em] text-[#D4AF37] truncate">
+                  <span className="sm:hidden">CHARLIE ADMIN</span>
+                  <span className="hidden sm:inline">CHARLIE LUXURY — ADMIN CONSOLE</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-[#B5893D]/25 text-[#F3E5AB] text-[10px] font-bold">
+                <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 bg-[#B5893D]/25 text-[#F3E5AB] text-[10px] font-bold shrink-0">
                   <CloudUpload className="w-3 h-3" />
                   Cloudinary: {cloudinaryInfo.cloudName}
                 </span>
               </div>
-              <p className="text-[11px] text-white/70">
-                Full Storefront, Video Reels, Banners, Stock &amp; WhatsApp Control
+              <p className="hidden md:block text-[11px] text-white/70 truncate">
+                Full Storefront, Video Reels, Banners, Stock &amp; Store Control
+              </p>
+              <p className="md:hidden text-[10px] text-white/75 font-semibold uppercase tracking-wider truncate">
+                {activeTabMeta.shortLabel}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {!user ? (
               <button
                 type="button"
                 onClick={loginWithGoogle}
-                className="h-9 px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                title="Cloud Sync Sign-In"
+                className="min-h-[40px] sm:h-9 px-2.5 sm:px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <ShieldCheck className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-[#D4AF37]" />
                 <span className="hidden lg:inline">Cloud Sync Sign-In</span>
               </button>
             ) : (
@@ -1046,27 +1141,29 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={() => setShowChangePassModal(true)}
               title="Change Admin Password"
-              className="h-9 px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              aria-label="Change Admin Password"
+              className="hidden sm:flex h-9 px-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold items-center gap-1.5 cursor-pointer"
             >
               <KeyRound className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span className="hidden sm:inline">Password</span>
+              <span>Password</span>
             </button>
 
             <button
               type="button"
               onClick={handleLockAdmin}
               title="Lock Admin Console"
-              className="h-9 px-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              aria-label="Lock Admin Console"
+              className="min-h-[40px] sm:h-9 px-2.5 sm:px-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
               <span className="hidden sm:inline">Lock</span>
             </button>
 
             <Link
               to="/"
-              className="h-9 px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap"
+              className="min-h-[40px] sm:h-9 px-2.5 sm:px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap"
             >
-              <span>Live Store</span>
+              <span>Store</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -1075,8 +1172,8 @@ export const AdminPage: React.FC = () => {
 
       {/* Change Admin Password Modal */}
       {showChangePassModal && (
-        <div className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white border border-[#B5893D] p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/65 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="w-full sm:max-w-sm bg-white border-t-2 sm:border border-[#B5893D] rounded-t-2xl sm:rounded-none p-5 sm:p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
               <div className="flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-[#B5893D]" />
@@ -1087,13 +1184,14 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowChangePassModal(false)}
-                className="w-7 h-7 bg-[#FAF7F2] flex items-center justify-center text-[#1A1A1A] cursor-pointer"
+                className="w-9 h-9 bg-[#FAF7F2] flex items-center justify-center text-[#1A1A1A] cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveNewPassword} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveNewPassword} className="space-y-3 text-sm sm:text-xs">
               <div>
                 <label className="block font-bold text-[#1A1A1A] mb-1">
                   New Admin Password *
@@ -1104,7 +1202,7 @@ export const AdminPage: React.FC = () => {
                   value={newPassInput}
                   onChange={(e) => setNewPassInput(e.target.value)}
                   placeholder="Enter new password"
-                  className="w-full h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
+                  className="w-full h-11 sm:h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
                 />
               </div>
               <div>
@@ -1117,12 +1215,12 @@ export const AdminPage: React.FC = () => {
                   value={confirmPassInput}
                   onChange={(e) => setConfirmPassInput(e.target.value)}
                   placeholder="Confirm new password"
-                  className="w-full h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
+                  className="w-full h-11 sm:h-10 px-3 border border-[#D4CFC7] focus:outline-none focus:border-[#B5893D]"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full h-10 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
+                className="w-full h-11 sm:h-10 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider cursor-pointer"
               >
                 Update Password
               </button>
@@ -1133,47 +1231,23 @@ export const AdminPage: React.FC = () => {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 max-w-sm bg-[#2A1810] text-white border border-[#B5893D] px-4 py-2.5 shadow-xl text-xs font-bold flex items-center gap-2">
+        <div className="fixed top-16 sm:top-20 left-3 right-3 sm:left-auto sm:right-4 z-50 sm:max-w-sm bg-[#2A1810] text-white border border-[#B5893D] px-4 py-2.5 shadow-xl text-xs font-bold flex items-center gap-2">
           <Check className="w-4 h-4 text-[#D4AF37] shrink-0" />
-          <span>{toastMessage}</span>
+          <span className="line-clamp-2">{toastMessage}</span>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-7 space-y-6">
-        {/* Luxury Admin Navigation Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-          {[
-            { id: 'products', label: `Products & Stock (${products.length})`, icon: Package },
-            {
-              id: 'reels',
-              label: `Celebrity Video Reels (${celebrityReels.length})`,
-              icon: Video,
-            },
-            { id: 'banners', label: `Hero & Luxury Banners (${banners.length})`, icon: ImageIcon },
-            { id: 'editorial', label: 'Notes, Occasions, Reviews & Blogs', icon: Sparkles },
-            { id: 'categories', label: `Categories (${categories.length})`, icon: LayoutGrid },
-            {
-              id: 'orders',
-              label: `Orders & Leads (${orders.length + rewardLeads.length + notifyMeRequests.length})`,
-              icon: ShoppingBag,
-            },
-            {
-              id: 'chats',
-              label: `Live AI Chats (${supportChats.length})`,
-              icon: MessageCircle,
-            },
-            { id: 'coupons', label: `Coupons (${coupons.length})`, icon: Percent },
-            { id: 'settings', label: 'Store & Brand Video Settings', icon: Settings },
-            { id: 'homepage', label: 'Homepage Sections', icon: Layers },
-            { id: 'dashboard', label: 'Analytics', icon: BarChart3 },
-          ].map((tab) => {
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-7 space-y-4 sm:space-y-6">
+        {/* Desktop Luxury Admin Navigation Bar */}
+        <div className="hidden md:flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {adminTabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`min-h-[42px] px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer transition-colors border ${
                   active
                     ? 'bg-[#B5893D] text-white border-[#B5893D]'
@@ -1191,80 +1265,83 @@ export const AdminPage: React.FC = () => {
             TAB 1: PRODUCTS, GOLD TAGLINES, BESTSELLER TABS & STOCK / NOTIFY ME
         ===================================================================== */}
         {activeTab === 'products' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Top Toolbar */}
-            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="bg-white border border-[#E5E0D8] p-3.5 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
-                  Luxury Catalog, Gold Taglines, Videos &amp; Stock Manager
+                <h2 className="font-serif-luxury text-base sm:text-xl font-bold uppercase tracking-[0.06em] sm:tracking-[0.08em] text-[#1A1A1A]">
+                  Catalog &amp; Stock Manager
                 </h2>
-                <p className="text-xs text-[#666666]">
-                  Edit Selling Price, MRP, Gold Tagline, or toggle any product to &ldquo;🔔 NOTIFY ME&rdquo; (Out of Stock) in 1 click.
+                <p className="text-[11px] sm:text-xs text-[#666666] mt-0.5">
+                  Edit Price, MRP, Stock, or toggle &ldquo;🔔 NOTIFY ME&rdquo; in 1 tap.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="relative flex-1 sm:w-64">
-                  <Search className="w-4 h-4 text-[#666666] absolute left-3 top-3" />
+              <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2">
+                <div className="relative sm:w-60">
+                  <Search className="w-4 h-4 text-[#666666] absolute left-3 top-3.5 sm:top-3" />
                   <input
                     type="text"
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
                     placeholder="Search product, brand..."
-                    className="w-full h-10 pl-9 pr-3 border border-[#D4CFC7] text-xs"
+                    className="w-full h-11 sm:h-10 pl-9 pr-3 border border-[#D4CFC7] text-sm sm:text-xs"
                   />
                 </div>
 
-                <select
-                  value={productCategoryFilter}
-                  onChange={(e) => setProductCategoryFilter(e.target.value)}
-                  className="h-10 px-3 border border-[#D4CFC7] bg-white text-xs font-bold"
-                >
-                  <option value="all">All Categories ({products.length})</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-2 sm:flex items-center gap-2">
+                  <select
+                    value={productCategoryFilter}
+                    onChange={(e) => setProductCategoryFilter(e.target.value)}
+                    className="h-11 sm:h-10 px-2.5 sm:px-3 border border-[#D4CFC7] bg-white text-xs font-bold truncate"
+                  >
+                    <option value="all">All ({products.length})</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.slug}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
 
-                <button
-                  type="button"
-                  onClick={startNewProduct}
-                  className="h-10 px-4 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Product</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={startNewProduct}
+                    className="h-11 sm:h-10 px-3 sm:px-4 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Product</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Full Product Editor Drawer / Card */}
+            {/* Full Product Editor Drawer / Mobile Full-Screen Sheet */}
             {editingProduct && (
-              <form
-                onSubmit={handleSaveProductSubmit}
-                className="bg-white border-2 border-[#B5893D] p-5 sm:p-6 space-y-5 text-xs shadow-lg"
-              >
-                <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#B5893D]">
-                      FULL LUXURY PRODUCT &amp; MEDIA EDITOR
-                    </span>
-                    <h3 className="font-serif-luxury text-lg sm:text-xl font-bold text-[#1A1A1A]">
-                      {products.some((p) => p.id === editingProduct.id)
-                        ? `Editing: ${editingProduct.name}`
-                        : 'Create New Luxury Product'}
-                    </h3>
+              <div className="fixed inset-0 z-50 bg-black/55 md:static md:z-auto md:bg-transparent flex flex-col justify-end md:block">
+                <form
+                  onSubmit={handleSaveProductSubmit}
+                  className="bg-white border-t-2 md:border-2 border-[#B5893D] w-full max-h-[92vh] md:max-h-none overflow-y-auto md:overflow-visible p-4 sm:p-6 space-y-4 sm:space-y-5 text-sm sm:text-xs shadow-2xl md:shadow-lg rounded-t-2xl md:rounded-none"
+                >
+                  <div className="sticky top-0 z-10 bg-white -mx-4 px-4 py-2.5 sm:mx-0 sm:px-0 sm:py-0 sm:static flex items-center justify-between border-b border-[#E5E0D8] pb-3">
+                    <div className="min-w-0 pr-2">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#B5893D] block">
+                        PRODUCT &amp; MEDIA EDITOR
+                      </span>
+                      <h3 className="font-serif-luxury text-base sm:text-xl font-bold text-[#1A1A1A] truncate">
+                        {products.some((p) => p.id === editingProduct.id)
+                          ? `Edit: ${editingProduct.name}`
+                          : 'Create New Product'}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingProduct(null)}
+                      className="min-h-[40px] px-3 bg-[#FAF7F2] hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Close</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setEditingProduct(null)}
-                    className="h-9 px-3 bg-[#FAF7F2] hover:bg-rose-50 text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                    <span>Close</span>
-                  </button>
-                </div>
 
                 {/* Basic Identity, Gold Tagline, Bestseller Tab & Pricing Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -1491,10 +1568,10 @@ export const AdminPage: React.FC = () => {
                         onChange={(e) =>
                           setEditingProduct({ ...editingProduct, mainImage: e.target.value })
                         }
-                        placeholder="Main Image URL or upload via Cloudinary"
-                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
+                        placeholder="Main Image URL or upload"
+                        className="flex-1 min-w-[170px] h-11 sm:h-10 px-3 bg-white border border-[#D4CFC7]"
                       />
-                      <label className="h-10 px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold flex items-center gap-1.5 cursor-pointer">
+                      <label className="h-11 sm:h-10 px-3.5 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0">
                         <Upload className="w-3.5 h-3.5" />
                         <span>{uploadingImage ? 'Uploading...' : 'Main Photo'}</span>
                         <input
@@ -1512,7 +1589,7 @@ export const AdminPage: React.FC = () => {
                           className="hidden"
                         />
                       </label>
-                      <label className="h-10 px-3.5 bg-[#1A1A1A] text-white font-bold flex items-center gap-1.5 cursor-pointer">
+                      <label className="h-11 sm:h-10 px-3.5 bg-[#1A1A1A] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0">
                         <Upload className="w-3.5 h-3.5" />
                         <span>Gallery</span>
                         <input
@@ -1526,7 +1603,7 @@ export const AdminPage: React.FC = () => {
                     </div>
 
                     {/* Product Video Upload */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                       <input
                         type="text"
                         value={editingProduct.videoUrl || ''}
@@ -1534,9 +1611,9 @@ export const AdminPage: React.FC = () => {
                           setEditingProduct({ ...editingProduct, videoUrl: e.target.value })
                         }
                         placeholder="Optional Product Video (.mp4 URL)"
-                        className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7]"
+                        className="flex-1 min-w-[170px] h-11 sm:h-10 px-3 bg-white border border-[#D4CFC7]"
                       />
-                      <label className="h-10 px-3.5 bg-[#2A1810] text-[#D4AF37] font-bold flex items-center gap-1.5 cursor-pointer shrink-0">
+                      <label className="h-11 sm:h-10 px-3.5 bg-[#2A1810] text-[#D4AF37] text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0">
                         <Film className="w-3.5 h-3.5" />
                         <span>{uploadingImage ? 'Uploading...' : 'Upload Video'}</span>
                         <input
@@ -1617,18 +1694,18 @@ export const AdminPage: React.FC = () => {
                         value={newColorName}
                         onChange={(e) => setNewColorName(e.target.value)}
                         placeholder="Color Name (e.g. Desert Titanium)"
-                        className="h-9 px-3 bg-white border border-[#D4CFC7]"
+                        className="flex-1 min-w-[150px] h-10 px-3 bg-white border border-[#D4CFC7]"
                       />
                       <input
                         type="color"
                         value={newColorHex}
                         onChange={(e) => setNewColorHex(e.target.value)}
-                        className="h-9 w-12 bg-white border border-[#D4CFC7] p-1 cursor-pointer"
+                        className="h-10 w-12 bg-white border border-[#D4CFC7] p-1 cursor-pointer shrink-0"
                       />
                       <button
                         type="button"
                         onClick={handleAddColorVariant}
-                        className="h-9 px-3.5 bg-[#1A1A1A] text-white font-bold cursor-pointer"
+                        className="h-10 px-3.5 bg-[#1A1A1A] text-white text-xs font-bold cursor-pointer shrink-0"
                       >
                         + Add Color
                       </button>
@@ -1730,27 +1807,162 @@ export const AdminPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="sticky bottom-0 bg-white/95 backdrop-blur-xs -mx-4 px-4 py-3 sm:mx-0 sm:px-0 sm:py-0 sm:static border-t border-[#E5E0D8] sm:border-t-0 flex items-center gap-2.5 pt-3">
                   <button
                     type="submit"
-                    className="h-11 px-6 bg-[#B5893D] hover:bg-[#9E742F] text-white font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer"
+                    className="flex-1 sm:flex-none h-11 px-6 bg-[#B5893D] hover:bg-[#9E742F] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
-                    <span>Save Product Changes</span>
+                    <span>Save Product</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingProduct(null)}
-                    className="h-11 px-5 bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A] font-bold cursor-pointer"
+                    className="h-11 px-5 bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A] text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
+              </div>
             )}
 
-            {/* Quick Inline Price, MRP, Stock & 1-Click 🔔 NOTIFY ME Table */}
-            <div className="bg-white border border-[#E5E0D8] overflow-hidden shadow-xs">
+            {/* Mobile Touch Card View (below md) */}
+            <div className="md:hidden space-y-3">
+              {filteredProducts.map((p) => {
+                const draft = getDraftForProduct(p);
+                const isDirty = Boolean(inlineDrafts[p.id]);
+                const isOut = p.stock <= 0;
+                return (
+                  <div
+                    key={p.id}
+                    className="bg-white border border-[#E5E0D8] p-3.5 space-y-3 shadow-xs"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-16 h-16 bg-[#F5F5F5] border border-[#E5E0D8] p-1 shrink-0">
+                        <SmartImage src={p.mainImage} alt={p.name} brand={p.brand} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#B5893D] truncate">
+                            {p.goldTagline || p.brand}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 shrink-0 border ${
+                              isOut
+                                ? 'bg-amber-50 border-[#B5893D] text-[#1A1A1A]'
+                                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                            }`}
+                          >
+                            {isOut ? 'Sold Out' : 'Active'}
+                          </span>
+                        </div>
+                        <p className="font-bold text-sm text-[#1A1A1A] line-clamp-2 leading-snug mt-0.5">
+                          {p.name}
+                        </p>
+                        <p className="text-[11px] text-[#666666] mt-0.5">
+                          {p.bestsellerTab || 'ALL'} · {p.category}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 3-Column Touch Inputs: Price, MRP, Stock */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#666666] uppercase mb-1">
+                          Price (₹)
+                        </label>
+                        <input
+                          type="number"
+                          value={draft.price}
+                          onChange={(e) =>
+                            updateInlineDraft(p, 'price', Number(e.target.value))
+                          }
+                          className="w-full h-11 px-2.5 border border-[#D4CFC7] focus:border-[#B5893D] font-bold text-sm text-[#1A1A1A] tabular-nums"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#666666] uppercase mb-1">
+                          MRP (₹)
+                        </label>
+                        <input
+                          type="number"
+                          value={draft.mrp}
+                          onChange={(e) =>
+                            updateInlineDraft(p, 'mrp', Number(e.target.value))
+                          }
+                          className="w-full h-11 px-2.5 border border-[#D4CFC7] text-[#666666] font-bold text-sm tabular-nums"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#666666] uppercase mb-1">
+                          Stock
+                        </label>
+                        <input
+                          type="number"
+                          value={draft.stock}
+                          onChange={(e) =>
+                            updateInlineDraft(p, 'stock', Number(e.target.value))
+                          }
+                          className="w-full h-11 px-2.5 border border-[#D4CFC7] font-bold text-sm tabular-nums"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Touch Action Row */}
+                    <div className="grid grid-cols-4 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleProductOutOfStock(p)}
+                        className={`col-span-2 min-h-[44px] px-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer border ${
+                          isOut
+                            ? 'bg-amber-50 border-[#B5893D] text-[#1A1A1A]'
+                            : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        }`}
+                      >
+                        <Bell className="w-3.5 h-3.5 text-[#B5893D] shrink-0" />
+                        <span className="truncate">{isOut ? 'Restock' : 'Set Notify'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => saveInlineProductRow(p)}
+                        className={`min-h-[44px] px-2 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors ${
+                          isDirty
+                            ? 'bg-[#B5893D] text-white'
+                            : 'bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A]'
+                        }`}
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Save</span>
+                      </button>
+
+                      <div className="flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingProduct(p)}
+                          aria-label="Full edit product"
+                          className="flex-1 min-h-[44px] bg-[#2A1810] text-[#D4AF37] font-bold flex items-center justify-center cursor-pointer"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteProduct(p.id)}
+                          aria-label="Delete product"
+                          className="min-h-[44px] w-11 bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center cursor-pointer shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table View (md and above) */}
+            <div className="hidden md:block bg-white border border-[#E5E0D8] overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
@@ -2081,29 +2293,31 @@ export const AdminPage: React.FC = () => {
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMoveReelOrder(idx, 'up')}
-                            className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                            aria-label="Move reel up"
+                            className="min-h-[38px] min-w-[38px] p-2 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer flex items-center justify-center"
                           >
-                            <ChevronUp className="w-3.5 h-3.5" />
+                            <ChevronUp className="w-4 h-4" />
                           </button>
                           <button
                             type="button"
                             disabled={idx === sortedReels.length - 1}
                             onClick={() => handleMoveReelOrder(idx, 'down')}
-                            className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                            aria-label="Move reel down"
+                            className="min-h-[38px] min-w-[38px] p-2 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer flex items-center justify-center"
                           >
-                            <ChevronDown className="w-3.5 h-3.5" />
+                            <ChevronDown className="w-4 h-4" />
                           </button>
                           <button
                             type="button"
                             onClick={() => startEditReel(reel)}
-                            className="px-2.5 py-1 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
+                            className="min-h-[38px] px-3 py-1.5 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => saveCelebrityReel({ ...reel, enabled: !reel.enabled })}
-                            className={`px-2.5 py-1 font-bold cursor-pointer ${
+                            className={`min-h-[38px] px-3 py-1.5 font-bold cursor-pointer ${
                               reel.enabled
                                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                                 : 'bg-slate-100 text-slate-600'
@@ -2114,9 +2328,10 @@ export const AdminPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => deleteCelebrityReel(reel.id)}
-                            className="p-1.5 bg-rose-50 text-rose-600 cursor-pointer"
+                            aria-label="Delete reel"
+                            className="min-h-[38px] min-w-[38px] p-2 bg-rose-50 text-rose-600 cursor-pointer flex items-center justify-center"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -2402,7 +2617,8 @@ export const AdminPage: React.FC = () => {
                           type="button"
                           disabled={idx === 0}
                           onClick={() => handleMoveBannerOrder(idx, 'up')}
-                          className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                          aria-label="Move banner up"
+                          className="min-h-[40px] min-w-[40px] p-2 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer flex items-center justify-center"
                         >
                           <ChevronUp className="w-4 h-4" />
                         </button>
@@ -2410,21 +2626,22 @@ export const AdminPage: React.FC = () => {
                           type="button"
                           disabled={idx === banners.length - 1}
                           onClick={() => handleMoveBannerOrder(idx, 'down')}
-                          className="p-1.5 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer"
+                          aria-label="Move banner down"
+                          className="min-h-[40px] min-w-[40px] p-2 bg-[#FAF7F2] border border-[#D4CFC7] disabled:opacity-35 cursor-pointer flex items-center justify-center"
                         >
                           <ChevronDown className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => startEditBanner(b)}
-                          className="px-3 py-1.5 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
+                          className="min-h-[40px] px-3.5 py-2 bg-[#2A1810] text-[#D4AF37] font-bold cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => saveBanner({ ...b, enabled: !b.enabled })}
-                          className={`px-3 py-1.5 font-bold cursor-pointer ${
+                          className={`min-h-[40px] px-3.5 py-2 font-bold cursor-pointer ${
                             b.enabled
                               ? 'bg-emerald-50 text-emerald-700'
                               : 'bg-slate-100 text-slate-600'
@@ -2435,7 +2652,8 @@ export const AdminPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => deleteBanner(b.id)}
-                          className="p-2 bg-rose-50 text-rose-600 cursor-pointer"
+                          aria-label="Delete banner"
+                          className="min-h-[40px] min-w-[40px] p-2 bg-rose-50 text-rose-600 cursor-pointer flex items-center justify-center"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2888,20 +3106,22 @@ export const AdminPage: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => startEditCategory(cat)}
-                        className="p-1.5 bg-[#FAF7F2] text-[#B5893D] cursor-pointer"
+                        aria-label={`Edit ${cat.name}`}
+                        className="min-h-[38px] min-w-[38px] p-2 bg-[#FAF7F2] text-[#B5893D] flex items-center justify-center cursor-pointer"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-4 h-4" />
                       </button>
                       <button
                         type="button"
                         onClick={() => deleteCategory(cat.id)}
-                        className="p-1.5 bg-rose-50 text-rose-600 cursor-pointer"
+                        aria-label={`Delete ${cat.name}`}
+                        className="min-h-[38px] min-w-[38px] p-2 bg-rose-50 text-rose-600 flex items-center justify-center cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -2915,10 +3135,10 @@ export const AdminPage: React.FC = () => {
             TAB 6: ORDERS, REWARDS POPUP LEADS & "🔔 NOTIFY ME" WAITLIST
         ===================================================================== */}
         {activeTab === 'orders' && (
-          <div className="space-y-6 text-xs">
+          <div className="space-y-4 sm:space-y-6 text-xs">
             {/* 1. Customer Orders */}
-            <div className="bg-white border border-[#E5E0D8] p-5 space-y-4">
-              <h2 className="font-serif-luxury text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
+            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 space-y-4">
+              <h2 className="font-serif-luxury text-base sm:text-lg font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
                 1. Customer Orders &amp; Payment Status ({orders.length})
               </h2>
               {orders.length === 0 ? (
@@ -2930,31 +3150,39 @@ export const AdminPage: React.FC = () => {
                   {orders.map((ord) => (
                     <div
                       key={ord.id}
-                      className="p-4 border border-[#E5E0D8] bg-[#FAF7F2] flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                      className="p-3.5 sm:p-4 border border-[#E5E0D8] bg-[#FAF7F2] flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4"
                     >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-[#1A1A1A]">
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-sm text-[#1A1A1A] tabular-nums">
                             Order #{ord.id}
                           </span>
-                          <span className="text-[#666666]">
+                          <span className="text-[11px] text-[#666666]">
                             · {new Date(ord.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="font-bold text-[#1A1A1A]">
-                          Customer: {ord.customerName} · Phone: {ord.customerPhone} · Email:{' '}
-                          {ord.customerEmail}
+                        <p className="font-bold text-[#1A1A1A] break-words">
+                          {ord.customerName} · {ord.customerPhone}
                         </p>
-                        <p className="text-[#666666]">Address / Pickup: {ord.shippingAddress}</p>
-                        <p className="font-semibold text-[#B5893D]">Items: {ord.itemsSummary}</p>
+                        {ord.customerEmail && (
+                          <p className="text-[11px] text-[#666666] break-all">
+                            {ord.customerEmail}
+                          </p>
+                        )}
+                        <p className="text-[#666666] break-words">
+                          Address / Pickup: {ord.shippingAddress}
+                        </p>
+                        <p className="font-semibold text-[#B5893D] break-words">
+                          Items: {ord.itemsSummary}
+                        </p>
                         <p className="font-extrabold text-sm text-[#1A1A1A] tabular-nums">
                           Total: {formatINR(ord.totalAmount)} ({ord.paymentMethod.toUpperCase()} —{' '}
                           {ord.paymentStatus})
                         </p>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="space-y-2 shrink-0">
+                        <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5">
                           {(
                             [
                               'pending',
@@ -2975,7 +3203,7 @@ export const AdminPage: React.FC = () => {
                                   st === 'delivered' ? 'paid' : ord.paymentStatus
                                 )
                               }
-                              className={`px-3 py-1.5 font-bold capitalize cursor-pointer ${
+                              className={`min-h-[40px] sm:min-h-[34px] px-2.5 sm:px-3 py-1.5 text-[11px] font-bold capitalize cursor-pointer ${
                                 ord.status === st
                                   ? 'bg-[#B5893D] text-white'
                                   : 'bg-white border border-[#D4CFC7] text-[#1A1A1A]'
@@ -3152,7 +3380,7 @@ export const AdminPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => saveCoupon({ ...c, active: !c.active })}
-                      className={`px-3 py-1.5 font-bold cursor-pointer ${
+                      className={`min-h-[40px] px-3.5 py-2 font-bold cursor-pointer ${
                         c.active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
                       }`}
                     >
@@ -3161,7 +3389,8 @@ export const AdminPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => deleteCoupon(c.code)}
-                      className="p-2 bg-rose-50 text-rose-600 cursor-pointer"
+                      aria-label={`Delete ${c.code}`}
+                      className="min-h-[40px] min-w-[40px] p-2 bg-rose-50 text-rose-600 flex items-center justify-center cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -3181,21 +3410,21 @@ export const AdminPage: React.FC = () => {
               onSubmit={handleSaveSettingsSubmit}
               className="bg-white border border-[#E5E0D8] p-5 sm:p-6 space-y-6 text-xs"
             >
-              <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E0D8] pb-3.5">
                 <div>
-                  <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase text-[#1A1A1A]">
-                    Store Details, Brand Story Video, Mega-Menu &amp; Rewards Popup Settings
+                  <h2 className="font-serif-luxury text-base sm:text-xl font-bold uppercase text-[#1A1A1A]">
+                    Store Details, Brand Video &amp; Popup Settings
                   </h2>
-                  <p className="text-[#666666]">
-                    Control every luxury banner, video, logo, WhatsApp number, and popup across the website.
+                  <p className="text-[11px] sm:text-xs text-[#666666] mt-0.5">
+                    Control luxury banners, video, logo, WhatsApp number, and popups.
                   </p>
                 </div>
                 <button
                   type="submit"
-                  className="h-10 px-5 bg-[#B5893D] text-white font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                  className="h-11 sm:h-10 px-5 bg-[#B5893D] text-white font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save All Settings</span>
+                  <span>Save Settings</span>
                 </button>
               </div>
 
@@ -3651,30 +3880,29 @@ export const AdminPage: React.FC = () => {
         ===================================================================== */}
         {activeTab === 'chats' && (
           <div className="space-y-4">
-            <div className="bg-white border border-[#E5E0D8] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-white border border-[#E5E0D8] p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-serif-luxury text-lg sm:text-xl font-bold uppercase tracking-[0.08em] text-[#1A1A1A]">
-                  Live AI Chats Monitor (Firebase &amp; Groq Sync)
+                <h2 className="font-serif-luxury text-base sm:text-xl font-bold uppercase tracking-[0.06em] sm:tracking-[0.08em] text-[#1A1A1A]">
+                  Live AI Chats Monitor
                 </h2>
-                <p className="text-xs text-[#666666]">
-                  Watch every customer query &amp; Groq AI reply live under{' '}
+                <p className="text-[11px] sm:text-xs text-[#666666] mt-0.5">
+                  Customer queries &amp; Groq AI replies synced under{' '}
                   <code className="bg-[#FAF7F2] px-1.5 py-0.5 text-[#B5893D] font-mono">
                     /support_chats/{'{userId}'}
-                  </code>{' '}
-                  and send manual concierge replies anytime.
+                  </code>
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => refreshSupportChats()}
-                className="h-9 px-4 bg-[#FAF7F2] hover:bg-[#B5893D] hover:text-white border border-[#D4CFC7] text-xs font-bold uppercase tracking-wider cursor-pointer self-start"
+                className="min-h-[40px] sm:h-9 px-4 bg-[#FAF7F2] hover:bg-[#B5893D] hover:text-white border border-[#D4CFC7] text-xs font-bold uppercase tracking-wider cursor-pointer self-start"
               >
                 Refresh Feed
               </button>
             </div>
 
             {supportChats.length === 0 ? (
-              <div className="bg-white border border-[#E5E0D8] p-12 text-center space-y-2">
+              <div className="bg-white border border-[#E5E0D8] p-8 sm:p-12 text-center space-y-2">
                 <MessageCircle className="w-8 h-8 text-[#B5893D] mx-auto" />
                 <p className="text-sm font-bold text-[#1A1A1A]">No Active Customer AI Chats Yet</p>
                 <p className="text-xs text-[#666666] max-w-md mx-auto">
@@ -3683,17 +3911,21 @@ export const AdminPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                {/* Left Pane: Active Customer Sessions */}
-                <div className="lg:col-span-4 bg-white border border-[#E5E0D8] flex flex-col max-h-[600px]">
+                {/* Left Pane: Active Customer Sessions (hidden on mobile when viewing a thread) */}
+                <div
+                  className={`${
+                    mobileChatView === 'thread' ? 'hidden lg:flex' : 'flex'
+                  } lg:col-span-4 bg-white border border-[#E5E0D8] flex-col max-h-[65vh] lg:max-h-[600px]`}
+                >
                   <div className="p-3 border-b border-[#E5E0D8]">
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-[#666666] absolute left-3 top-3" />
+                      <Search className="w-4 h-4 text-[#666666] absolute left-3 top-3" />
                       <input
                         type="text"
                         value={chatSearchQuery}
                         onChange={(e) => setChatSearchQuery(e.target.value)}
                         placeholder="Search user, phone or message..."
-                        className="w-full h-9 pl-8 pr-3 bg-[#FAF7F2] border border-[#E5E0D8] text-xs focus:outline-none focus:border-[#B5893D]"
+                        className="w-full h-10 pl-9 pr-3 bg-[#FAF7F2] border border-[#E5E0D8] text-sm sm:text-xs focus:outline-none focus:border-[#B5893D]"
                       />
                     </div>
                   </div>
@@ -3715,15 +3947,18 @@ export const AdminPage: React.FC = () => {
                           <button
                             key={session.userId}
                             type="button"
-                            onClick={() => setSelectedChatUserId(session.userId)}
-                            className={`w-full text-left p-3.5 transition-colors cursor-pointer ${
+                            onClick={() => {
+                              setSelectedChatUserId(session.userId);
+                              setMobileChatView('thread');
+                            }}
+                            className={`w-full text-left p-3.5 min-h-[64px] transition-colors cursor-pointer ${
                               isSelected
                                 ? 'bg-[#FAF7F2] border-l-4 border-[#B5893D]'
                                 : 'hover:bg-[#FAF7F2]/60'
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-bold text-[#1A1A1A] truncate">
+                              <span className="text-sm sm:text-xs font-bold text-[#1A1A1A] truncate">
                                 {session.customerName}
                               </span>
                               <span className="text-[10px] text-[#8C8C8C] shrink-0 tabular-nums">
@@ -3734,11 +3969,11 @@ export const AdminPage: React.FC = () => {
                               </span>
                             </div>
                             {(session.customerPhone || session.productName) && (
-                              <p className="text-[10px] font-semibold text-[#B5893D] truncate mt-0.5">
+                              <p className="text-[11px] sm:text-[10px] font-semibold text-[#B5893D] truncate mt-0.5">
                                 {session.customerPhone || session.productName}
                               </p>
                             )}
-                            <p className="text-[11px] text-[#666666] line-clamp-1 mt-1">
+                            <p className="text-xs sm:text-[11px] text-[#666666] line-clamp-1 mt-1">
                               {session.lastSender === 'assistant'
                                 ? 'AI: '
                                 : session.lastSender === 'admin'
@@ -3758,38 +3993,51 @@ export const AdminPage: React.FC = () => {
                     supportChats.find((s) => s.userId === selectedChatUserId) || supportChats[0];
                   if (!activeSession) return null;
                   return (
-                    <div className="lg:col-span-8 bg-white border border-[#E5E0D8] flex flex-col h-[600px]">
-                      <div className="px-4 py-3 border-b border-[#E5E0D8] bg-[#FAF7F2] flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <h3 className="text-sm font-bold text-[#1A1A1A] truncate">
-                              {activeSession.customerName}
-                            </h3>
-                            <span className="text-[10px] px-2 py-0.5 bg-white border border-[#E5E0D8] font-mono text-[#666666]">
-                              {activeSession.messages.length} msgs
-                            </span>
+                    <div
+                      className={`${
+                        mobileChatView === 'list' ? 'hidden lg:flex' : 'flex'
+                      } lg:col-span-8 bg-white border border-[#E5E0D8] flex-col h-[70vh] lg:h-[600px]`}
+                    >
+                      <div className="px-3 sm:px-4 py-3 border-b border-[#E5E0D8] bg-[#FAF7F2] flex items-center justify-between gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => setMobileChatView('list')}
+                            aria-label="Back to chat list"
+                            className="lg:hidden min-h-[40px] min-w-[40px] px-2 bg-white border border-[#D4CFC7] text-[#1A1A1A] flex items-center justify-center cursor-pointer shrink-0"
+                          >
+                            <ArrowLeft className="w-4 h-4" />
+                          </button>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                              <h3 className="text-sm font-bold text-[#1A1A1A] truncate">
+                                {activeSession.customerName}
+                              </h3>
+                              <span className="text-[10px] px-2 py-0.5 bg-white border border-[#E5E0D8] font-mono text-[#666666] shrink-0">
+                                {activeSession.messages.length}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#666666] truncate">
+                              {activeSession.customerPhone || activeSession.userId}
+                              {activeSession.productName
+                                ? ` · ${activeSession.productName}`
+                                : ''}
+                            </p>
                           </div>
-                          <p className="text-[11px] text-[#666666] truncate">
-                            ID: {activeSession.userId}
-                            {activeSession.customerPhone ? ` · ${activeSession.customerPhone}` : ''}
-                            {activeSession.productName
-                              ? ` · Viewing: ${activeSession.productName}`
-                              : ''}
-                          </p>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => deleteSupportChat(activeSession.userId)}
-                          className="h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                          className="min-h-[38px] sm:h-8 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Clear</span>
                         </button>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
+                      <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 bg-white">
                         {activeSession.messages.map((m) => {
                           const isCustomer = m.sender === 'user';
                           const isAdminReply = m.sender === 'admin';
@@ -3806,9 +4054,9 @@ export const AdminPage: React.FC = () => {
                                     ? activeSession.customerName
                                     : isAdminReply
                                     ? 'Admin Concierge'
-                                    : 'Groq AI Assistant'}
+                                    : 'Groq AI'}
                                 </span>
-                                <span>
+                                <span className="tabular-nums">
                                   {new Date(m.timestamp).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit',
@@ -3816,7 +4064,7 @@ export const AdminPage: React.FC = () => {
                                 </span>
                               </div>
                               <div
-                                className={`max-w-[80%] px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
+                                className={`max-w-[85%] sm:max-w-[80%] px-3.5 py-2.5 text-sm sm:text-xs leading-relaxed whitespace-pre-wrap ${
                                   isCustomer
                                     ? 'bg-[#F5F5F5] text-[#1A1A1A] border border-[#E5E0D8]'
                                     : isAdminReply
@@ -3838,20 +4086,20 @@ export const AdminPage: React.FC = () => {
                           await sendAdminChatReply(activeSession.userId, adminReplyInput);
                           setAdminReplyInput('');
                         }}
-                        className="p-3 border-t border-[#E5E0D8] bg-[#FAF7F2] flex items-center gap-2"
+                        className="p-2.5 sm:p-3 border-t border-[#E5E0D8] bg-[#FAF7F2] flex items-center gap-2"
                       >
                         <input
                           type="text"
                           value={adminReplyInput}
                           onChange={(e) => setAdminReplyInput(e.target.value)}
-                          placeholder="Send a live Store Concierge message to this customer..."
-                          className="flex-1 h-10 px-3 bg-white border border-[#D4CFC7] text-xs focus:outline-none focus:border-[#B5893D]"
+                          placeholder="Reply as Store Concierge..."
+                          className="flex-1 h-11 sm:h-10 px-3 bg-white border border-[#D4CFC7] text-sm sm:text-xs focus:outline-none focus:border-[#B5893D]"
                         />
                         <button
                           type="submit"
-                          className="h-10 px-4 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                          className="h-11 sm:h-10 px-4 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors shrink-0"
                         >
-                          Send Reply
+                          Send
                         </button>
                       </form>
                     </div>
@@ -3862,6 +4110,170 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* =====================================================================
+          MOBILE BOTTOM THUMB-ZONE NAVIGATION BAR (md:hidden)
+      ===================================================================== */}
+      <nav
+        aria-label="Mobile Admin Navigation"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#2A1810] text-white border-t border-[#B5893D]/40 shadow-[0_-4px_20px_rgba(0,0,0,0.18)]"
+      >
+        <div className="grid grid-cols-5 h-[62px]">
+          {primaryMobileTabIds.map((tabId) => {
+            const tab = adminTabs.find((t) => t.id === tabId)!;
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setShowMobileMoreSheet(false);
+                }}
+                className={`relative flex flex-col items-center justify-center gap-1 min-h-[44px] cursor-pointer transition-colors ${
+                  active ? 'text-[#D4AF37]' : 'text-white/70 hover:text-white'
+                }`}
+              >
+                {active && (
+                  <span className="absolute top-0 inset-x-3 h-0.5 bg-[#D4AF37]" />
+                )}
+                <div className="relative">
+                  <Icon className="w-5 h-5" />
+                  {typeof tab.badge === 'number' && tab.badge > 0 && (
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 bg-[#B5893D] text-white text-[9px] font-bold flex items-center justify-center rounded-full tabular-nums">
+                      {tab.badge > 99 ? '99+' : tab.badge}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-bold tracking-wide leading-none">
+                  {tab.shortLabel}
+                </span>
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => setShowMobileMoreSheet((v) => !v)}
+            className={`relative flex flex-col items-center justify-center gap-1 min-h-[44px] cursor-pointer transition-colors ${
+              isMoreTabActive || showMobileMoreSheet
+                ? 'text-[#D4AF37]'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            {isMoreTabActive && (
+              <span className="absolute top-0 inset-x-3 h-0.5 bg-[#D4AF37]" />
+            )}
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[10px] font-bold tracking-wide leading-none">
+              More
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      {/* =====================================================================
+          MOBILE "MORE TOOLS" BOTTOM SHEET DRAWER (md:hidden)
+      ===================================================================== */}
+      {showMobileMoreSheet && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/60 flex items-end justify-center"
+          onClick={() => setShowMobileMoreSheet(false)}
+        >
+          <div
+            className="w-full max-h-[82vh] bg-white border-t-2 border-[#B5893D] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag Handle + Sheet Header */}
+            <div className="pt-2.5 pb-3 px-4 border-b border-[#E5E0D8] bg-[#FAF7F2]">
+              <div className="w-10 h-1 bg-[#D4CFC7] rounded-full mx-auto mb-3" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#B5893D]">
+                    ADMIN WORKSPACE
+                  </span>
+                  <h3 className="font-serif-luxury text-base font-bold uppercase text-[#1A1A1A]">
+                    All Storefront Tools
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMoreSheet(false)}
+                  aria-label="Close menu"
+                  className="min-h-[40px] min-w-[40px] bg-white border border-[#E5E0D8] flex items-center justify-center text-[#1A1A1A] cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* All 11 Tabs + Security Controls */}
+            <div className="overflow-y-auto p-3 space-y-1.5">
+              {adminTabs.map((tab) => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setShowMobileMoreSheet(false);
+                    }}
+                    className={`w-full min-h-[48px] px-3.5 py-2.5 flex items-center justify-between gap-3 text-left text-xs font-bold uppercase tracking-wider border transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-[#B5893D] text-white border-[#B5893D]'
+                        : 'bg-white border-[#E5E0D8] text-[#1A1A1A]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-[#B5893D]'}`} />
+                      <span className="truncate">{tab.label}</span>
+                    </div>
+                    {typeof tab.badge === 'number' && (
+                      <span
+                        className={`px-2 py-0.5 text-[10px] font-bold tabular-nums shrink-0 ${
+                          active
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[#FAF7F2] text-[#666666] border border-[#E5E0D8]'
+                        }`}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              <div className="pt-2 border-t border-[#E5E0D8] grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileMoreSheet(false);
+                    setShowChangePassModal(true);
+                  }}
+                  className="min-h-[44px] px-3 bg-[#FAF7F2] border border-[#D4CFC7] text-[#1A1A1A] text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <KeyRound className="w-4 h-4 text-[#B5893D]" />
+                  <span>Password</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMobileMoreSheet(false);
+                    handleLockAdmin();
+                  }}
+                  className="min-h-[44px] px-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Lock Console</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
