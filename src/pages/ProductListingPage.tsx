@@ -155,8 +155,8 @@ export const ProductListingPage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-[#F5F6F8] min-h-screen pb-10">
-      {/* Top Category Banner (Exact Video 00:28) */}
+    <div className="bg-white min-h-screen pb-10">
+      {/* Top Category Banner */}
       <div className="max-w-7xl mx-auto">
         <SmartImage
           src={getCategoryBanner()}
@@ -167,28 +167,28 @@ export const ProductListingPage: React.FC = () => {
         />
       </div>
 
-      {/* Exact Video Sticky "Sort | Filter (1)" Bar + "Found - X" Counter (00:28 - 00:41) */}
-      <div className="sticky top-[92px] z-30 bg-white border-b border-slate-200 shadow-2xs">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 divide-x divide-slate-200 h-11">
+      {/* Sticky "Sort | Filter" Bar + "Found - X" Counter */}
+      <div className="sticky top-14 sm:top-16 z-30 bg-white border-b border-[#EAE5DC]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 divide-x divide-[#EAE5DC] h-11">
           <button
             type="button"
             onClick={() => setMobileSortOpen(true)}
-            className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#1E293B] hover:text-[#F26522] cursor-pointer"
+            className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#1A1A1A] hover:text-[#B5893D] cursor-pointer transition-colors"
           >
             <span>Sort</span>
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#595959]" />
           </button>
 
           <button
             type="button"
             onClick={() => setMobileFilterOpen(true)}
-            className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#1E293B] hover:text-[#F26522] cursor-pointer"
+            className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#1A1A1A] hover:text-[#B5893D] cursor-pointer transition-colors"
           >
             <span>Filter</span>
             <div className="relative flex items-center">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#595959]" />
               {activeFilterCount > 0 && (
-                <span className="ml-1 w-4 h-4 rounded-full bg-[#28A745] text-white text-[10px] font-extrabold flex items-center justify-center tabular-nums">
+                <span className="ml-1.5 w-4 h-4 rounded-full bg-[#B5893D] text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
                   {activeFilterCount}
                 </span>
               )}
@@ -196,17 +196,17 @@ export const ProductListingPage: React.FC = () => {
           </button>
         </div>
 
-        {/* "Found - X" Grey Strip (Exact Video 00:31) */}
-        <div className="bg-[#F5F6F8] px-3 py-1.5 border-t border-slate-200 text-xs text-slate-600">
+        {/* "Found - X" Strip */}
+        <div className="bg-[#FAF7F2] px-4 py-1.5 border-t border-[#EAE5DC] text-xs text-[#595959]">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <span>
-              Found - <strong className="text-[#1E293B]">{filteredAndSorted.length}</strong>
+            <span className="tabular-nums">
+              Found <strong className="text-[#1A1A1A] font-semibold">{filteredAndSorted.length}</strong> items
             </span>
             {activeFilterCount > 0 && (
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="text-[11px] font-bold text-[#F26522] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-[#A67C33] hover:underline cursor-pointer"
               >
                 Clear All
               </button>
@@ -215,21 +215,23 @@ export const ProductListingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2-Column Bordered Product Grid (Exact Video 00:31 - 00:42) */}
-      <div className="max-w-7xl mx-auto bg-white border-t border-l border-slate-200">
+      {/* Product Grid */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-5">
         {filteredAndSorted.length === 0 ? (
-          <div className="p-10 text-center space-y-3">
-            <p className="text-sm font-bold text-[#1E293B]">No matching products found</p>
+          <div className="p-10 text-center space-y-3 border border-[#EAE5DC] bg-[#FAF7F2]">
+            <p className="font-serif-luxury text-lg font-semibold text-[#1A1A1A]">
+              No matching products found
+            </p>
             <button
               type="button"
               onClick={resetAllFilters}
-              className="px-4 py-2 rounded bg-[#F26522] text-white text-xs font-bold cursor-pointer"
+              className="px-5 py-2 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors"
             >
               Reset Filters
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {filteredAndSorted.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -240,15 +242,17 @@ export const ProductListingPage: React.FC = () => {
       {/* Sort Modal */}
       {mobileSortOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex flex-col justify-end">
-          <div className="bg-white rounded-t-2xl p-5 space-y-3 max-w-lg w-full mx-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-              <h3 className="text-sm font-extrabold text-[#1E293B]">Sort Products By</h3>
+          <div className="bg-white rounded-t-2xl p-5 space-y-3 max-w-lg w-full mx-auto border-t border-[#EAE5DC]">
+            <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2.5">
+              <h3 className="font-serif-luxury text-base font-semibold uppercase tracking-wider text-[#1A1A1A]">
+                Sort Products By
+              </h3>
               <button
                 type="button"
                 onClick={() => setMobileSortOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center cursor-pointer"
+                className="w-7 h-7 rounded-full bg-[#FAF7F2] flex items-center justify-center cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-[#1A1A1A]" />
               </button>
             </div>
             <div className="space-y-1">

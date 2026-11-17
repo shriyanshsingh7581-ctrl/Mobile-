@@ -37,13 +37,13 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-[#B5893D] text-white pt-10 pb-24 md:pb-12 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-10">
-        {/* 1. 4-Column Top Links Grid (Exact Video 00:17 - 00:20) */}
+        {/* 1. 4-Column Top Links Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 text-xs">
           <div className="space-y-3">
-            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+            <h4 className="font-semibold uppercase tracking-[0.1em] text-white text-xs">
               SHOP BY CATEGORY
             </h4>
-            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+            <ul className="space-y-2 text-white/95 text-xs leading-relaxed">
               <li>
                 <Link to="/products?category=iphone" className="hover:underline">
                   Flagship iPhones
@@ -88,10 +88,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+            <h4 className="font-semibold uppercase tracking-[0.1em] text-white text-xs">
               CUSTOMER SERVICE
             </h4>
-            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+            <ul className="space-y-2 text-white/95 text-xs leading-relaxed">
               <li>
                 <button
                   type="button"
@@ -130,10 +130,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+            <h4 className="font-semibold uppercase tracking-[0.1em] text-white text-xs">
               LEGAL &amp; POLICIES
             </h4>
-            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+            <ul className="space-y-2 text-white/95 text-xs leading-relaxed">
               <li>
                 <Link to="/store" className="hover:underline">
                   Privacy Policy
@@ -153,10 +153,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-[11px] sm:text-xs">
+            <h4 className="font-semibold uppercase tracking-[0.1em] text-white text-xs">
               OUR JOURNEY
             </h4>
-            <ul className="space-y-2 text-white/90 text-[11px] sm:text-xs">
+            <ul className="space-y-2 text-white/95 text-xs leading-relaxed">
               <li>
                 <Link to="/store" className="hover:underline">
                   Our Showroom Legacy
@@ -171,18 +171,18 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. Middle Row: Contact Us + Center Crest & Newsletter + Right Address (Exact Video 00:18 - 00:20) */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-4 border-t border-white/20 text-xs">
+        {/* 2. Middle Row: Contact Us + Center Crest & Newsletter + Right Address */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-4 border-t border-white/25 text-xs">
           {/* Left: CONTACT US */}
           <div className="md:col-span-4 space-y-2">
-            <h4 className="font-bold uppercase tracking-[0.12em] text-white text-xs">
+            <h4 className="font-semibold uppercase tracking-[0.1em] text-white text-xs">
               CONTACT US
             </h4>
-            <p className="text-white/90 font-medium">Timings :</p>
-            <p className="text-white/90">
+            <p className="text-white/95 font-medium">Timings :</p>
+            <p className="text-white/95">
               {storeSettings.openingHours || 'Monday to Friday / 10am to 6pm'}
             </p>
-            <p className="text-white/90">
+            <p className="text-white/95">
               Email:{' '}
               <a
                 href={`mailto:${storeSettings.email || 'charliegedekar@gmail.com'}`}
@@ -191,7 +191,7 @@ export const Footer: React.FC = () => {
                 {storeSettings.email || 'charliegedekar@gmail.com'}
               </a>
             </p>
-            <p className="text-white/90 font-semibold">
+            <p className="text-white font-semibold tabular-nums">
               Call:{' '}
               <a
                 href={`tel:${(storeSettings.phone || '+91 8818850488').replace(/[^0-9+]/g, '')}`}
@@ -208,7 +208,7 @@ export const Footer: React.FC = () => {
               <div className="w-12 h-12 rounded-full bg-white/15 border border-white/40 flex items-center justify-center">
                 <Crown className="w-6 h-6 text-white" />
               </div>
-              <span className="font-serif-luxury text-sm font-bold tracking-[0.2em] uppercase">
+              <span className="font-serif-luxury text-base font-bold tracking-[0.16em] uppercase">
                 {storeSettings.storeName || 'CHARLIE LUXURY'}
               </span>
             </div>
@@ -219,7 +219,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook"
-                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+                className="w-8 h-8 rounded-full border border-white/45 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
               >
                 <Facebook className="w-3.5 h-3.5" />
               </a>
@@ -228,7 +228,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
-                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+                className="w-8 h-8 rounded-full border border-white/45 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
               >
                 <Instagram className="w-3.5 h-3.5" />
               </a>
@@ -237,7 +237,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"
-                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
+                className="w-8 h-8 rounded-full border border-white/45 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors"
               >
                 <Youtube className="w-3.5 h-3.5" />
               </a>
@@ -245,26 +245,26 @@ export const Footer: React.FC = () => {
                 type="button"
                 onClick={() => openWhatsAppEnquiry({})}
                 aria-label="WhatsApp"
-                className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full border border-white/45 flex items-center justify-center hover:bg-white hover:text-[#B5893D] transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <p className="text-[11px] text-white/90 max-w-xs leading-relaxed">
+            <p className="text-xs text-white/95 max-w-xs leading-relaxed">
               Subscribe for special offers, newsletters and become a part of our movement
             </p>
 
             <form
               onSubmit={handleNewsletterSubmit}
-              className="w-full max-w-xs flex items-center border border-white/70 bg-transparent h-10 px-3"
+              className="w-full max-w-xs flex items-center border border-white/75 bg-transparent h-10 px-3"
             >
               <input
                 type="email"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder="Your Email"
-                className="flex-1 bg-transparent text-xs text-white placeholder:text-white/75 focus:outline-none"
+                className="flex-1 bg-transparent text-xs text-white placeholder:text-white/80 focus:outline-none"
               />
               <button
                 type="submit"
@@ -277,8 +277,8 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Right: Showroom Address */}
-          <div className="md:col-span-3 text-left md:text-right text-[11px] text-white/90 leading-relaxed space-y-1">
-            <p className="font-bold text-white uppercase tracking-wider">
+          <div className="md:col-span-3 text-left md:text-right text-xs text-white/95 leading-relaxed space-y-1">
+            <p className="font-semibold text-white uppercase tracking-[0.06em]">
               {storeSettings.businessName || 'CHARLIE MOBILES & ACCESSORIES'}
             </p>
             <p>{storeSettings.address}</p>
@@ -286,15 +286,15 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. Copyright & Most Searched Links (Exact Video 00:19 - 00:20) */}
-        <div className="pt-6 border-t border-white/20 space-y-4 text-[11px]">
-          <div className="text-center text-white/90">
+        {/* 3. Copyright & Most Searched Links */}
+        <div className="pt-6 border-t border-white/25 space-y-4 text-xs">
+          <div className="text-center text-white/95">
             © {new Date().getFullYear()} {storeSettings.businessName || 'Charlie Mobiles & Accessories'}. All Rights Reserved.
           </div>
 
           <div className="space-y-1.5">
-            <p className="font-bold text-white">Most Searched</p>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-white/90">
+            <p className="font-semibold text-white">Most Searched</p>
+            <div className="flex flex-wrap gap-x-3.5 gap-y-1.5 text-white/95">
               {mostSearchedLinks.map((item) => (
                 <Link
                   key={item.label}

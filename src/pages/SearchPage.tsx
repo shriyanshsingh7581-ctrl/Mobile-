@@ -65,14 +65,14 @@ export const SearchPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 space-y-6">
       {/* Live Search Box */}
       <form onSubmit={handleFormSubmit} className="relative">
-        <Search className="w-5 h-5 text-[#2563EB] absolute left-4 top-3.5" />
+        <Search className="w-5 h-5 text-[#B5893D] absolute left-4 top-3.5" />
         <input
           type="text"
           autoFocus
           value={queryText}
           onChange={(e) => setQueryText(e.target.value)}
           placeholder="Search smartphones, brands (Apple, Vivo, Samsung), earbuds, chargers..."
-          className="w-full h-12 pl-12 pr-12 rounded-2xl bg-white border-2 border-[#2563EB] text-sm sm:text-base font-medium text-[#171717] shadow-xs focus:outline-none"
+          className="w-full h-12 pl-12 pr-12 bg-white border border-[#D4CFC7] focus:border-[#B5893D] text-sm sm:text-base font-medium text-[#1A1A1A] placeholder:text-[#777777] shadow-2xs focus:outline-none"
         />
         {queryText && (
           <button
@@ -82,9 +82,9 @@ export const SearchPage: React.FC = () => {
               setSearchParams({});
             }}
             aria-label="Clear search"
-            className="absolute right-3.5 top-2.5 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center cursor-pointer"
+            className="absolute right-3.5 top-2.5 w-7 h-7 rounded-full bg-[#FAF7F2] hover:bg-[#EAE5DC] flex items-center justify-center cursor-pointer"
           >
-            <X className="w-4 h-4 text-[#171717]" />
+            <X className="w-4 h-4 text-[#1A1A1A]" />
           </button>
         )}
       </form>
@@ -94,16 +94,16 @@ export const SearchPage: React.FC = () => {
         <div className="space-y-6">
           {/* Recent Searches */}
           {recentSearches.length > 0 && (
-            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5">
+            <div className="bg-white border border-[#EAE5DC] p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#171717]">
-                  <Clock className="w-4 h-4 text-[#2563EB]" />
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]">
+                  <Clock className="w-4 h-4 text-[#B5893D]" />
                   <span>Recent Searches</span>
                 </div>
                 <button
                   type="button"
                   onClick={clearRecentSearches}
-                  className="text-xs font-semibold text-[#737373] hover:text-rose-600 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-[#595959] hover:text-rose-600 flex items-center gap-1 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Clear</span>
@@ -115,7 +115,7 @@ export const SearchPage: React.FC = () => {
                     key={term}
                     type="button"
                     onClick={() => handleSelectTerm(term)}
-                    className="px-3 py-1.5 rounded-xl bg-[#F5F6F8] hover:bg-blue-50 text-xs font-semibold text-[#171717] hover:text-[#2563EB] transition-colors cursor-pointer"
+                    className="px-3 py-1.5 bg-[#FAF7F2] hover:bg-[#EAE5DC] border border-[#EAE5DC] text-xs font-medium text-[#1A1A1A] hover:text-[#B5893D] transition-colors cursor-pointer"
                   >
                     {term}
                   </button>
@@ -125,9 +125,9 @@ export const SearchPage: React.FC = () => {
           )}
 
           {/* Popular Searches */}
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5">
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#171717] mb-3">
-              <Sparkles className="w-4 h-4 text-[#2563EB]" />
+          <div className="bg-white border border-[#EAE5DC] p-4 sm:p-5">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] mb-3">
+              <Sparkles className="w-4 h-4 text-[#B5893D]" />
               <span>Popular Searches at Charlie Mobile</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -136,7 +136,7 @@ export const SearchPage: React.FC = () => {
                   key={term}
                   type="button"
                   onClick={() => handleSelectTerm(term)}
-                  className="px-3 py-1.5 rounded-xl border border-[#E5E7EB] hover:border-[#2563EB] text-xs font-semibold text-[#171717] hover:text-[#2563EB] transition-colors cursor-pointer"
+                  className="px-3 py-1.5 border border-[#D4CFC7] hover:border-[#B5893D] text-xs font-medium text-[#1A1A1A] hover:text-[#B5893D] transition-colors cursor-pointer"
                 >
                   {term}
                 </button>
@@ -145,14 +145,14 @@ export const SearchPage: React.FC = () => {
           </div>
 
           {/* Trending Smartphones */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-[#2563EB]" />
-              <h2 className="text-base sm:text-lg font-extrabold text-[#171717]">
+              <Flame className="w-5 h-5 text-[#B5893D]" />
+              <h2 className="font-serif-luxury text-lg sm:text-xl font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">
                 Trending Products Right Now
               </h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
               {trendingProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
@@ -165,12 +165,12 @@ export const SearchPage: React.FC = () => {
           {/* Matching Category Shortcuts */}
           {matchingCategories.length > 0 && (
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              <span className="text-xs font-bold text-[#737373] shrink-0">Categories:</span>
+              <span className="text-xs font-semibold text-[#595959] shrink-0">Categories:</span>
               {matchingCategories.map((cat) => (
                 <Link
                   key={cat.id}
                   to={`/products?category=${cat.slug}`}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#2563EB] text-xs font-bold text-[#2563EB] flex items-center gap-1 shrink-0"
+                  className="px-3 py-1.5 bg-white border border-[#D4CFC7] hover:border-[#B5893D] text-xs font-semibold text-[#A67C33] flex items-center gap-1 shrink-0"
                 >
                   <span>{cat.name}</span>
                   <ArrowRight className="w-3 h-3" />
@@ -181,18 +181,18 @@ export const SearchPage: React.FC = () => {
 
           {/* Product Results or Empty State */}
           {matchingProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-10 text-center space-y-3">
-              <p className="text-base font-extrabold text-[#171717]">
+            <div className="bg-white border border-[#EAE5DC] p-10 text-center space-y-3">
+              <p className="font-serif-luxury text-lg font-semibold text-[#1A1A1A]">
                 No products matched &ldquo;{queryText}&rdquo;
               </p>
-              <p className="text-xs text-[#737373]">
+              <p className="text-xs text-[#595959]">
                 Try searching by brand (Apple, Samsung, Vivo, OnePlus, Redmi) or category (Earbuds, Chargers).
               </p>
               <div className="pt-2 flex justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setQueryText('')}
-                  className="px-4 py-2 rounded-xl bg-[#2563EB] text-white text-xs font-bold cursor-pointer"
+                  className="px-5 py-2 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors"
                 >
                   View Popular Searches
                 </button>
@@ -200,10 +200,10 @@ export const SearchPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-[#737373] tabular-nums">
+              <p className="text-xs font-semibold text-[#595959] tabular-nums">
                 Found {matchingProducts.length} results for &ldquo;{queryText}&rdquo;
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                 {matchingProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

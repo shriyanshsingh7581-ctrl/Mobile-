@@ -72,21 +72,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Link>
       </div>
 
-      {/* 2. Centered Luxury Editorial Details Block (Exact Video 00:00 - 00:05 & 00:26 - 00:35) */}
+      {/* 2. Centered Luxury Editorial Details Block */}
       <div className="flex flex-col flex-1 pt-3 pb-1 text-center justify-between">
         <Link to={`/product/${product.id}`} className="space-y-1 px-1">
-          {/* Uppercase Gold Tagline (#B5893D) */}
-          <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-[#B5893D] truncate">
+          {/* Uppercase Gold Tagline (#A67C33) */}
+          <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.07em] text-[#A67C33] truncate">
             {goldTagline}
           </p>
 
-          {/* Bold Product Title (#1A1A1A) */}
-          <h3 className="text-xs sm:text-[13px] font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] transition-colors line-clamp-1 leading-snug">
+          {/* Product Title (#1A1A1A) */}
+          <h3 className="text-[13px] sm:text-sm font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] transition-colors line-clamp-1 leading-snug tracking-tight">
             {product.name}
           </h3>
 
           {/* 5 Gold Stars + Review Count */}
-          <div className="flex items-center justify-center gap-1 pt-0.5">
+          <div className="flex items-center justify-center gap-1.5 pt-0.5">
             <div className="flex items-center text-[#D4AF37]">
               {[0, 1, 2, 3, 4].map((starIdx) => (
                 <Star
@@ -95,22 +95,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 />
               ))}
             </div>
-            <span className="text-[10px] text-[#666666] tabular-nums">
+            <span className="text-[11px] font-medium text-[#595959] tabular-nums">
               {product.reviewCount || 42} reviews
             </span>
           </div>
 
-          {/* Price Row: Bold Selling Price + Strikethrough MRP + Gold % OFF */}
+          {/* Price Row: Selling Price + Strikethrough MRP + Gold % OFF */}
           <div className="flex items-center justify-center flex-wrap gap-1.5 pt-1 tabular-nums">
-            <span className="text-xs sm:text-sm font-bold text-[#1A1A1A]">
+            <span className="text-[13px] sm:text-[15px] font-bold text-[#1A1A1A]">
               {formatINR(product.price)}
             </span>
             {product.mrp > product.price && (
               <>
-                <span className="text-[10px] sm:text-[11px] line-through text-[#888888]">
+                <span className="text-[11px] sm:text-xs line-through text-[#777777]">
                   {formatINR(product.mrp)}
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-[#B5893D]">
+                <span className="text-[11px] sm:text-xs font-semibold text-[#A67C33]">
                   {discountPercent}% OFF
                 </span>
               </>
@@ -118,13 +118,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </Link>
 
-        {/* 3. Full-Width Sharp Bordered ADD TO CART or 🔔 NOTIFY ME Button (Exact Video 00:28) */}
+        {/* 3. Full-Width Sharp Bordered ADD TO CART or NOTIFY ME Button */}
         <div className="pt-3">
           {isOutOfStock ? (
             <button
               type="button"
               onClick={() => setActiveNotifyModalProduct(product)}
-              className="w-full h-9 sm:h-10 border border-[#D4AF37] bg-white hover:bg-[#FAF7F2] text-[#1A1A1A] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full h-9 sm:h-10 border border-[#D4AF37] bg-white hover:bg-[#FAF7F2] text-[#1A1A1A] text-[11px] font-semibold uppercase tracking-[0.1em] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <Bell className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
               <span>NOTIFY ME</span>
@@ -133,7 +133,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <button
               type="button"
               onClick={() => addToCart(product, 1)}
-              className="w-full h-9 sm:h-10 border border-[#1A1A1A] bg-white hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              className="w-full h-9 sm:h-10 border border-[#1A1A1A] bg-white hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors cursor-pointer"
             >
               ADD TO CART
             </button>

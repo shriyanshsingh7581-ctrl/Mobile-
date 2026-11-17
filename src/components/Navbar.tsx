@@ -313,14 +313,14 @@ export const Navbar: React.FC = () => {
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                       />
                     </div>
-                    <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-[#1A1A1A]">
+                    <span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">
                       {card.title}
                     </span>
                   </Link>
                 ))}
               </div>
 
-              {/* B. Embedded Promo Banner Card inside Drawer ("Too Cool For ORDINARY" — Exact Video 00:37 - 00:46) */}
+              {/* B. Embedded Clean Promo Banner Card inside Drawer (No Text Overlay) */}
               <Link
                 to={storeSettings.megaMenuBannerLink || '/products'}
                 onClick={() => setMobileDrawerOpen(false)}
@@ -332,26 +332,16 @@ export const Navbar: React.FC = () => {
                       storeSettings.megaMenuBannerUrl ||
                       'https://img-prd-pim.poorvika.com/pageimg/vivo-v80-zeiss-portrait-so-pro-Available-now-M.webp'
                     }
-                    alt={storeSettings.megaMenuBannerTitle || 'Too Cool For ORDINARY'}
+                    alt={storeSettings.megaMenuBannerTitle || 'Signature Promo Banner'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-transparent flex flex-col justify-center px-4">
-                    <span className="text-[10px] font-medium text-[#1A1A1A]">
-                      {storeSettings.megaMenuBannerTitle?.includes('ORDINARY')
-                        ? 'Too Cool For'
-                        : storeSettings.megaMenuBannerSubtitle || 'Signature Series'}
-                    </span>
-                    <span className="font-serif-luxury text-lg font-bold uppercase tracking-wider text-[#1A1A1A] leading-none mt-0.5">
-                      {storeSettings.megaMenuBannerTitle || 'ORDINARY'}
-                    </span>
-                  </div>
                 </div>
               </Link>
 
-              {/* C. "PRODUCTS" Section (Exact Video 00:37 - 00:46) */}
+              {/* C. "PRODUCTS" Section */}
               <div className="space-y-2.5">
-                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#777777]">
                   PRODUCTS
                 </h3>
                 <ul className="space-y-2.5 text-[13px] font-medium text-[#1A1A1A]">
@@ -405,9 +395,9 @@ export const Navbar: React.FC = () => {
                 </ul>
               </div>
 
-              {/* D. "SHOP" Expandable Filter Rows (Exact Video 00:37 - 00:46) */}
+              {/* D. "SHOP" Expandable Filter Rows */}
               <div className="space-y-2 pt-2 border-t border-[#F0ECE1]">
-                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#777777]">
                   SHOP
                 </h3>
                 <div className="divide-y divide-[#F5F2EB]">
@@ -449,9 +439,9 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
 
-              {/* E. "MORE & SUPPORT" Links (Exact Video 00:37 - 00:46) */}
+              {/* E. "MORE & SUPPORT" Links */}
               <div className="space-y-2.5 pt-2 border-t border-[#F0ECE1]">
-                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999999]">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#777777]">
                   MORE &amp; SUPPORT
                 </h3>
                 <ul className="space-y-2.5 text-[13px] font-medium text-[#1A1A1A]">
@@ -538,11 +528,11 @@ export const Navbar: React.FC = () => {
           <Link
             to="/"
             className={`flex flex-col items-center justify-center gap-0.5 ${
-              location.pathname === '/' ? 'text-[#B5893D]' : 'text-[#666666]'
+              location.pathname === '/' ? 'text-[#B5893D]' : 'text-[#595959]'
             }`}
           >
             <Home className="w-4 h-4" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Home</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em]">Home</span>
           </Link>
 
           <Link
@@ -551,20 +541,20 @@ export const Navbar: React.FC = () => {
               location.pathname.startsWith('/categories') ||
               location.pathname.startsWith('/products')
                 ? 'text-[#B5893D]'
-                : 'text-[#666666]'
+                : 'text-[#595959]'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Categories</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em]">Categories</span>
           </Link>
 
           <button
             type="button"
             onClick={handleReelsNavClick}
-            className="flex flex-col items-center justify-center gap-0.5 text-[#666666] hover:text-[#B5893D] cursor-pointer"
+            className="flex flex-col items-center justify-center gap-0.5 text-[#595959] hover:text-[#B5893D] cursor-pointer"
           >
             <Film className="w-4 h-4 text-[#B5893D]" />
-            <span className="text-[9px] font-bold uppercase tracking-wider text-[#B5893D]">
+            <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-[#B5893D]">
               Reels
             </span>
           </button>
@@ -572,28 +562,28 @@ export const Navbar: React.FC = () => {
           <Link
             to="/cart"
             className={`relative flex flex-col items-center justify-center gap-0.5 ${
-              location.pathname === '/cart' ? 'text-[#B5893D]' : 'text-[#666666]'
+              location.pathname === '/cart' ? 'text-[#B5893D]' : 'text-[#595959]'
             }`}
           >
             <div className="relative">
               <ShoppingBag className="w-4 h-4" />
               {totalCartItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#B5893D] text-white text-[8px] font-bold flex items-center justify-center tabular-nums">
+                <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[#B5893D] text-white text-[9px] font-bold flex items-center justify-center tabular-nums">
                   {totalCartItems}
                 </span>
               )}
             </div>
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Cart</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em]">Cart</span>
           </Link>
 
           <Link
             to="/account"
             className={`flex flex-col items-center justify-center gap-0.5 ${
-              location.pathname === '/account' ? 'text-[#B5893D]' : 'text-[#666666]'
+              location.pathname === '/account' ? 'text-[#B5893D]' : 'text-[#595959]'
             }`}
           >
             <User className="w-4 h-4" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Account</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em]">Account</span>
           </Link>
         </div>
       </nav>

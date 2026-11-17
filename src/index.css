@@ -3,7 +3,7 @@
 @layer base {
   :root {
     --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-    --font-sans: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
@@ -12,11 +12,22 @@
     font-family: var(--font-sans);
     background-color: #FFFFFF;
     color: #1A1A1A;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
   }
 
   input,
@@ -30,11 +41,14 @@
 
 .font-serif-luxury {
   font-family: var(--font-serif);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 
 .font-serif-editorial {
   font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 .font-mono-num {

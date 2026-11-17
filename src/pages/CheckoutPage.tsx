@@ -199,7 +199,7 @@ export const CheckoutPage: React.FC = () => {
         <h1 className="text-xl font-extrabold text-[#171717]">No Items to Checkout</h1>
         <Link
           to="/products"
-          className="inline-block px-5 py-2.5 rounded-xl bg-[#2563EB] text-white text-xs font-bold"
+          className="inline-block px-5 py-2.5 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-semibold uppercase tracking-wider transition-colors"
         >
           Browse Smartphones
         </Link>
@@ -210,11 +210,11 @@ export const CheckoutPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#A67C33] uppercase tracking-[0.14em]">
           <Lock className="w-3.5 h-3.5" />
           <span>Charlie Mobile Checkout</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#171717]">
+        <h1 className="font-serif-luxury text-2xl sm:text-3xl font-semibold text-[#1A1A1A] mt-1">
           Complete Your Order
         </h1>
       </div>
@@ -226,8 +226,8 @@ export const CheckoutPage: React.FC = () => {
         {/* Left: Customer Info, Delivery & Payment Options */}
         <div className="lg:col-span-7 space-y-6">
           {/* Step 1: Delivery Method */}
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-4">
-            <h2 className="text-base font-extrabold text-[#171717]">
+          <div className="bg-white border border-[#EAE5DC] p-5 space-y-4">
+            <h2 className="font-serif-luxury text-base sm:text-lg font-semibold text-[#1A1A1A]">
               1. Choose Delivery or Store Pickup
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -258,17 +258,17 @@ export const CheckoutPage: React.FC = () => {
                     key={opt.id}
                     type="button"
                     onClick={() => setDeliveryMethod(opt.id as Order['deliveryMethod'])}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                    className={`p-3.5 border text-left transition-all cursor-pointer ${
                       active
-                        ? 'border-[#2563EB] bg-blue-50/70'
-                        : 'border-[#E5E7EB] hover:border-slate-300'
+                        ? 'border-[#B5893D] bg-[#FAF7F2]'
+                        : 'border-[#EAE5DC] hover:border-[#D4CFC7]'
                     }`}
                   >
                     <Icon
-                      className={`w-5 h-5 ${active ? 'text-[#2563EB]' : 'text-[#737373]'}`}
+                      className={`w-5 h-5 ${active ? 'text-[#B5893D]' : 'text-[#595959]'}`}
                     />
-                    <p className="mt-2 text-xs font-extrabold text-[#171717]">{opt.title}</p>
-                    <p className="text-[11px] text-[#737373] mt-0.5">{opt.desc}</p>
+                    <p className="mt-2 text-xs font-semibold text-[#1A1A1A]">{opt.title}</p>
+                    <p className="text-[11px] text-[#595959] mt-0.5">{opt.desc}</p>
                   </button>
                 );
               })}
@@ -276,8 +276,8 @@ export const CheckoutPage: React.FC = () => {
           </div>
 
           {/* Step 2: Customer Information */}
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-4">
-            <h2 className="text-base font-extrabold text-[#171717]">
+          <div className="bg-white border border-[#EAE5DC] p-5 space-y-4">
+            <h2 className="font-serif-luxury text-base sm:text-lg font-semibold text-[#1A1A1A]">
               2. Customer &amp; Address Information
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
@@ -372,15 +372,17 @@ export const CheckoutPage: React.FC = () => {
           </div>
 
           {/* Step 3: Payment Options */}
-          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-4">
-            <h2 className="text-base font-extrabold text-[#171717]">3. Payment Method</h2>
+          <div className="bg-white border border-[#EAE5DC] p-5 space-y-4">
+            <h2 className="font-serif-luxury text-base sm:text-lg font-semibold text-[#1A1A1A]">
+              3. Payment Method
+            </h2>
             <div className="space-y-2.5 text-xs">
               {storeSettings.codEnabled && (
                 <label
-                  className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer ${
+                  className={`flex items-start gap-3 p-3.5 border cursor-pointer ${
                     paymentMethod === 'cod'
-                      ? 'border-[#2563EB] bg-blue-50/60'
-                      : 'border-[#E5E7EB]'
+                      ? 'border-[#B5893D] bg-[#FAF7F2]'
+                      : 'border-[#EAE5DC]'
                   }`}
                 >
                   <input
@@ -388,13 +390,13 @@ export const CheckoutPage: React.FC = () => {
                     name="paymentMethod"
                     checked={paymentMethod === 'cod'}
                     onChange={() => setPaymentMethod('cod')}
-                    className="mt-0.5"
+                    className="mt-0.5 accent-[#B5893D]"
                   />
                   <div>
-                    <p className="font-extrabold text-[#171717]">
+                    <p className="font-semibold text-[#1A1A1A]">
                       Cash / UPI / Card on Delivery or Store Pickup
                     </p>
-                    <p className="text-[#737373] mt-0.5">
+                    <p className="text-[#595959] mt-0.5">
                       Inspect your sealed device at Charlie Mobile or at your doorstep before paying.
                     </p>
                   </div>
@@ -402,10 +404,10 @@ export const CheckoutPage: React.FC = () => {
               )}
 
               <label
-                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer ${
+                className={`flex items-start gap-3 p-3.5 border cursor-pointer ${
                   paymentMethod === 'upi'
-                    ? 'border-[#2563EB] bg-blue-50/60'
-                    : 'border-[#E5E7EB]'
+                    ? 'border-[#B5893D] bg-[#FAF7F2]'
+                    : 'border-[#EAE5DC]'
                 }`}
               >
                 <input
@@ -413,11 +415,11 @@ export const CheckoutPage: React.FC = () => {
                   name="paymentMethod"
                   checked={paymentMethod === 'upi'}
                   onChange={() => setPaymentMethod('upi')}
-                  className="mt-0.5"
+                  className="mt-0.5 accent-[#B5893D]"
                 />
                 <div className="flex-1">
-                  <p className="font-extrabold text-[#171717]">Direct UPI Transfer</p>
-                  <p className="text-[#737373] mt-0.5">
+                  <p className="font-semibold text-[#1A1A1A]">Direct UPI Transfer</p>
+                  <p className="text-[#595959] mt-0.5">
                     {storeSettings.upiId
                       ? `Merchant UPI ID: ${storeSettings.upiId}`
                       : 'Store UPI ID configurable in Admin Panel. Order will be marked Pending Verification until bank confirmation.'}
@@ -428,17 +430,17 @@ export const CheckoutPage: React.FC = () => {
                       value={upiReference}
                       onChange={(e) => setUpiReference(e.target.value)}
                       placeholder="Optional 12-digit UPI UTR / Reference Number"
-                      className="mt-2 w-full h-9 px-3 rounded-xl bg-white border border-[#E5E7EB] text-xs"
+                      className="mt-2 w-full h-9 px-3 bg-white border border-[#D4CFC7] text-xs focus:outline-none focus:border-[#B5893D]"
                     />
                   )}
                 </div>
               </label>
 
               <label
-                className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer ${
+                className={`flex items-start gap-3 p-3.5 border cursor-pointer ${
                   paymentMethod === 'online'
-                    ? 'border-[#2563EB] bg-blue-50/60'
-                    : 'border-[#E5E7EB]'
+                    ? 'border-[#B5893D] bg-[#FAF7F2]'
+                    : 'border-[#EAE5DC]'
                 }`}
               >
                 <input
@@ -446,13 +448,13 @@ export const CheckoutPage: React.FC = () => {
                   name="paymentMethod"
                   checked={paymentMethod === 'online'}
                   onChange={() => setPaymentMethod('online')}
-                  className="mt-0.5"
+                  className="mt-0.5 accent-[#B5893D]"
                 />
                 <div>
-                  <p className="font-extrabold text-[#171717]">
+                  <p className="font-semibold text-[#1A1A1A]">
                     Online Payment Gateway / Credit Card EMI
                   </p>
-                  <p className="text-[#737373] mt-0.5">
+                  <p className="text-[#595959] mt-0.5">
                     Requires live payment provider confirmation. Will be recorded as Pending Verification until gateway webhook confirms payment.
                   </p>
                 </div>
@@ -462,40 +464,40 @@ export const CheckoutPage: React.FC = () => {
         </div>
 
         {/* Right: Order Summary */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-[#E5E7EB] p-5 space-y-4 sticky top-28">
-          <h2 className="text-base font-extrabold text-[#171717]">Order Summary</h2>
-          <div className="divide-y divide-[#E5E7EB] max-h-72 overflow-y-auto pr-1">
+        <div className="lg:col-span-5 bg-white border border-[#EAE5DC] p-5 space-y-4 sticky top-28">
+          <h2 className="font-serif-luxury text-lg font-semibold text-[#1A1A1A]">Order Summary</h2>
+          <div className="divide-y divide-[#EAE5DC] max-h-72 overflow-y-auto pr-1">
             {cart.map((item) => (
               <div key={item.productId + item.selectedColor} className="py-3 flex justify-between gap-3 text-xs">
                 <div>
-                  <p className="font-bold text-[#171717]">{item.product.name}</p>
-                  <p className="text-[#737373]">
+                  <p className="font-semibold text-[#1A1A1A]">{item.product.name}</p>
+                  <p className="text-[#595959]">
                     {item.selectedColor} · {item.selectedStorage} × {item.quantity}
                   </p>
                 </div>
-                <span className="font-extrabold text-[#171717] tabular-nums shrink-0">
+                <span className="font-bold text-[#1A1A1A] tabular-nums shrink-0">
                   {formatINR(item.unitPrice * item.quantity)}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="pt-3 border-t border-[#E5E7EB] space-y-2 text-xs">
-            <div className="flex justify-between text-[#737373] tabular-nums">
+          <div className="pt-3 border-t border-[#EAE5DC] space-y-2 text-xs">
+            <div className="flex justify-between text-[#595959] tabular-nums">
               <span>Subtotal</span>
               <span>{formatINR(subtotal)}</span>
             </div>
             {couponDiscount > 0 && (
-              <div className="flex justify-between text-emerald-700 font-bold tabular-nums">
+              <div className="flex justify-between text-emerald-700 font-semibold tabular-nums">
                 <span>Coupon Discount</span>
                 <span>- {formatINR(couponDiscount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-[#737373] tabular-nums">
+            <div className="flex justify-between text-[#595959] tabular-nums">
               <span>Delivery Charges</span>
               <span>{deliveryFee === 0 ? 'FREE' : formatINR(deliveryFee)}</span>
             </div>
-            <div className="pt-3 border-t border-[#E5E7EB] flex justify-between items-baseline text-base font-extrabold text-[#171717] tabular-nums">
+            <div className="pt-3 border-t border-[#EAE5DC] flex justify-between items-baseline text-base font-bold text-[#1A1A1A] tabular-nums">
               <span>Total Payable</span>
               <span className="text-xl">{formatINR(totalAmount)}</span>
             </div>
@@ -506,7 +508,7 @@ export const CheckoutPage: React.FC = () => {
               type="submit"
               disabled={submitting}
               onClick={() => setSendToWhatsAppOnSubmit(true)}
-              className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] disabled:bg-slate-400 text-white text-sm font-extrabold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+              className="w-full h-12 bg-[#25D366] hover:bg-[#1EBE5D] disabled:bg-slate-400 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
             >
               <MessageCircle className="w-5 h-5 fill-white" />
               <span>
@@ -520,7 +522,7 @@ export const CheckoutPage: React.FC = () => {
               type="submit"
               disabled={submitting}
               onClick={() => setSendToWhatsAppOnSubmit(false)}
-              className="w-full h-11 rounded-xl bg-[#F26522] hover:bg-[#EA580C] disabled:bg-slate-400 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full h-11 bg-[#1A1A1A] hover:bg-[#B5893D] disabled:bg-slate-400 text-white text-xs font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <CreditCard className="w-4 h-4" />
               <span>
@@ -543,7 +545,7 @@ export const CheckoutPage: React.FC = () => {
                   paymentMethod,
                 })
               }
-              className="w-full h-10 rounded-xl border border-[#25D366] bg-emerald-50/50 hover:bg-emerald-50 text-[#171717] text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full h-10 border border-[#25D366] bg-emerald-50/50 hover:bg-emerald-50 text-[#1A1A1A] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
               <span>Quick WhatsApp Order Without Form</span>

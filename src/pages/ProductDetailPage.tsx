@@ -36,7 +36,7 @@ const DEFAULT_FALLBACK_REVIEWS: ProductReview[] = [
     author: 'Anonymous',
     rating: 5,
     date: '11/16/2026',
-    comment: 'SUPERB GENUINE DEVICE. SEALED BOX DELIVERY AND AWESOME SHOWROOM SUPPORT.',
+    comment: 'Superb genuine device. Sealed-box delivery and attentive showroom concierge support.',
     verifiedBuyer: true,
   },
   {
@@ -352,21 +352,21 @@ export const ProductDetailPage: React.FC = () => {
           {/* Right Column: Luxury Editorial Product Details */}
           <div className="lg:col-span-7 space-y-4">
             <div className="space-y-1.5">
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-[#B5893D]">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-[#A67C33]">
                 {product.goldTagline || `${product.brand} · LUXURY EDITION`}
               </p>
 
-              <h1 className="font-serif-luxury text-lg sm:text-2xl font-bold text-[#1A1A1A] leading-snug">
+              <h1 className="font-serif-luxury text-xl sm:text-3xl font-bold text-[#1A1A1A] leading-snug">
                 {product.name} {variantSummary ? `(${variantSummary})` : ''}
               </h1>
 
-              <div className="flex items-center gap-2 text-xs text-[#666666]">
+              <div className="flex items-center gap-2 text-xs text-[#595959]">
                 <div className="flex items-center gap-0.5 text-[#D4AF37]">
                   {[0, 1, 2, 3, 4].map((idx) => (
                     <Star key={idx} className="w-3.5 h-3.5 fill-[#D4AF37] text-[#D4AF37]" />
                   ))}
                 </div>
-                <span className="font-semibold text-[#1A1A1A]">
+                <span className="font-semibold text-[#1A1A1A] tabular-nums">
                   {displayAggregateScore} ({product.reviewCount || displayedReviews.length} Reviews)
                 </span>
               </div>
@@ -811,7 +811,7 @@ export const ProductDetailPage: React.FC = () => {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-semibold text-[#1A1A1A] line-clamp-2 leading-tight">
+                        <p className="text-[11px] font-semibold text-[#1A1A1A] line-clamp-2 leading-snug">
                           {linkedProduct.name}
                         </p>
                       </div>

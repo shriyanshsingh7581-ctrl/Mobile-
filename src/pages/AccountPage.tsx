@@ -79,10 +79,10 @@ export const AccountPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 space-y-6">
-      {/* Top User Banner */}
-      <div className="bg-[#101114] text-white rounded-3xl p-5 sm:p-7 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top User Header */}
+      <div className="bg-[#2A1810] text-white p-5 sm:p-7 border border-[#B5893D]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#B5893D] flex items-center justify-center text-xl font-extrabold">
+          <div className="w-14 h-14 bg-[#B5893D] flex items-center justify-center font-serif-luxury text-2xl font-bold">
             {user?.displayName
               ? user.displayName.slice(0, 1).toUpperCase()
               : mobileUser
@@ -90,14 +90,14 @@ export const AccountPage: React.FC = () => {
               : 'C'}
           </div>
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#F4D993]">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#E6C67C]">
               {user
                 ? 'Verified Charlie Mobile Member'
                 : mobileUser
                 ? 'Verified Mobile Member'
                 : 'Guest Shopper Account'}
             </span>
-            <h1 className="text-xl sm:text-2xl font-extrabold">
+            <h1 className="font-serif-luxury text-xl sm:text-2xl font-semibold text-[#F4D993]">
               {user
                 ? user.displayName || user.email
                 : mobileUser

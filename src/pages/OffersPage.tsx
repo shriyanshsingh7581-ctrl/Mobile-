@@ -42,17 +42,17 @@ export const OffersPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-8 space-y-8">
-      {/* Promotional Header Banner */}
-      <div className="rounded-3xl bg-[#101114] text-white p-6 sm:p-8 border border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      {/* Promotional Header */}
+      <div className="rounded-2xl bg-[#2A1810] text-white p-6 sm:p-8 border border-[#B5893D]/40 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#00C2FF]">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#E6C67C]">
             <Sparkles className="w-4 h-4" />
-            <span>Charlie Mobile Festival Deals</span>
+            <span>Charlie Mobile Privilege Deals</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="font-serif-luxury text-2xl sm:text-4xl font-semibold tracking-[0.05em] text-[#F4D993]">
             Smartphone Deals, Instant Exchange &amp; No-Cost EMI
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
             Unlock instant coupon discounts, extra exchange bonuses up to ₹9,000 on your old phone, and zero down-payment EMI plans at Charlie Mobile &amp; Accessories.
           </p>
         </div>
@@ -64,17 +64,17 @@ export const OffersPage: React.FC = () => {
                 'Hello Charlie Mobile, please share today’s special store exchange and bank cashback offers.',
             })
           }
-          className="self-start lg:self-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white text-xs font-bold cursor-pointer shrink-0"
+          className="self-start lg:self-auto min-h-[44px] px-5 py-2.5 bg-[#B5893D] hover:bg-[#A67C33] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer shrink-0 transition-colors"
         >
           Ask Store for Custom Deal
         </button>
       </div>
 
       {/* Active Coupon Codes */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Tag className="w-5 h-5 text-[#2563EB]" />
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#171717]">
+      <section className="space-y-4">
+        <div className="flex items-center gap-2.5">
+          <Tag className="w-5 h-5 text-[#B5893D]" />
+          <h2 className="font-serif-luxury text-lg sm:text-2xl font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">
             Active Promotional Coupon Codes
           </h2>
         </div>
@@ -84,23 +84,23 @@ export const OffersPage: React.FC = () => {
             .map((coupon) => (
               <div
                 key={coupon.code}
-                className="bg-white rounded-2xl border border-[#E5E7EB] p-5 flex flex-col justify-between gap-3"
+                className="bg-white border border-[#EAE5DC] p-5 flex flex-col justify-between gap-3"
               >
                 <div>
-                  <span className="text-xs font-extrabold text-[#2563EB] uppercase tracking-wider">
+                  <span className="text-[11px] font-semibold text-[#A67C33] uppercase tracking-[0.1em]">
                     Min Order {formatINR(coupon.minOrderAmount)}
                   </span>
-                  <h3 className="mt-1 text-base font-extrabold text-[#171717]">{coupon.title}</h3>
-                  <p className="mt-1 text-xs text-[#737373]">{coupon.description}</p>
+                  <h3 className="mt-1 text-base font-semibold text-[#1A1A1A]">{coupon.title}</h3>
+                  <p className="mt-1 text-xs text-[#595959] leading-relaxed">{coupon.description}</p>
                 </div>
-                <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between">
-                  <span className="font-mono-num text-sm font-extrabold text-[#171717] tracking-wider">
+                <div className="pt-3 border-t border-[#EAE5DC] flex items-center justify-between">
+                  <span className="font-mono-num text-sm font-bold text-[#1A1A1A] tracking-wider">
                     {coupon.code}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleCopyCoupon(coupon.code)}
-                    className="min-h-[36px] px-3 py-1.5 rounded-xl bg-[#101114] hover:bg-[#2563EB] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    className="min-h-[36px] px-3.5 py-1.5 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition-colors"
                   >
                     {copiedCode === coupon.code ? (
                       <>
@@ -123,21 +123,21 @@ export const OffersPage: React.FC = () => {
       {/* Interactive Exchange & No-Cost EMI Calculators */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Old-Phone Exchange Calculator */}
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider">
+        <div className="bg-white border border-[#EAE5DC] p-5 sm:p-6 space-y-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#A67C33] uppercase tracking-[0.12em]">
             <RefreshCw className="w-4 h-4" />
             <span>Smart Upgrade Estimator</span>
           </div>
-          <h2 className="text-lg font-extrabold text-[#171717]">
+          <h2 className="font-serif-luxury text-lg sm:text-xl font-semibold text-[#1A1A1A]">
             Old Smartphone Exchange Value Estimator
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block font-bold text-[#171717] mb-1">Your Current Brand</label>
+              <label className="block font-semibold text-[#1A1A1A] mb-1">Your Current Brand</label>
               <select
                 value={oldPhoneBrand}
                 onChange={(e) => setOldPhoneBrand(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F5F6F8] font-semibold"
+                className="w-full h-10 px-3 border border-[#D4CFC7] bg-[#FAF7F2] font-medium text-[#1A1A1A]"
               >
                 <option>Apple iPhone</option>
                 <option>Samsung Galaxy</option>
@@ -146,13 +146,13 @@ export const OffersPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-bold text-[#171717] mb-1">Device Condition</label>
+              <label className="block font-semibold text-[#1A1A1A] mb-1">Device Condition</label>
               <select
                 value={oldPhoneCondition}
                 onChange={(e) =>
                   setOldPhoneCondition(e.target.value as 'flawless' | 'good' | 'working')
                 }
-                className="w-full h-10 px-3 rounded-xl border border-[#E5E7EB] bg-[#F5F6F8] font-semibold"
+                className="w-full h-10 px-3 border border-[#D4CFC7] bg-[#FAF7F2] font-medium text-[#1A1A1A]"
               >
                 <option value="flawless">Flawless (No Scratches)</option>
                 <option value="good">Good (Minor Wear)</option>
@@ -160,10 +160,10 @@ export const OffersPage: React.FC = () => {
               </select>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-[#F5F6F8] flex items-center justify-between">
+          <div className="p-4 bg-[#FAF7F2] border border-[#EAE5DC] flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#737373]">Estimated Exchange Credit + Bonus</p>
-              <p className="text-xl font-extrabold text-[#2563EB] tabular-nums">
+              <p className="text-xs text-[#595959]">Estimated Exchange Credit + Bonus</p>
+              <p className="text-xl font-bold text-[#B5893D] tabular-nums">
                 Up to {formatINR(estimatedExchangeValue + 5000)}
               </p>
             </div>
@@ -174,7 +174,7 @@ export const OffersPage: React.FC = () => {
                   customMessage: `Hi Charlie Mobile, I want to exchange my ${oldPhoneBrand} (${oldPhoneCondition} condition) for a new smartphone.`,
                 })
               }
-              className="px-4 py-2 rounded-xl bg-[#101114] text-white text-xs font-bold cursor-pointer"
+              className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors"
             >
               Book Valuation
             </button>
@@ -182,17 +182,17 @@ export const OffersPage: React.FC = () => {
         </div>
 
         {/* No-Cost EMI Calculator */}
-        <div className="bg-white rounded-3xl border border-[#E5E7EB] p-5 sm:p-6 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider">
+        <div className="bg-white border border-[#EAE5DC] p-5 sm:p-6 space-y-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#A67C33] uppercase tracking-[0.12em]">
             <CreditCard className="w-4 h-4" />
             <span>Zero Interest EMI Planner</span>
           </div>
-          <h2 className="text-lg font-extrabold text-[#171717]">
+          <h2 className="font-serif-luxury text-lg sm:text-xl font-semibold text-[#1A1A1A]">
             No-Cost Monthly EMI Calculator
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block font-bold text-[#171717] mb-1">
+              <label className="block font-semibold text-[#1A1A1A] mb-1 tabular-nums">
                 Smartphone Price: {formatINR(emiPrice)}
               </label>
               <input
@@ -202,21 +202,21 @@ export const OffersPage: React.FC = () => {
                 step={5000}
                 value={emiPrice}
                 onChange={(e) => setEmiPrice(Number(e.target.value))}
-                className="w-full accent-[#2563EB] mt-2"
+                className="w-full accent-[#B5893D] mt-2"
               />
             </div>
             <div>
-              <label className="block font-bold text-[#171717] mb-1">Tenure (Months)</label>
+              <label className="block font-semibold text-[#1A1A1A] mb-1">Tenure (Months)</label>
               <div className="flex gap-1.5">
                 {[3, 6, 9, 12].map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => setEmiMonths(m)}
-                    className={`flex-1 h-10 rounded-xl font-bold cursor-pointer ${
+                    className={`flex-1 h-10 font-semibold cursor-pointer border transition-colors ${
                       emiMonths === m
-                        ? 'bg-[#2563EB] text-white'
-                        : 'bg-[#F5F6F8] text-[#171717]'
+                        ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                        : 'bg-[#FAF7F2] text-[#1A1A1A] border-[#EAE5DC]'
                     }`}
                   >
                     {m}M
@@ -225,27 +225,27 @@ export const OffersPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-[#F5F6F8] flex items-center justify-between">
+          <div className="p-4 bg-[#FAF7F2] border border-[#EAE5DC] flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#737373]">Monthly No-Cost Installment ({emiMonths} Months)</p>
-              <p className="text-xl font-extrabold text-[#171717] tabular-nums">
+              <p className="text-xs text-[#595959]">Monthly No-Cost Installment ({emiMonths} Months)</p>
+              <p className="text-xl font-bold text-[#1A1A1A] tabular-nums">
                 {formatINR(emiPrice / emiMonths)} / month
               </p>
             </div>
-            <span className="text-xs font-bold text-emerald-700">0% Extra Interest</span>
+            <span className="text-xs font-semibold text-emerald-700">0% Extra Interest</span>
           </div>
         </div>
       </section>
 
       {/* Top Smartphone Price Drops */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Percent className="w-5 h-5 text-[#2563EB]" />
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#171717]">
+      <section className="space-y-4">
+        <div className="flex items-center gap-2.5">
+          <Percent className="w-5 h-5 text-[#B5893D]" />
+          <h2 className="font-serif-luxury text-lg sm:text-2xl font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">
             Biggest Smartphone Price Drops
           </h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
           {smartphoneDeals.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -253,11 +253,11 @@ export const OffersPage: React.FC = () => {
       </section>
 
       {/* Accessories Combo Deals */}
-      <section className="space-y-3">
-        <h2 className="text-lg sm:text-xl font-extrabold text-[#171717]">
+      <section className="space-y-4">
+        <h2 className="font-serif-luxury text-lg sm:text-2xl font-semibold uppercase tracking-[0.08em] text-[#1A1A1A]">
           Genuine Accessories &amp; Audio Deals
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
           {accessoryDeals.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

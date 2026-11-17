@@ -119,31 +119,37 @@ export const HomePage: React.FC = () => {
   return (
     <div className="bg-white min-h-screen pb-10 space-y-10 sm:space-y-14 select-none">
       {/* =====================================================================
-          1. FULL-WIDTH HERO BANNER SLIDER (EXACT VIDEO 00:31 - 00:35)
+          1. FULL-WIDTH CLEAN HERO BANNER SLIDER (NO TEXT OVERLAY ON BANNER)
       ===================================================================== */}
       {currentHero && (
         <section className="relative w-full overflow-hidden bg-[#F5F7FA]">
           <div className="relative w-full aspect-[16/9] sm:aspect-[21/8] max-h-[480px] overflow-hidden">
             {currentHeroIsVideo ? (
               <div className="relative w-full h-full bg-[#1A1A1A]">
-                <video
-                  key={currentHero.videoUrl || currentHero.image}
-                  src={currentHero.videoUrl || currentHero.image}
-                  poster={
-                    !isVideoUrl(currentHero.image) ? currentHero.image : undefined
-                  }
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted={bannerMuted}
-                  loop
-                  playsInline
-                  preload="auto"
-                />
+                <Link
+                  to={currentHero.ctaLink || '/products'}
+                  aria-label={currentHero.title || 'Explore collection'}
+                  className="block w-full h-full"
+                >
+                  <video
+                    key={currentHero.videoUrl || currentHero.image}
+                    src={currentHero.videoUrl || currentHero.image}
+                    poster={
+                      !isVideoUrl(currentHero.image) ? currentHero.image : undefined
+                    }
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted={bannerMuted}
+                    loop
+                    playsInline
+                    preload="auto"
+                  />
+                </Link>
                 <button
                   type="button"
                   onClick={() => setBannerMuted((m) => !m)}
                   aria-label={bannerMuted ? 'Unmute video' : 'Mute video'}
-                  className="absolute bottom-3 right-3 z-20 px-3 py-1.5 bg-black/65 text-white text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                  className="absolute bottom-3 right-3 z-20 px-3 py-1.5 bg-black/65 text-white text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
                 >
                   {bannerMuted ? (
                     <>
@@ -159,43 +165,20 @@ export const HomePage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <SmartImage
-                src={currentHero.image}
-                alt={currentHero.title}
-                className="w-full h-full object-cover"
-              />
+              <Link
+                to={currentHero.ctaLink || '/products'}
+                aria-label={currentHero.title || 'Explore collection'}
+                className="block w-full h-full"
+              >
+                <SmartImage
+                  src={currentHero.image}
+                  alt={currentHero.title}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
             )}
 
-            {/* Editorial Headline & SHOP NOW Overlay (Exact Video 00:31 - 00:35) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/55 to-transparent flex items-center">
-              <div className="max-w-7xl mx-auto w-full px-8 sm:px-14">
-                <div className="max-w-md space-y-2 sm:space-y-3">
-                  {currentHero.tag && (
-                    <span className="inline-block text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#B5893D]">
-                      {currentHero.tag}
-                    </span>
-                  )}
-                  <h1 className="font-serif-luxury text-xl sm:text-4xl lg:text-5xl font-bold text-[#1A1A1A] uppercase leading-none tracking-wider">
-                    {currentHero.title}
-                  </h1>
-                  {currentHero.subtitle && (
-                    <p className="text-[11px] sm:text-sm text-[#4A4A4A] line-clamp-2 max-w-sm">
-                      {currentHero.subtitle}
-                    </p>
-                  )}
-                  <div className="pt-1">
-                    <Link
-                      to={currentHero.ctaLink || '/products'}
-                      className="inline-flex items-center justify-center h-8 sm:h-10 px-5 sm:px-7 bg-[#1A1A1A] hover:bg-[#B5893D] text-white text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] transition-colors"
-                    >
-                      {currentHero.ctaText || 'SHOP NOW'}
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Left < and Right > Navigation Arrows (Exact Video 00:31 - 00:35) */}
+            {/* Left < and Right > Navigation Arrows */}
             {activeBanners.length > 1 && (
               <>
                 <button
@@ -206,7 +189,7 @@ export const HomePage: React.FC = () => {
                     )
                   }
                   aria-label="Previous slide"
-                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/85 hover:bg-white text-[#1A1A1A] shadow-md flex items-center justify-center cursor-pointer"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/85 hover:bg-white text-[#1A1A1A] shadow-md flex items-center justify-center cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -216,7 +199,7 @@ export const HomePage: React.FC = () => {
                     setActiveSlide((prev) => (prev + 1) % activeBanners.length)
                   }
                   aria-label="Next slide"
-                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/85 hover:bg-white text-[#1A1A1A] shadow-md flex items-center justify-center cursor-pointer"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/85 hover:bg-white text-[#1A1A1A] shadow-md flex items-center justify-center cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -233,19 +216,19 @@ export const HomePage: React.FC = () => {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           {/* Header Row: OUR BESTSELLERS + Horizontal Line + View More Button */}
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('our_bestsellers', 'OUR BESTSELLERS')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
             <Link
               to="/products"
-              className="h-8 sm:h-9 px-3.5 sm:px-5 border border-[#D4CFC7] hover:border-[#1A1A1A] text-[11px] sm:text-xs font-medium text-[#1A1A1A] flex items-center justify-center shrink-0 transition-colors"
+              className="h-8 sm:h-9 px-3.5 sm:px-5 border border-[#D4CFC7] hover:border-[#1A1A1A] text-xs font-medium text-[#1A1A1A] flex items-center justify-center shrink-0 transition-colors"
             >
               View More
             </Link>
           </div>
 
-          {/* Interactive Category Filter Tabs (HIM | HER | ATTAR / PRO | GIFTING) */}
+          {/* Interactive Category Filter Tabs */}
           <div className="flex items-center gap-5 sm:gap-8 overflow-x-auto no-scrollbar border-b border-[#F0ECE1]">
             {bestsellerTabs.map((tab) => {
               const isActive = activeBestsellerTab === tab;
@@ -254,10 +237,10 @@ export const HomePage: React.FC = () => {
                   key={tab}
                   type="button"
                   onClick={() => setActiveBestsellerTab(tab)}
-                  className={`pb-2.5 text-xs sm:text-sm font-medium uppercase tracking-[0.12em] whitespace-nowrap transition-colors relative cursor-pointer ${
+                  className={`pb-2.5 text-xs sm:text-[13px] font-medium uppercase tracking-[0.1em] whitespace-nowrap transition-colors relative cursor-pointer ${
                     isActive
                       ? 'text-[#1A1A1A] font-semibold'
-                      : 'text-[#888888] hover:text-[#1A1A1A]'
+                      : 'text-[#666666] hover:text-[#1A1A1A]'
                   }`}
                 >
                   {tab}
@@ -292,7 +275,7 @@ export const HomePage: React.FC = () => {
           className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5 scroll-mt-20"
         >
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('loved_by_celebrities', 'LOVED BY CELEBRITIES')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -363,10 +346,10 @@ export const HomePage: React.FC = () => {
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[10px] sm:text-[11px] font-medium text-[#1A1A1A] line-clamp-2 leading-tight">
+                          <p className="text-[11px] sm:text-xs font-semibold text-[#1A1A1A] line-clamp-2 leading-snug">
                             {linkedProduct.name}
                           </p>
-                          <p className="text-[11px] sm:text-xs font-bold text-[#1A1A1A] mt-0.5 tabular-nums">
+                          <p className="text-xs font-bold text-[#1A1A1A] mt-0.5 tabular-nums">
                             {formatINR(linkedProduct.price)}
                           </p>
                         </div>
@@ -408,7 +391,7 @@ export const HomePage: React.FC = () => {
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <span className="text-[11px] sm:text-sm font-medium text-[#1A1A1A] group-hover:text-[#B5893D] transition-colors line-clamp-1">
+                <span className="text-xs sm:text-sm font-medium text-[#1A1A1A] group-hover:text-[#B5893D] transition-colors line-clamp-1">
                   {cat.name}
                 </span>
               </Link>
@@ -418,26 +401,26 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          5. "DISCOVER LUXURY GIFTING" FULL-WIDTH ESPRESSO & GOLD BANNER (00:04 - 00:13)
+          5. "DISCOVER LUXURY GIFTING" FULL-WIDTH ESPRESSO & GOLD BANNER
       ===================================================================== */}
       {isSectionEnabled('luxury_gifting') && (
         <section className="w-full bg-gradient-to-r from-[#2A1810] via-[#3A2216] to-[#2A1810] text-white overflow-hidden">
-          <div className="max-w-7xl mx-auto px-5 sm:px-10 py-7 sm:py-12 grid grid-cols-12 items-center gap-4">
-            <div className="col-span-7 sm:col-span-6 space-y-2 sm:space-y-3">
-              <span className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#E6C67C]">
+          <div className="max-w-7xl mx-auto px-5 sm:px-10 py-8 sm:py-12 grid grid-cols-12 items-center gap-4">
+            <div className="col-span-7 sm:col-span-6 space-y-2.5 sm:space-y-3">
+              <span className="block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#E6C67C]">
                 DISCOVER
               </span>
-              <h2 className="font-serif-editorial text-2xl sm:text-5xl font-normal italic text-[#F4D993] leading-none">
+              <h2 className="font-serif-editorial text-2xl sm:text-4xl lg:text-5xl font-medium italic text-[#F4D993] leading-tight">
                 {storeSettings.luxuryGiftingBannerTitle || 'Luxury Gifting'}
               </h2>
-              <p className="text-[11px] sm:text-sm text-white/90 max-w-sm">
+              <p className="text-xs sm:text-sm text-white/95 max-w-sm leading-relaxed">
                 {storeSettings.luxuryGiftingBannerSubtitle ||
                   'Premium Gift Sets For Every Occasion.'}
               </p>
               <div className="pt-2">
                 <Link
                   to={storeSettings.luxuryGiftingBannerLink || '/offers'}
-                  className="inline-flex items-center justify-center h-8 sm:h-10 px-5 sm:px-7 bg-white hover:bg-[#F4D993] text-[#2A1810] text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] transition-colors"
+                  className="inline-flex items-center justify-center h-9 sm:h-10 px-5 sm:px-7 bg-white hover:bg-[#F4D993] text-[#2A1810] text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] transition-colors"
                 >
                   SHOP NOW
                 </Link>
@@ -466,7 +449,7 @@ export const HomePage: React.FC = () => {
       {isSectionEnabled('shop_by_notes') && shopByNotes.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('shop_by_notes', 'SHOP BY NOTES')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -487,11 +470,11 @@ export const HomePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <h3 className="text-[11px] sm:text-sm font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] truncate">
+                  <h3 className="text-xs sm:text-sm font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] truncate">
                     {item.title}
                   </h3>
                   {item.subtitle && (
-                    <p className="text-[9px] sm:text-xs text-[#666666] truncate">
+                    <p className="text-[10px] sm:text-xs text-[#595959] truncate">
                       {item.subtitle}
                     </p>
                   )}
@@ -503,12 +486,12 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          7. "RANVEER'S FAVOURITE" / FEATURED FAVOURITES (EXACT VIDEO 00:12 - 00:14)
+          7. "RANVEER'S FAVOURITE" / FEATURED FAVOURITES
       ===================================================================== */}
       {isSectionEnabled('featured_favourites') && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {storeSettings.featuredFavouritesTitle ||
                 getSectionTitle('featured_favourites', "RANVEER'S FAVOURITE")}
             </h2>
@@ -529,12 +512,12 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          8. "SHOP BY OCCASIONS" (EXACT VIDEO 00:13 - 00:14)
+          8. "SHOP BY OCCASIONS"
       ===================================================================== */}
       {isSectionEnabled('shop_by_occasions') && shopByOccasions.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('shop_by_occasions', 'SHOP BY OCCASIONS')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -555,11 +538,11 @@ export const HomePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <h3 className="text-[11px] sm:text-sm font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] truncate">
+                  <h3 className="text-xs sm:text-sm font-semibold text-[#1A1A1A] group-hover:text-[#B5893D] truncate">
                     {occ.title}
                   </h3>
                   {occ.subtitle && (
-                    <p className="text-[9px] sm:text-xs text-[#666666] truncate">
+                    <p className="text-[10px] sm:text-xs text-[#595959] truncate">
                       {occ.subtitle}
                     </p>
                   )}
@@ -571,12 +554,12 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          9. "NEW ARRIVALS" WITH "🔔 NOTIFY ME" STOCK SUPPORT (EXACT VIDEO 00:14 & 00:28)
+          9. "NEW ARRIVALS" WITH "NOTIFY ME" STOCK SUPPORT
       ===================================================================== */}
       {isSectionEnabled('new_arrivals') && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('new_arrivals', 'NEW ARRIVALS')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -604,7 +587,7 @@ export const HomePage: React.FC = () => {
             <div className="w-10 h-10 rounded-full border border-[#B5893D]/40 flex items-center justify-center text-[#B5893D]">
               <Award className="w-5 h-5 stroke-[1.5]" />
             </div>
-            <span className="font-serif-luxury text-[10px] sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#1A1A1A]">
+            <span className="font-serif-luxury text-[11px] sm:text-sm font-semibold uppercase tracking-[0.1em] text-[#1A1A1A]">
               LEGACY QUALITY
             </span>
           </div>
@@ -613,7 +596,7 @@ export const HomePage: React.FC = () => {
             <div className="w-10 h-10 rounded-full border border-[#B5893D]/40 flex items-center justify-center text-[#B5893D]">
               <Sparkles className="w-5 h-5 stroke-[1.5]" />
             </div>
-            <span className="font-serif-luxury text-[10px] sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#1A1A1A]">
+            <span className="font-serif-luxury text-[11px] sm:text-sm font-semibold uppercase tracking-[0.1em] text-[#1A1A1A]">
               100% AUTHENTIC
             </span>
           </div>
@@ -622,7 +605,7 @@ export const HomePage: React.FC = () => {
             <div className="w-10 h-10 rounded-full border border-[#B5893D]/40 flex items-center justify-center text-[#B5893D]">
               <Globe className="w-5 h-5 stroke-[1.5]" />
             </div>
-            <span className="font-serif-luxury text-[10px] sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#1A1A1A]">
+            <span className="font-serif-luxury text-[11px] sm:text-sm font-semibold uppercase tracking-[0.1em] text-[#1A1A1A]">
               LOVED WORLDWIDE
             </span>
           </div>
@@ -630,12 +613,12 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* =====================================================================
-          11. "FROM OUR LOVED ONES" GOLD-BORDERED TESTIMONIALS (EXACT VIDEO 00:14 - 00:16)
+          11. "FROM OUR LOVED ONES" GOLD-BORDERED TESTIMONIALS
       ===================================================================== */}
       {isSectionEnabled('from_our_loved_ones') && testimonials.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('from_our_loved_ones', 'FROM OUR LOVED ONES')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -656,7 +639,7 @@ export const HomePage: React.FC = () => {
                       />
                     ))}
                   </div>
-                  <p className="text-[10px] sm:text-xs text-[#4A4A4A] leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-[#444444] leading-relaxed">
                     &ldquo;{item.quote}&rdquo;
                   </p>
                 </div>
@@ -669,10 +652,10 @@ export const HomePage: React.FC = () => {
                     referrerPolicy="no-referrer"
                   />
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-bold text-[#1A1A1A] truncate">
+                    <p className="text-[11px] sm:text-xs font-bold text-[#1A1A1A] truncate">
                       {item.authorName}
                     </p>
-                    <p className="text-[8px] sm:text-[10px] text-[#777777] truncate">
+                    <p className="text-[10px] sm:text-[11px] text-[#595959] truncate">
                       {item.authorRole}
                     </p>
                   </div>
@@ -684,11 +667,11 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          12. "TRUSTED BY LEADING BRANDS" LOGO STRIP (EXACT VIDEO 00:15 - 00:17)
+          12. "TRUSTED BY LEADING BRANDS" LOGO STRIP
       ===================================================================== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
         <div className="flex items-center gap-4">
-          <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+          <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
             TRUSTED BY LEADING BRANDS
           </h2>
           <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -698,7 +681,7 @@ export const HomePage: React.FC = () => {
           {['FORBES', 'ELLE', 'GRAZIA', 'FORBES', 'ELLE', 'GRAZIA'].map((brand, idx) => (
             <span
               key={`${brand}-${idx}`}
-              className="font-serif-editorial text-xl sm:text-3xl font-semibold tracking-[0.18em] text-[#1A1A1A]/85 shrink-0"
+              className="font-serif-editorial text-xl sm:text-3xl font-semibold tracking-[0.16em] text-[#1A1A1A]/85 shrink-0"
             >
               {brand}
             </span>
@@ -707,12 +690,12 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* =====================================================================
-          13. "BLOGS" 2-COLUMN EDITORIAL CARDS (EXACT VIDEO 00:15 - 00:24)
+          13. "BLOGS" 2-COLUMN EDITORIAL CARDS
       ===================================================================== */}
       {isSectionEnabled('blogs_section') && blogPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
           <div className="flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {getSectionTitle('blogs_section', 'BLOGS')}
             </h2>
             <div className="h-[1px] bg-[#E5E0D8] flex-1" />
@@ -736,7 +719,7 @@ export const HomePage: React.FC = () => {
                       referrerPolicy="no-referrer"
                     />
                   </Link>
-                  <h3 className="text-xs sm:text-sm font-medium text-[#1A1A1A] line-clamp-2 leading-relaxed">
+                  <h3 className="text-xs sm:text-sm font-semibold text-[#1A1A1A] line-clamp-2 leading-relaxed">
                     {post.title}
                   </h3>
                 </div>
@@ -744,7 +727,7 @@ export const HomePage: React.FC = () => {
                 <div>
                   <Link
                     to={post.link || '/products'}
-                    className="inline-flex items-center gap-2 h-8 sm:h-9 px-3.5 border border-[#D4CFC7] hover:border-[#1A1A1A] text-[10px] sm:text-xs font-medium text-[#1A1A1A] transition-colors"
+                    className="inline-flex items-center gap-2 h-8 sm:h-9 px-3.5 border border-[#D4CFC7] hover:border-[#1A1A1A] text-[11px] sm:text-xs font-medium text-[#1A1A1A] transition-colors"
                   >
                     <span>{post.ctaText || 'Find Your Style'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -757,12 +740,12 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* =====================================================================
-          14. "LET US WALK YOU THROUGH" — FULL-WIDTH INLINE BRAND VIDEO (00:17 - 00:24)
+          14. "LET US WALK YOU THROUGH" — FULL-WIDTH INLINE BRAND VIDEO
       ===================================================================== */}
       {isSectionEnabled('walk_you_through') && (
         <section className="space-y-5 pt-2">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-4">
-            <h2 className="font-serif-luxury text-base sm:text-2xl font-semibold uppercase tracking-[0.12em] text-[#1A1A1A] shrink-0">
+            <h2 className="font-serif-luxury text-[15px] sm:text-xl lg:text-2xl font-semibold uppercase tracking-[0.09em] text-[#1A1A1A] shrink-0">
               {storeSettings.brandStoryTitle ||
                 getSectionTitle('walk_you_through', 'LET US WALK YOU THROUGH')}
             </h2>
